@@ -1,0 +1,61 @@
+{% extends "base_admin.html" %}
+
+{% block admin_content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">
+            <i class="fas fa-plus-circle me-2"></i>Crear Nuevo Torneo
+        </h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('crear_torneo') }}">
+            <div class="mb-3">
+                <label for="num_equipos" class="form-label">Número de Equipos</label>
+                <input type="number" class="form-control" id="num_equipos" name="num_equipos" 
+                       min="2" max="20" required onchange="generarCamposEquipos()">
+            </div>
+            
+            <div id="equipos-container" class="mb-4">
+                <!-- Los campos de equipos se generarán aquí con JavaScript -->
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save me-2"></i>Crear Torneo
+                </button>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function generarCamposEquipos() {
+        const numEquipos = document.getElementById('num_equipos').value;
+        const container = document.getElementById('equipos-container');
+        container.innerHTML = '';
+        
+        for (let i = 1; i <= numEquipos; i++) {
+            const div = document.createElement('div');
+            div.className = 'mb-3';
+            
+            const label = document.createElement('label');
+            label.className = 'form-label';
+            label.textContent = `Nombre del Equipo ${i}`;
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control';
+            input.name = `equipo_${i}`;
+            input.required = true;
+            input.placeholder = `Ingrese nombre para equipo ${i}`;
+            
+            div.appendChild(label);
+            div.appendChild(input);
+            container.appendChild(div);
+        }
+    }
+</script>
+{% endblock %}

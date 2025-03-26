@@ -1,0 +1,373 @@
+{% extends "base_admin.html" %}
+
+{% block admin_content %}
+<div class="container mt-4">
+    <!-- Alertas y mensajes -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Panel de control superior -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-tachometer-alt me-2"></i>Panel de Control
+                </h4>
+                <div>
+                    <a href="{{ url_for('crear_torneo') }}" class="btn btn-success me-2">
+                        <i class="fas fa-plus-circle me-1"></i>Nuevo Torneo
+                    </a>
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalReiniciar">
+                        <i class="fas fa-sync-alt me-1"></i>Reiniciar Torneo
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card text-white bg-info mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Equipos Registrados</h5>
+                            <p class="card-text display-6">{{ total_equipos }}</p>
+                            {% if total_equipos is odd %}
+                                <small class="d-block">(Torneo con descansos)</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-white bg-success mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Partidos Jugados</h5>
+                            <p class="card-text display-6">{{ partidos_jugados }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-white bg-primary mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Jornadas Programadas</h5>
+                            <p class="card-text display-6">{{ total_jornadas }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pestañas -->
+    <ul class="nav nav-tabs mb-4" id="adminTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="admin-jornadas-tab" data-bs-toggle="tab" data-bs-target="#admin-jornadas" type="button" role="tab">
+                <i class="fas fa-calendar-alt me-1"></i>Jornadas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="admin-tabla-tab" data-bs-toggle="tab" data-bs-target="#admin-tabla" type="button" role="tab">
+                <i class="fas fa-table me-1"></i>Tabla de Posiciones
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="adminTabContent">
+        <!-- Tab Jornadas -->
+        <div class="tab-pane fade show active" id="admin-jornadas" role="tabpanel">
+            {% if not jornadas %}
+                <div class="alert alert-info">
+                    No hay jornadas programadas. Por favor crea un nuevo torneo.
+                </div>
+            {% else %}
+                {% for jornada_num, partidos_jornada in jornadas %}
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">
+                                <i class="fas fa-calendar-day me-2"></i>Jornada {{ jornada_num }}
+                            </h4>
+                            {% if total_equipos is odd %}
+                                {% set equipos_jugando = [] %}
+                                {% for partido in partidos_jornada %}
+                                    {% if equipos_jugando.append(partido.equipo_local) %}{% endif %}
+                                    {% if equipos_jugando.append(partido.equipo_visitante) %}{% endif %}
+                                {% endfor %}
+                                {% set todos_equipos = tabla|map(attribute='nombre')|list %}
+                                {% set equipo_descanso = (todos_equipos|reject('in', equipos_jugando)|first) %}
+                                <small class="d-block mt-1">
+                                    <i class="fas fa-moon"></i> Equipo que descansa: <strong>{{ equipo_descanso }}</strong>
+                                </small>
+                            {% endif %}
+                        </div>
+                        <span class="badge bg-light text-dark">
+                            {{ partidos_jornada|length }} partido(s)
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Local</th>
+                                        <th>Resultado</th>
+                                        <th>Visitante</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for partido in partidos_jornada %}
+                                    <tr>
+                                        <td class="fw-bold">{{ partido.equipo_local }}</td>
+                                        <td>
+                                            {% if partido.jugado %}
+                                                <span class="badge bg-primary rounded-pill fs-6">
+                                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">vs</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="fw-bold">{{ partido.equipo_visitante }}</td>
+                                        <td>
+                                            {% if partido.jugado %}
+                                                <span class="badge bg-success">Jugado</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalResultado{{ partido.id }}">
+                                                {% if partido.jugado %}
+                                                    <i class="fas fa-edit me-1"></i>Editar
+                                                {% else %}
+                                                    <i class="fas fa-plus me-1"></i>Agregar
+                                                {% endif %}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <!-- Tab Tabla de Posiciones -->
+        <div class="tab-pane fade" id="admin-tabla" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>Tabla de Posiciones
+                    </h4>
+                    <div>
+                        <a href="{{ url_for('actualizar_tabla') }}" class="btn btn-success me-2">
+                            <i class="fas fa-sync-alt me-1"></i>Actualizar
+                        </a>
+                        <button class="btn btn-light" onclick="window.print()">
+                            <i class="fas fa-print me-1"></i>Imprimir
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if not tabla %}
+                        <div class="alert alert-info">
+                            No hay datos disponibles. Por favor crea un torneo y registra resultados.
+                        </div>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Equipo</th>
+                                        <th>PJ</th>
+                                        <th>PG</th>
+                                        <th>PE</th>
+                                        <th>PP</th>
+                                        <th>GF</th>
+                                        <th>GC</th>
+                                        <th>DG</th>
+                                        <th>Pts</th>
+                                        {% if total_equipos is odd %}<th>Descansos</th>{% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for equipo in tabla %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>
+                                            <strong>{{ equipo.nombre }}</strong>
+                                            {% if loop.index <= 4 %}
+                                                <span class="badge bg-success ms-2">Clasificación</span>
+                                            {% elif loop.index >= (tabla|length - 2) %}
+                                                <span class="badge bg-danger ms-2">Descenso</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ equipo.partidos_jugados }}</td>
+                                        <td>{{ (equipo.puntos // 3) }}</td>
+                                        <td>{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td>{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td>{{ equipo.goles_favor }}</td>
+                                        <td>{{ equipo.goles_contra }}</td>
+                                        <td>{{ equipo.diferencia_goles }}</td>
+                                        <td><strong class="text-primary">{{ equipo.puntos }}</strong></td>
+                                        {% if total_equipos is odd %}
+                                            <td>
+                                                {% set descansos = total_jornadas - equipo.partidos_jugados %}
+                                                {% if descansos > 0 %}
+                                                    <span class="badge bg-secondary" data-bs-toggle="tooltip" 
+                                                          title="Este equipo ha descansado {{ descansos }} vez{{ 'es' if descansos > 1 else '' }}">
+                                                        <i class="fas fa-moon"></i> {{ descansos }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if total_equipos is odd %}
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Este torneo tiene un número impar de equipos. En cada jornada, un equipo descansa.
+                                Los descansos se distribuyen equitativamente entre todos los equipos.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Reiniciar Torneo -->
+<div class="modal fade" id="modalReiniciar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Reinicio
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que deseas reiniciar completamente el torneo?</p>
+                <p class="fw-bold">Esta acción eliminará todos los equipos, partidos y resultados.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ url_for('reiniciar_torneo') }}" method="POST">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-sync-alt me-1"></i>Reiniciar Torneo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modales para editar resultados -->
+{% for jornada_num, partidos_jornada in jornadas %}
+    {% for partido in partidos_jornada %}
+    <div class="modal fade" id="modalResultado{{ partido.id }}" tabindex="-1" aria-labelledby="modalLabel{{ partido.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalLabel{{ partido.id }}">
+                        <i class="fas fa-futbol me-2"></i>{{ partido.equipo_local }} vs {{ partido.equipo_visitante }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for('actualizar_resultado', partido_id=partido.id) }}" method="POST">
+                    <div class="modal-body">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-5 text-center">
+                                <h5 class="fw-bold">{{ partido.equipo_local }}</h5>
+                                <input type="number" class="form-control form-control-lg text-center fw-bold" 
+                                       name="goles_local" value="{{ partido.goles_local if partido.jugado else 0 }}" 
+                                       min="0" required>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <h2 class="my-0">vs</h2>
+                            </div>
+                            <div class="col-md-5 text-center">
+                                <h5 class="fw-bold">{{ partido.equipo_visitante }}</h5>
+                                <input type="number" class="form-control form-control-lg text-center fw-bold" 
+                                       name="goles_visitante" value="{{ partido.goles_visitante if partido.jugado else 0 }}" 
+                                       min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Guardar Resultado
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endfor %}
+
+<style>
+    .card-header {
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+    }
+    .table th {
+        white-space: nowrap;
+    }
+    .badge-clasificacion {
+        background-color: #100347;
+    }
+    .badge-descenso {
+        background-color: #dc3545;
+    }
+    .form-control-lg {
+        font-size: 1.25rem;
+        padding: 0.5rem 1rem;
+    }
+    .nav-tabs .nav-link {
+        font-weight: 500;
+    }
+    .badge.bg-secondary {
+        font-size: 0.85rem;
+        padding: 0.35em 0.65em;
+    }
+</style>
+
+<script>
+    // Inicializar tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Auto-cierre de alerts después de 5 segundos
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                new bootstrap.Alert(alert).close();
+            });
+        }, 5000);
+    });
+</script>
+{% endblock %}

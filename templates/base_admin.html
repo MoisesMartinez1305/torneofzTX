@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .admin-panel {
+        background-color: #b8b5b5;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .admin-nav {
+        margin-bottom: 20px;
+    }
+    .admin-actions .btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-panel">
+    <h2 class="mb-4"><i class="fas fa-cog me-2"></i>{% block admin_title %}Panel de Administración{% endblock %}</h2>
+    
+    <div class="admin-nav">
+        <ul class="nav nav-tabs">
+            
+        </ul>
+    </div>
+    <!-- En la sección de admin-nav -->
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+            <i class="fas fa-home me-1"></i>Inicio
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{{ url_for('crear_torneo') }}">
+            <i class="fas fa-plus-circle me-1"></i>Crear Torneo
+        </a>
+    </li>
+</ul>
+    
+    {% block admin_content %}{% endblock %}
+</div>
+{% endblock %}

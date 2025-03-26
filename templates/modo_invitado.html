@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 style="color: white;"class="text-center mb-4">Torneo Fútbol Rápido - Modo Invitado</h1>
+    
+    <!-- Estadísticas rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-info">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Equipos</h5>
+                    <p class="card-text display-6">{{ total_equipos }}</p>
+                    {% if total_equipos is odd %}
+                        <small class="d-block">(Torneo con descansos)</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Partidos Jugados</h5>
+                    <p class="card-text display-6">{{ partidos_jugados }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Jornadas</h5>
+                    <p class="card-text display-6">{{ total_jornadas }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pestañas -->
+    <ul class="nav nav-tabs mb-4" id="invitadoTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="jornadas-tab" data-bs-toggle="tab" data-bs-target="#jornadas" type="button" role="tab">
+                <i class="fas fa-calendar-alt me-1"></i> Jornadas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tabla-tab" data-bs-toggle="tab" data-bs-target="#tabla" type="button" role="tab">
+                <i class="fas fa-trophy me-1"></i> Tabla de Posiciones
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="invitadoTabContent">
+        <!-- Tab Jornadas -->
+        <div class="tab-pane fade show active" id="jornadas" role="tabpanel">
+            {% if not jornadas %}
+                <div class="alert alert-info">
+                    No hay jornadas programadas disponibles.
+                </div>
+            {% else %}
+                {% for jornada_num, partidos_jornada in jornadas %}
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">Jornada {{ jornada_num }}</h4>
+                            {% if total_equipos is odd %}
+                                {% set equipos_jugando = [] %}
+                                {% for partido in partidos_jornada %}
+                                    {% if equipos_jugando.append(partido.equipo_local) %}{% endif %}
+                                    {% if equipos_jugando.append(partido.equipo_visitante) %}{% endif %}
+                                {% endfor %}
+                                {% set todos_equipos = tabla|map(attribute='nombre')|list %}
+                                {% set equipo_descanso = (todos_equipos|reject('in', equipos_jugando)|first) %}
+                                <small class="d-block mt-1">
+                                    <i class="fas fa-moon"></i> Descansa: <strong>{{ equipo_descanso }}</strong>
+                                </small>
+                            {% endif %}
+                        </div>
+                        <span class="badge bg-light text-dark">
+                            {{ partidos_jornada|length }} partido(s)
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Local</th>
+                                        <th>Resultado</th>
+                                        <th>Visitante</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for partido in partidos_jornada %}
+                                    <tr>
+                                        <td>{{ partido.equipo_local }}</td>
+                                        <td>
+                                            {% if partido.jugado %}
+                                                <span class="badge bg-primary rounded-pill">
+                                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">vs</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ partido.equipo_visitante }}</td>
+                                        <td>
+                                            {% if partido.jugado %}
+                                                <span class="badge bg-success">Jugado</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <!-- Tab Tabla de Posiciones -->
+        <div class="tab-pane fade" id="tabla" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Tabla de Posiciones</h4>
+                </div>
+                <div class="card-body">
+                    {% if not tabla %}
+                        <div class="alert alert-info">
+                            No hay datos disponibles en la tabla de posiciones.
+                        </div>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Equipo</th>
+                                        <th>PJ</th>
+                                        <th>PG</th>
+                                        <th>PE</th>
+                                        <th>PP</th>
+                                        <th>GF</th>
+                                        <th>GC</th>
+                                        <th>DG</th>
+                                        <th>Pts</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for equipo in tabla %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>
+                                            <strong>{{ equipo.nombre }}</strong>
+                                        </td>
+                                        <td>{{ equipo.partidos_jugados }}</td>
+                                        <td>{{ (equipo.puntos // 3) }}</td>
+                                        <td>{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td>{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td>{{ equipo.goles_favor }}</td>
+                                        <td>{{ equipo.goles_contra }}</td>
+                                        <td>{{ equipo.diferencia_goles }}</td>
+                                        <td><strong>{{ equipo.puntos }}</strong></td>
+                                        
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if total_equipos is odd %}
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Este torneo tiene un número impar de equipos. En cada jornada, un equipo descansa.
+                                Los descansos se distribuyen equitativamente entre todos los equipos.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-clasificacion {
+        background-color: #28a745;
+    }
+    .badge-descenso {
+        background-color: #dc3545;
+    }
+    .card-header {
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+    }
+    .nav-tabs .nav-link {
+        font-weight: 500;
+    }
+    .badge.bg-secondary {
+        font-size: 0.85rem;
+        padding: 0.35em 0.65em;
+    }
+</style>
+
+<script>
+    // Inicializar tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}
