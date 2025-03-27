@@ -1,22 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-5">
-    <!-- Encabezado principal con logo y título -->
-    <div class="text-center mb-5">
-        <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="Logo del torneo" class="mb-3" style="max-width: 150px;">
-        <h1 class="display-4 fw-bold text-white mb-3 text-shadow">Torneo de Fútbol Rápido 2025</h1>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<div class="container mt-3 mt-md-5">
+    <!-- Encabezado principal -->
+    <div class="text-center mb-4 mb-md-5">
+        <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="Logo del torneo" class="img-fluid mb-2 mb-md-3" style="max-width: 150px;">
+        <h1 class="display-4 fw-bold text-white mb-2 mb-md-3 text-shadow">Torneo de Fútbol Rápido 2025</h1>
         <h2 class="display-5 text-white mb-0 text-gradient">Fuentezuelas, TX - Varonil Libre</h2>
     </div>
 
-    <!-- Tarjetas de estadísticas -->
-    <div class="row mb-5 g-4">
+    <!-- Tarjetas de estadísticas (ahora responsivas) -->
+    <div class="row mb-4 mb-md-5 g-3 g-md-4">
         <!-- Tarjeta de equipos -->
-        <div class="col-md-4">
+        <div class="col-lg-4 col-md-6 col-12">
             <div class="card border-0 shadow-lg h-100">
-                <div class="card-body text-center py-4">
-                    <div class="icon-stats mb-3">
-                        <i class="fas fa-users fa-3x text-info"></i>
+                <div class="card-body text-center py-3 py-md-4">
+                    <div class="icon-stats mb-2 mb-md-3">
+                        <i class="fas fa-users fa-2x fa-md-3x text-info"></i>
                     </div>
                     <h3 class="h5 card-title text-muted">Equipos</h3>
                     <p class="display-4 fw-bold text-dark mb-0">{{ total_equipos }}</p>
@@ -25,11 +26,11 @@
         </div>
         
         <!-- Tarjeta de jornadas -->
-        <div class="col-md-4">
+        <div class="col-lg-4 col-md-6 col-12">
             <div class="card border-0 shadow-lg h-100">
-                <div class="card-body text-center py-4">
-                    <div class="icon-stats mb-3">
-                        <i class="fas fa-calendar-alt fa-3x text-primary"></i>
+                <div class="card-body text-center py-3 py-md-4">
+                    <div class="icon-stats mb-2 mb-md-3">
+                        <i class="fas fa-calendar-alt fa-2x fa-md-3x text-primary"></i>
                     </div>
                     <h3 class="h5 card-title text-muted">Jornadas</h3>
                     <p class="display-4 fw-bold text-dark mb-0">{{ total_jornadas }}</p>
@@ -37,20 +38,20 @@
             </div>
         </div>
         
-        <!-- Tarjeta de progreso -->
-        <div class="col-md-4">
+        <!-- Tarjeta de progreso (ocupa toda la fila en móviles) -->
+        <div class="col-lg-4 col-md-12 col-12">
             <div class="card border-0 shadow-lg h-100">
-                <div class="card-body text-center py-4">
-                    <div class="icon-stats mb-3">
-                        <i class="fas fa-tasks fa-3x text-success"></i>
+                <div class="card-body text-center py-3 py-md-4">
+                    <div class="icon-stats mb-2 mb-md-3">
+                        <i class="fas fa-tasks fa-2x fa-md-3x text-success"></i>
                     </div>
-                    <h3 class="h5 card-title text-muted">Progreso del Torneo</h3>
+                    <h3 class="h5 card-title text-muted">Progreso</h3>
                     
                     {% set total_partidos = total_jornadas * (total_equipos // 2) %}
                     {% set partidos_jugados = todos_los_partidos|selectattr('jugado')|list|length %}
                     {% set porcentaje = (partidos_jugados / total_partidos * 100) if total_partidos > 0 else 0 %}
                     
-                    <div class="progress mb-3" style="height: 30px;">
+                    <div class="progress mb-2 mb-md-3" style="height: 25px;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
                              role="progressbar" 
                              style="width: {{ porcentaje }}%" 
@@ -60,26 +61,26 @@
                         </div>
                     </div>
                     
-                    <p class="display-6 fw-bold text-dark mb-1">{{ porcentaje|round(1) }}%</p>
+                    <p class="display-5 display-md-4 fw-bold text-dark mb-1">{{ porcentaje|round(1) }}%</p>
                     <small class="text-muted">
-                        {{ partidos_jugados }} de {{ total_partidos }} partidos jugados
+                        {{ partidos_jugados }} de {{ total_partidos }} partidos
                     </small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Pestañas de navegación -->
-    <div class="custom-tabs mb-4">
-        <ul class="nav nav-pills mb-4 justify-content-center" id="invitadoTab" role="tablist">
+    <!-- Pestañas de navegación (ahora con scroll horizontal en móviles) -->
+    <div class="custom-tabs mb-3 mb-md-4">
+        <ul class="nav nav-pills mb-3 justify-content-center flex-nowrap overflow-auto" id="invitadoTab" role="tablist" style="white-space: nowrap;">
             <li class="nav-item mx-1" role="presentation">
-                <button class="nav-link active px-4 py-2 rounded-pill" id="jornadas-tab" data-bs-toggle="tab" data-bs-target="#jornadas" type="button" role="tab">
-                    <i class="fas fa-calendar-alt me-2"></i> Jornadas
+                <button class="nav-link active px-3 px-md-4 py-1 py-md-2 rounded-pill" id="jornadas-tab" data-bs-toggle="tab" data-bs-target="#jornadas" type="button" role="tab">
+                    <i class="fas fa-calendar-alt me-1 me-md-2"></i> Jornadas
                 </button>
             </li>
             <li class="nav-item mx-1" role="presentation">
-                <button class="nav-link px-4 py-2 rounded-pill" id="tabla-tab" data-bs-toggle="tab" data-bs-target="#tabla" type="button" role="tab">
-                    <i class="fas fa-trophy me-2"></i> Clasificación
+                <button class="nav-link px-3 px-md-4 py-1 py-md-2 rounded-pill" id="tabla-tab" data-bs-toggle="tab" data-bs-target="#tabla" type="button" role="tab">
+                    <i class="fas fa-trophy me-1 me-md-2"></i> Clasificación
                 </button>
             </li>
         </ul>
@@ -90,19 +91,19 @@
         <!-- Pestaña de Jornadas -->
         <div class="tab-pane fade show active" id="jornadas" role="tabpanel">
             {% if not jornadas %}
-                <div class="alert alert-light shadow-sm text-center py-4">
-                    <i class="far fa-calendar-times fa-3x text-muted mb-3"></i>
+                <div class="alert alert-light shadow-sm text-center py-3 py-md-4">
+                    <i class="far fa-calendar-times fa-2x fa-md-3x text-muted mb-2 mb-md-3"></i>
                     <h4 class="text-muted">No hay jornadas programadas</h4>
-                    <p class="mb-0">Próximamente se publicará el calendario de partidos</p>
+                    <p class="mb-0">Próximamente se publicará el calendario</p>
                 </div>
             {% else %}
                 {% for jornada_num, partidos_jornada in jornadas %}
-                <div class="card border-0 shadow-sm mb-4 overflow-hidden">
-                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+                <div class="card border-0 shadow-sm mb-3 mb-md-4 overflow-hidden">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2 py-md-3">
                         <div class="d-flex align-items-center">
-                            <i class="fas fa-calendar-day fs-4 me-3"></i>
+                            <i class="fas fa-calendar-day fs-4 me-2 me-md-3"></i>
                             <div>
-                                <h4 class="mb-0 fw-normal">Jornada {{ jornada_num }}</h4>
+                                <h4 class="mb-0 fw-normal fs-5 fs-md-4">Jornada {{ jornada_num }}</h4>
                                 {% if total_equipos is odd %}
                                     {% set equipos_jugando = [] %}
                                     {% for partido in partidos_jornada %}
@@ -117,7 +118,7 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <span class="badge bg-light text-dark fs-6 py-2 px-3 rounded-pill">
+                        <span class="badge bg-light text-dark fs-6 py-1 py-md-2 px-2 px-md-3 rounded-pill">
                             {{ partidos_jornada|length }} partido(s)
                         </span>
                     </div>
@@ -138,7 +139,7 @@
                                         <td class="fw-bold">{{ partido.equipo_local }}</td>
                                         <td class="text-center">
                                             {% if partido.jugado %}
-                                                <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">
+                                                <span class="badge bg-primary rounded-pill fs-6 px-2 px-md-3 py-1 py-md-2">
                                                     {{ partido.goles_local }} - {{ partido.goles_visitante }}
                                                 </span>
                                             {% else %}
@@ -148,11 +149,11 @@
                                         <td class="fw-bold">{{ partido.equipo_visitante }}</td>
                                         <td class="text-center">
                                             {% if partido.jugado %}
-                                                <span class="badge bg-success bg-opacity-10 text-success py-2 px-3 rounded-pill">
+                                                <span class="badge bg-success bg-opacity-10 text-success py-1 py-md-2 px-2 px-md-3 rounded-pill">
                                                     <i class="fas fa-check-circle me-1"></i> Jugado
                                                 </span>
                                             {% else %}
-                                                <span class="badge bg-warning bg-opacity-10 text-warning py-2 px-3 rounded-pill">
+                                                <span class="badge bg-warning bg-opacity-10 text-warning py-1 py-md-2 px-2 px-md-3 rounded-pill">
                                                     <i class="fas fa-clock me-1"></i> Pendiente
                                                 </span>
                                             {% endif %}
@@ -171,24 +172,22 @@
         <!-- Pestaña de Tabla de Posiciones -->
         <div class="tab-pane fade" id="tabla" role="tabpanel">
             <div class="card border-0 shadow-sm">
-                <!-- Encabezado de la tabla de posiciones (opacidad completa) -->
-                <div class="card-header bg-dark text-white py-3" style="opacity: 1;">
+                <div class="card-header bg-dark text-white py-2 py-md-3" style="opacity: 1;">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-trophy fs-4 me-3"></i>
-                        <h4 class="mb-0 fw-normal">Tabla de Clasificación</h4>
+                        <i class="fas fa-trophy fs-4 me-2 me-md-3"></i>
+                        <h4 class="mb-0 fw-normal fs-5 fs-md-4">Tabla de Clasificación</h4>
                     </div>
                 </div>
                 <div class="card-body p-0 position-relative">
-                    <!-- Fondo con logo transparente -->
                     <div class="table-background">
                         <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="Logo de fondo" class="img-fluid opacity-10">
                     </div>
                     
                     {% if not tabla %}
-                        <div class="alert alert-light shadow-sm text-center py-4">
-                            <i class="fas fa-table fa-3x text-muted mb-3"></i>
+                        <div class="alert alert-light shadow-sm text-center py-3 py-md-4">
+                            <i class="fas fa-table fa-2x fa-md-3x text-muted mb-2 mb-md-3"></i>
                             <h4 class="text-muted">No hay datos disponibles</h4>
-                            <p class="mb-0">La tabla de posiciones se actualizará después de los primeros partidos</p>
+                            <p class="mb-0">La tabla se actualizará después de los primeros partidos</p>
                         </div>
                     {% else %}
                         <div class="table-responsive">
@@ -197,12 +196,12 @@
                                     <tr>
                                         <th class="text-center">POS</th>
                                         <th>Equipo</th>
-                                        <th class="text-center">PJ</th>
-                                        <th class="text-center">PG</th>
-                                        <th class="text-center">PE</th>
-                                        <th class="text-center">PP</th>
-                                        <th class="text-center">GF</th>
-                                        <th class="text-center">GC</th>
+                                        <th class="text-center d-none d-md-table-cell">PJ</th>
+                                        <th class="text-center d-none d-lg-table-cell">PG</th>
+                                        <th class="text-center d-none d-lg-table-cell">PE</th>
+                                        <th class="text-center d-none d-lg-table-cell">PP</th>
+                                        <th class="text-center d-none d-md-table-cell">GF</th>
+                                        <th class="text-center d-none d-md-table-cell">GC</th>
                                         <th class="text-center">DG</th>
                                         <th class="text-center fw-bold">Pts</th>
                                     </tr>
@@ -214,12 +213,12 @@
                                         <td>
                                             <strong>{{ equipo.nombre }}</strong>
                                         </td>
-                                        <td class="text-center">{{ equipo.partidos_jugados }}</td>
-                                        <td class="text-center">{{ (equipo.puntos // 3) }}</td>
-                                        <td class="text-center">{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
-                                        <td class="text-center">{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
-                                        <td class="text-center">{{ equipo.goles_favor }}</td>
-                                        <td class="text-center">{{ equipo.goles_contra }}</td>
+                                        <td class="text-center d-none d-md-table-cell">{{ equipo.partidos_jugados }}</td>
+                                        <td class="text-center d-none d-lg-table-cell">{{ (equipo.puntos // 3) }}</td>
+                                        <td class="text-center d-none d-lg-table-cell">{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td class="text-center d-none d-lg-table-cell">{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td class="text-center d-none d-md-table-cell">{{ equipo.goles_favor }}</td>
+                                        <td class="text-center d-none d-md-table-cell">{{ equipo.goles_contra }}</td>
                                         <td class="text-center fw-bold">{{ equipo.diferencia_goles }}</td>
                                         <td class="text-center fw-bold bg-dark text-white">{{ equipo.puntos }}</td>
                                     </tr>
@@ -235,7 +234,7 @@
 </div>
 
 <style>
-    /* Estilos para efectos de texto */
+    /* Estilos base */
     .text-gradient {
         background: linear-gradient(45deg, #ffffff, #a5d8ff);
         -webkit-background-clip: text;
@@ -248,10 +247,9 @@
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
     
-    /* Estilos para iconos en tarjetas */
     .icon-stats {
-        width: 80px;
-        height: 80px;
+        width: 60px;
+        height: 60px;
         margin: 0 auto;
         display: flex;
         align-items: center;
@@ -260,7 +258,6 @@
         background-color: rgba(13, 110, 253, 0.1);
     }
     
-    /* Estilos para pestañas */
     .custom-tabs .nav-pills .nav-link {
         transition: all 0.3s ease;
     }
@@ -270,7 +267,6 @@
         box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
     }
     
-    /* Estilos para tablas modernas */
     .table-modern {
         border-collapse: separate;
         border-spacing: 0;
@@ -291,21 +287,19 @@
         transition: background-color 0.2s ease;
     }
     
-    /* Efecto hover sutil para filas */
     .table-modern tbody tr:hover {
         background-color: rgba(0, 0, 0, 0.03);
     }
     
     .table-modern td, .table-modern th {
-        padding: 12px 15px;
+        padding: 10px 12px;
         vertical-align: middle;
         border-top: 1px solid #e9ecef;
     }
     
-    /* Estilos para el fondo con logo */
     .table-background {
         position: absolute;
-        top: 90px;
+        top: 0;
         left: 0;
         width: 100%;
         height: 100%;
@@ -313,17 +307,15 @@
         align-items: center;
         justify-content: center;
         z-index: 0;
-        opacity: 1; /* Logo al 10% de opacidad */
-        pointer-events: none; /* Permite interactuar con la tabla */
+        opacity: 0.1;
+        pointer-events: none;
     }
     
-    /* Posicionamiento de la tabla sobre el fondo */
     .table-standings {
         position: relative;
         z-index: 1;
     }
     
-    /* Anchuras específicas para columnas */
     .w-40 {
         width: 30% !important;
     }
@@ -332,53 +324,87 @@
         width: 10% !important;
     }
     
-    /* Estilos para tarjetas */
     .card {
         border-radius: 12px;
         overflow: hidden;
     }
     
-    /* Asegurar legibilidad sobre el fondo */
     .table-standings tbody td {
-        background-color: rgba(255, 255, 255, 0.822); /* Fondo casi blanco */
+        background-color: rgba(255, 255, 255, 0.9);
     }
     
-    /* Estilos para estados especiales */
     .table-success {
-        background-color: rgba(40, 167, 69, 0.05) !important; /* Verde muy suave */
+        background-color: rgba(40, 167, 69, 0.05) !important;
     }
     
     .table-danger {
-        background-color: rgba(220, 53, 69, 0.05) !important; /* Rojo muy suave */
+        background-color: rgba(220, 53, 69, 0.05) !important;
     }
     
-    /* Estilos para badges */
-    .badge-score {
-        display: inline-block;
-        padding: 5px 12px;
-        border-radius: 20px;
-        background-color: #0d6efd;
-        color: white;
-        font-weight: 500;
+    /* ===== RESPONSIVIDAD ===== */
+    @media (max-width: 992px) {
+        .display-4 {
+            font-size: 2.8rem !important;
+        }
+        .display-5 {
+            font-size: 2rem !important;
+        }
     }
     
-    /* Media queries para responsividad */
     @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2.2rem !important;
+        }
+        .display-5 {
+            font-size: 1.6rem !important;
+        }
+        
+        .icon-stats {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .icon-stats i {
+            font-size: 1.5rem !important;
+        }
+        
         .table-modern td, .table-modern th {
             padding: 8px 10px;
             font-size: 0.9rem;
         }
+    }
+    
+    @media (max-width: 576px) {
+        .display-4 {
+            font-size: 1.8rem !important;
+        }
+        .display-5 {
+            font-size: 1.3rem !important;
+        }
+        
+        .card-header h4 {
+            font-size: 1.1rem !important;
+        }
         
         .icon-stats {
-            width: 60px;
-            height: 60px;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .icon-stats i {
+            font-size: 1.2rem !important;
+        }
+        
+        .table-modern td, .table-modern th {
+            padding: 6px 8px;
+            font-size: 0.85rem;
         }
     }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar tooltips de Bootstrap
+        // Inicializar tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);

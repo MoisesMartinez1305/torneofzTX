@@ -15,31 +15,36 @@
         margin-right: 5px;
         margin-bottom: 5px;
     }
+    /* Asegurando que las tabs y botones se comporten bien en dispositivos pequeños */
+    @media (max-width: 767px) {
+        .admin-nav ul {
+            padding-left: 0;
+        }
+        .admin-nav .nav-item {
+            text-align: center;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="admin-panel">
+<div class="container-fluid admin-panel">
     <h2 class="mb-4"><i class="fas fa-cog me-2"></i>{% block admin_title %}Panel de Administración{% endblock %}</h2>
     
     <div class="admin-nav">
         <ul class="nav nav-tabs">
-            
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                    <i class="fas fa-home me-1"></i>Inicio
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('crear_torneo') }}">
+                    <i class="fas fa-plus-circle me-1"></i>Crear Torneo
+                </a>
+            </li>
         </ul>
     </div>
-    <!-- En la sección de admin-nav -->
-<ul class="nav nav-tabs">
-    <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
-            <i class="fas fa-home me-1"></i>Inicio
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link active" href="{{ url_for('crear_torneo') }}">
-            <i class="fas fa-plus-circle me-1"></i>Crear Torneo
-        </a>
-    </li>
-</ul>
     
     {% block admin_content %}{% endblock %}
 </div>

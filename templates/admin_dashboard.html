@@ -33,7 +33,7 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-4 col-sm-6 col-12">
                     <div class="card text-white bg-info mb-3">
                         <div class="card-body">
                             <h5 class="card-title">Equipos Registrados</h5>
@@ -44,7 +44,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4 col-sm-6 col-12">
                     <div class="card text-white bg-success mb-3">
                         <div class="card-body">
                             <h5 class="card-title">Partidos Jugados</h5>
@@ -52,7 +52,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4 col-sm-6 col-12">
                     <div class="card text-white bg-primary mb-3">
                         <div class="card-body">
                             <h5 class="card-title">Jornadas Programadas</h5>
@@ -176,7 +176,6 @@
                                 <i class="fas fa-sync-alt me-1"></i>Actualizar
                             </button>
                         </form>
-                        
                     </div>
                 </div>
                 <div class="card-body">
@@ -228,10 +227,10 @@
                                                 {% if descansos > 0 %}
                                                     <span class="badge bg-secondary" data-bs-toggle="tooltip" 
                                                           title="Este equipo ha descansado {{ descansos }} vez{{ 'es' if descansos > 1 else '' }}">
-                                                        <i class="fas fa-moon"></i> {{ descansos }}
+                                                        <i class="fas fa-moon"></i> {{ descansos }} vez{{ 'es' if descansos > 1 else '' }}
                                                     </span>
                                                 {% else %}
-                                                    <span class="text-muted">-</span>
+                                                    <span class="badge bg-light text-dark">-</span>
                                                 {% endif %}
                                             </td>
                                         {% endif %}
@@ -240,134 +239,10 @@
                                 </tbody>
                             </table>
                         </div>
-                        {% if total_equipos is odd %}
-                            <div class="alert alert-info mt-3">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Este torneo tiene un número impar de equipos. En cada jornada, un equipo descansa.
-                                Los descansos se distribuyen equitativamente entre todos los equipos.
-                            </div>
-                        {% endif %}
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Modal Reiniciar Torneo -->
-<div class="modal fade" id="modalReiniciar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Reinicio
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>¿Estás seguro que deseas reiniciar completamente el torneo?</p>
-                <p class="fw-bold">Esta acción eliminará todos los equipos, partidos y resultados.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <form action="{{ url_for('reiniciar_torneo') }}" method="POST">
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-sync-alt me-1"></i>Reiniciar Torneo
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modales para editar resultados -->
-{% for jornada_num, partidos_jornada in jornadas %}
-    {% for partido in partidos_jornada %}
-    <div class="modal fade" id="modalResultado{{ partido.id }}" tabindex="-1" aria-labelledby="modalLabel{{ partido.id }}" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="modalLabel{{ partido.id }}">
-                        <i class="fas fa-futbol me-2"></i>{{ partido.equipo_local }} vs {{ partido.equipo_visitante }}
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ url_for('actualizar_resultado', partido_id=partido.id) }}" method="POST">
-                    <div class="modal-body">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-md-5 text-center">
-                                <h5 class="fw-bold">{{ partido.equipo_local }}</h5>
-                                <input type="number" class="form-control form-control-lg text-center fw-bold" 
-                                       name="goles_local" value="{{ partido.goles_local if partido.jugado else 0 }}" 
-                                       min="0" required>
-                            </div>
-                            <div class="col-md-2 text-center">
-                                <h2 class="my-0">vs</h2>
-                            </div>
-                            <div class="col-md-5 text-center">
-                                <h5 class="fw-bold">{{ partido.equipo_visitante }}</h5>
-                                <input type="number" class="form-control form-control-lg text-center fw-bold" 
-                                       name="goles_visitante" value="{{ partido.goles_visitante if partido.jugado else 0 }}" 
-                                       min="0" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-1"></i>Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i>Guardar Resultado
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-{% endfor %}
-
-<style>
-    .card-header {
-        border-radius: 0.5rem 0.5rem 0 0 !important;
-    }
-    .table th {
-        white-space: nowrap;
-    }
-    .badge-clasificacion {
-        background-color: #100347;
-    }
-    .badge-descenso {
-        background-color: #dc3545;
-    }
-    .form-control-lg {
-        font-size: 1.25rem;
-        padding: 0.5rem 1rem;
-    }
-    .nav-tabs .nav-link {
-        font-weight: 500;
-    }
-    .badge.bg-secondary {
-        font-size: 0.85rem;
-        padding: 0.35em 0.65em;
-    }
-</style>
-
-<script>
-    // Inicializar tooltips
-    document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-        
-        // Auto-cierre de alerts después de 5 segundos
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                new bootstrap.Alert(alert).close();
-            });
-        }, 5000);
-    });
-</script>
 {% endblock %}
