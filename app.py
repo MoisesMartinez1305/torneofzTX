@@ -214,6 +214,7 @@ def actualizar_tabla():
     
     return redirect(url_for('admin_dashboard'))
 
+
 # Rutas de administración
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
