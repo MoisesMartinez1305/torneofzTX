@@ -10,7 +10,7 @@
         <h2 class="display-5 text-white mb-0 text-gradient">Fuentezuelas, TX - Varonil Libre</h2>
     </div>
 
-    <!-- Tarjetas de estadísticas (ahora responsivas) -->
+    <!-- Tarjetas de estadísticas -->
     <div class="row mb-4 mb-md-5 g-3 g-md-4">
         <!-- Tarjeta de equipos -->
         <div class="col-lg-4 col-md-6 col-12">
@@ -38,7 +38,7 @@
             </div>
         </div>
         
-        <!-- Tarjeta de progreso (ocupa toda la fila en móviles) -->
+        <!-- Tarjeta de progreso -->
         <div class="col-lg-4 col-md-12 col-12">
             <div class="card border-0 shadow-lg h-100">
                 <div class="card-body text-center py-3 py-md-4">
@@ -70,7 +70,7 @@
         </div>
     </div>
 
-    <!-- Pestañas de navegación (ahora con scroll horizontal en móviles) -->
+    <!-- Pestañas de navegación -->
     <div class="custom-tabs mb-3 mb-md-4">
         <ul class="nav nav-pills mb-3 justify-content-center flex-nowrap overflow-auto" id="invitadoTab" role="tablist" style="white-space: nowrap;">
             <li class="nav-item mx-1" role="presentation">
@@ -169,10 +169,10 @@
             {% endif %}
         </div>
         
-        <!-- Pestaña de Tabla de Posiciones -->
+        <!-- Pestaña de Tabla de Posiciones - VERSIÓN COMPLETA CON TODAS LAS COLUMNAS -->
         <div class="tab-pane fade" id="tabla" role="tabpanel">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-dark text-white py-2 py-md-3" style="opacity: 1;">
+                <div class="card-header bg-dark text-white py-2 py-md-3">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-trophy fs-4 me-2 me-md-3"></i>
                         <h4 class="mb-0 fw-normal fs-5 fs-md-4">Tabla de Clasificación</h4>
@@ -190,16 +190,16 @@
                             <p class="mb-0">La tabla se actualizará después de los primeros partidos</p>
                         </div>
                     {% else %}
-                        <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                            <table class="table table-modern table-standings align-middle mb-0" style="min-width: 700px;">
+                        <div class="table-responsive">
+                            <table class="table table-modern table-standings align-middle mb-0" style="min-width: 650px;">
                                 <thead class="table-dark">
                                     <tr>
                                         <th class="text-center">POS</th>
                                         <th>Equipo</th>
                                         <th class="text-center">PJ</th>
-                                        <th class="text-center d-none d-sm-table-cell">PG</th>
-                                        <th class="text-center d-none d-sm-table-cell">PE</th>
-                                        <th class="text-center d-none d-sm-table-cell">PP</th>
+                                        <th class="text-center">PG</th>
+                                        <th class="text-center">PE</th>
+                                        <th class="text-center">PP</th>
                                         <th class="text-center">GF</th>
                                         <th class="text-center">GC</th>
                                         <th class="text-center">DG</th>
@@ -214,9 +214,9 @@
                                             <strong>{{ equipo.nombre }}</strong>
                                         </td>
                                         <td class="text-center">{{ equipo.partidos_jugados }}</td>
-                                        <td class="text-center d-none d-sm-table-cell">{{ (equipo.puntos // 3) }}</td>
-                                        <td class="text-center d-none d-sm-table-cell">{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
-                                        <td class="text-center d-none d-sm-table-cell">{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td class="text-center">{{ (equipo.puntos // 3) }}</td>
+                                        <td class="text-center">{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td class="text-center">{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
                                         <td class="text-center">{{ equipo.goles_favor }}</td>
                                         <td class="text-center">{{ equipo.goles_contra }}</td>
                                         <td class="text-center fw-bold">{{ equipo.diferencia_goles }}</td>
@@ -235,6 +235,11 @@
 
 <style>
     /* Estilos base */
+    body {
+        background-color: #012b55;
+        color: #333;
+    }
+    
     .text-gradient {
         background: linear-gradient(45deg, #ffffff, #a5d8ff);
         -webkit-background-clip: text;
@@ -260,11 +265,13 @@
     
     .custom-tabs .nav-pills .nav-link {
         transition: all 0.3s ease;
+        border: 1px solid transparent;
     }
     
     .custom-tabs .nav-pills .nav-link.active {
         background: linear-gradient(135deg, #0d6efd, #0b5ed7);
         box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+        border-color: rgba(255, 255, 255, 0.2);
     }
     
     .table-modern {
@@ -281,6 +288,7 @@
         border: none;
         position: sticky;
         top: 0;
+        z-index: 10;
     }
     
     .table-modern tbody tr {
@@ -292,14 +300,15 @@
     }
     
     .table-modern td, .table-modern th {
-        padding: 10px 12px;
+        padding: 12px 15px;
         vertical-align: middle;
-        border-top: 1px solid #e9ecef;
+        border-right: #012b55;
+        border-top: 1px solid #117ae2;
     }
     
     .table-background {
         position: absolute;
-        top: 0;
+        top: 30px;
         left: 0;
         width: 100%;
         height: 100%;
@@ -307,7 +316,7 @@
         align-items: center;
         justify-content: center;
         z-index: 0;
-        opacity: 0.1;
+        opacity: 1;
         pointer-events: none;
     }
     
@@ -327,55 +336,75 @@
     .card {
         border-radius: 12px;
         overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    /*tabla fondo*/
     .table-standings tbody td {
-        background-color: rgba(255, 255, 255, 0.9);
+        background-color: rgba(255, 255, 255, 0.863);
     }
     
     .table-success {
-        background-color: rgba(40, 167, 69, 0.05) !important;
+        background-color: rgba(40, 167, 69, 0.08) !important;
     }
     
     .table-danger {
-        background-color: rgba(220, 53, 69, 0.05) !important;
+        background-color: rgba(220, 53, 69, 0.08) !important;
     }
     
-    /* Estilos específicos para la tabla en móviles */
-    @media (max-width: 767.98px) {
-        .table-responsive {
-            width: 100%;
-            margin-bottom: 15px;
-            overflow-y: hidden;
-            -ms-overflow-style: -ms-autohiding-scrollbar;
-            border: none;
-        }
-        
-        .table-responsive > .table {
-            margin-bottom: 0;
-        }
-        
-        .table-responsive > .table > thead > tr > th,
-        .table-responsive > .table > tbody > tr > th,
-        .table-responsive > .table > tfoot > tr > th,
-        .table-responsive > .table > thead > tr > td,
-        .table-responsive > .table > tbody > tr > td,
-        .table-responsive > .table > tfoot > tr > td {
-            white-space: nowrap;
+    /* Estilos para la tabla responsive */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 20px;
+        border-radius: 0 0 12px 12px;
+    }
+    
+    /* Scroll personalizado para la tabla */
+    .table-responsive::-webkit-scrollbar {
+        height: 8px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    
+    /* Ajustes responsivos */
+    @media (max-width: 1199.98px) {
+        .table-modern td, .table-modern th {
+            padding: 10px 12px;
         }
     }
     
-    /* ===== RESPONSIVIDAD GENERAL ===== */
-    @media (max-width: 992px) {
+    @media (max-width: 991.98px) {
         .display-4 {
             font-size: 2.8rem !important;
         }
         .display-5 {
             font-size: 2rem !important;
         }
+        
+        .table-modern td, .table-modern th {
+            padding: 9px 11px;
+        }
     }
     
-    @media (max-width: 768px) {
+    @media (max-width: 767.98px) {
         .display-4 {
             font-size: 2.2rem !important;
         }
@@ -394,11 +423,15 @@
         
         .table-modern td, .table-modern th {
             padding: 8px 10px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+        }
+        
+        .table-standings {
+            min-width: 650px;
         }
     }
     
-    @media (max-width: 576px) {
+    @media (max-width: 575.98px) {
         .display-4 {
             font-size: 1.8rem !important;
         }
@@ -421,7 +454,19 @@
         
         .table-modern td, .table-modern th {
             padding: 6px 8px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+        }
+        
+        .table-standings {
+            min-width: 600px;
+        }
+        
+        .w-40 {
+            width: 35% !important;
+        }
+        
+        .w-20 {
+            width: 15% !important;
         }
     }
 </style>
@@ -439,11 +484,20 @@
         statCards.forEach(card => {
             card.addEventListener('mouseenter', () => {
                 card.style.transform = 'translateY(-5px)';
-                card.style.transition = 'all 0.3s ease';
+                card.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.15)';
             });
             card.addEventListener('mouseleave', () => {
                 card.style.transform = '';
+                card.style.boxShadow = '';
             });
+        });
+        
+        // Indicador visual para tablas desplazables
+        const scrollableTables = document.querySelectorAll('.table-responsive');
+        scrollableTables.forEach(table => {
+            if (table.scrollWidth > table.clientWidth) {
+                table.insertAdjacentHTML('afterend', '<div class="text-center text-muted mb-3"><small>Desliza para ver más columnas <i class="fas fa-arrow-right"></i></small></div>');
+            }
         });
     });
 </script>

@@ -1,5 +1,7 @@
 {% extends "base_admin.html" %}
 
+{% block admin_title %}Dashboard del Torneo{% endblock %}
+
 {% block admin_content %}
 <div class="container mt-4">
     <!-- Alertas y mensajes -->
@@ -21,7 +23,7 @@
                 <h4 class="mb-0">
                     <i class="fas fa-tachometer-alt me-2"></i>Panel de Control
                 </h4>
-                <div>
+                <div class="admin-actions">
                     <a href="{{ url_for('crear_torneo') }}" class="btn btn-success me-2">
                         <i class="fas fa-plus-circle me-1"></i>Nuevo Torneo
                     </a>
@@ -33,8 +35,8 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-4 col-sm-6 col-12">
-                    <div class="card text-white bg-info mb-3">
+                <div class="col-md-4 col-sm-6 col-12 mb-3">
+                    <div class="card text-white bg-info h-100">
                         <div class="card-body">
                             <h5 class="card-title">Equipos Registrados</h5>
                             <p class="card-text display-6">{{ total_equipos }}</p>
@@ -44,16 +46,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 col-sm-6 col-12">
-                    <div class="card text-white bg-success mb-3">
+                <div class="col-md-4 col-sm-6 col-12 mb-3">
+                    <div class="card text-white bg-success h-100">
                         <div class="card-body">
                             <h5 class="card-title">Partidos Jugados</h5>
                             <p class="card-text display-6">{{ partidos_jugados }}</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 col-sm-6 col-12">
-                    <div class="card text-white bg-primary mb-3">
+                <div class="col-md-4 col-sm-6 col-12 mb-3">
+                    <div class="card text-white bg-primary h-100">
                         <div class="card-body">
                             <h5 class="card-title">Jornadas Programadas</h5>
                             <p class="card-text display-6">{{ total_jornadas }}</p>
@@ -245,4 +247,87 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para reiniciar torneo -->
+<div class="modal fade" id="modalReiniciar" tabindex="-1" aria-labelledby="modalReiniciarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="modalReiniciarLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Reiniciar Torneo
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('reiniciar_torneo') }}" method="POST">
+                <div class="modal-body">
+                    <p>¿Estás seguro que deseas reiniciar el torneo?</p>
+                    <p class="text-danger"><strong>Advertencia:</strong> Esta acción eliminará todos los resultados y estadísticas actuales.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-sync-alt me-1"></i> Confirmar Reinicio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modales para editar/agregar resultados -->
+{% if jornadas %}
+    {% for jornada_num, partidos_jornada in jornadas %}
+        {% for partido in partidos_jornada %}
+        <div class="modal fade" id="modalResultado{{ partido.id }}" tabindex="-1" aria-labelledby="modalResultadoLabel{{ partido.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="modalResultadoLabel{{ partido.id }}">
+                            {% if partido.jugado %}Editar{% else %}Agregar{% endif %} Resultado
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ url_for('actualizar_resultado', partido_id=partido.id) }}" method="POST">
+                        <div class="modal-body">
+                            <div class="row align-items-center mb-3">
+                                <div class="col-md-5 text-end">
+                                    <h5>{{ partido.equipo_local }}</h5>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" class="form-control text-center" name="goles_local" 
+                                           value="{{ partido.goles_local if partido.jugado else '0' }}" min="0" required>
+                                </div>
+                                <div class="col-md-5 text-center">
+                                    <span class="fs-4">vs</span>
+                                </div>
+                            </div>
+                            <div class="row align-items-center">
+                                <div class="col-md-5 text-end">
+                                    <h5>{{ partido.equipo_visitante }}</h5>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" class="form-control text-center" name="goles_visitante" 
+                                           value="{{ partido.goles_visitante if partido.jugado else '0' }}" min="0" required>
+                                </div>
+                                <div class="col-md-5"></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-1"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endfor %}
+{% endif %}
+
 {% endblock %}
