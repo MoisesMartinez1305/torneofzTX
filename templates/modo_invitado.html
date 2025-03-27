@@ -190,18 +190,18 @@
                             <p class="mb-0">La tabla se actualizará después de los primeros partidos</p>
                         </div>
                     {% else %}
-                        <div class="table-responsive">
-                            <table class="table table-modern table-standings align-middle mb-0">
+                        <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                            <table class="table table-modern table-standings align-middle mb-0" style="min-width: 700px;">
                                 <thead class="table-dark">
                                     <tr>
                                         <th class="text-center">POS</th>
                                         <th>Equipo</th>
-                                        <th class="text-center d-none d-md-table-cell">PJ</th>
-                                        <th class="text-center d-none d-lg-table-cell">PG</th>
-                                        <th class="text-center d-none d-lg-table-cell">PE</th>
-                                        <th class="text-center d-none d-lg-table-cell">PP</th>
-                                        <th class="text-center d-none d-md-table-cell">GF</th>
-                                        <th class="text-center d-none d-md-table-cell">GC</th>
+                                        <th class="text-center">PJ</th>
+                                        <th class="text-center d-none d-sm-table-cell">PG</th>
+                                        <th class="text-center d-none d-sm-table-cell">PE</th>
+                                        <th class="text-center d-none d-sm-table-cell">PP</th>
+                                        <th class="text-center">GF</th>
+                                        <th class="text-center">GC</th>
                                         <th class="text-center">DG</th>
                                         <th class="text-center fw-bold">Pts</th>
                                     </tr>
@@ -213,12 +213,12 @@
                                         <td>
                                             <strong>{{ equipo.nombre }}</strong>
                                         </td>
-                                        <td class="text-center d-none d-md-table-cell">{{ equipo.partidos_jugados }}</td>
-                                        <td class="text-center d-none d-lg-table-cell">{{ (equipo.puntos // 3) }}</td>
-                                        <td class="text-center d-none d-lg-table-cell">{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
-                                        <td class="text-center d-none d-lg-table-cell">{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
-                                        <td class="text-center d-none d-md-table-cell">{{ equipo.goles_favor }}</td>
-                                        <td class="text-center d-none d-md-table-cell">{{ equipo.goles_contra }}</td>
+                                        <td class="text-center">{{ equipo.partidos_jugados }}</td>
+                                        <td class="text-center d-none d-sm-table-cell">{{ (equipo.puntos // 3) }}</td>
+                                        <td class="text-center d-none d-sm-table-cell">{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td class="text-center d-none d-sm-table-cell">{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td class="text-center">{{ equipo.goles_favor }}</td>
+                                        <td class="text-center">{{ equipo.goles_contra }}</td>
                                         <td class="text-center fw-bold">{{ equipo.diferencia_goles }}</td>
                                         <td class="text-center fw-bold bg-dark text-white">{{ equipo.puntos }}</td>
                                     </tr>
@@ -341,7 +341,31 @@
         background-color: rgba(220, 53, 69, 0.05) !important;
     }
     
-    /* ===== RESPONSIVIDAD ===== */
+    /* Estilos específicos para la tabla en móviles */
+    @media (max-width: 767.98px) {
+        .table-responsive {
+            width: 100%;
+            margin-bottom: 15px;
+            overflow-y: hidden;
+            -ms-overflow-style: -ms-autohiding-scrollbar;
+            border: none;
+        }
+        
+        .table-responsive > .table {
+            margin-bottom: 0;
+        }
+        
+        .table-responsive > .table > thead > tr > th,
+        .table-responsive > .table > tbody > tr > th,
+        .table-responsive > .table > tfoot > tr > th,
+        .table-responsive > .table > thead > tr > td,
+        .table-responsive > .table > tbody > tr > td,
+        .table-responsive > .table > tfoot > tr > td {
+            white-space: nowrap;
+        }
+    }
+    
+    /* ===== RESPONSIVIDAD GENERAL ===== */
     @media (max-width: 992px) {
         .display-4 {
             font-size: 2.8rem !important;
