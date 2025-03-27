@@ -1,114 +1,160 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 style="color: white;"class="text-center mb-4">Torneo Fútbol Rápido - Modo Invitado</h1>
-    
-    <!-- Estadísticas rápidas -->
-    <div class="row mb-4">
+<div class="container mt-5">
+    <!-- Encabezado principal con logo y título -->
+    <div class="text-center mb-5">
+        <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="Logo del torneo" class="mb-3" style="max-width: 150px;">
+        <h1 class="display-4 fw-bold text-white mb-3 text-shadow">Torneo de Fútbol Rápido 2025</h1>
+        <h2 class="display-5 text-white mb-0 text-gradient">Fuentezuelas, TX - Varonil Libre</h2>
+    </div>
+
+    <!-- Tarjetas de estadísticas -->
+    <div class="row mb-5 g-4">
+        <!-- Tarjeta de equipos -->
         <div class="col-md-4">
-            <div class="card text-white bg-info">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Equipos</h5>
-                    <p class="card-text display-6">{{ total_equipos }}</p>
-                    {% if total_equipos is odd %}
-                        <small class="d-block">(Torneo con descansos)</small>
-                    {% endif %}
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-body text-center py-4">
+                    <div class="icon-stats mb-3">
+                        <i class="fas fa-users fa-3x text-info"></i>
+                    </div>
+                    <h3 class="h5 card-title text-muted">Equipos</h3>
+                    <p class="display-4 fw-bold text-dark mb-0">{{ total_equipos }}</p>
                 </div>
             </div>
         </div>
+        
+        <!-- Tarjeta de jornadas -->
         <div class="col-md-4">
-            <div class="card text-white bg-success">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Partidos Jugados</h5>
-                    <p class="card-text display-6">{{ partidos_jugados }}</p>
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-body text-center py-4">
+                    <div class="icon-stats mb-3">
+                        <i class="fas fa-calendar-alt fa-3x text-primary"></i>
+                    </div>
+                    <h3 class="h5 card-title text-muted">Jornadas</h3>
+                    <p class="display-4 fw-bold text-dark mb-0">{{ total_jornadas }}</p>
                 </div>
             </div>
         </div>
+        
+        <!-- Tarjeta de progreso -->
         <div class="col-md-4">
-            <div class="card text-white bg-primary">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Jornadas</h5>
-                    <p class="card-text display-6">{{ total_jornadas }}</p>
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-body text-center py-4">
+                    <div class="icon-stats mb-3">
+                        <i class="fas fa-tasks fa-3x text-success"></i>
+                    </div>
+                    <h3 class="h5 card-title text-muted">Progreso del Torneo</h3>
+                    
+                    {% set total_partidos = total_jornadas * (total_equipos // 2) %}
+                    {% set partidos_jugados = todos_los_partidos|selectattr('jugado')|list|length %}
+                    {% set porcentaje = (partidos_jugados / total_partidos * 100) if total_partidos > 0 else 0 %}
+                    
+                    <div class="progress mb-3" style="height: 30px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                             role="progressbar" 
+                             style="width: {{ porcentaje }}%" 
+                             aria-valuenow="{{ porcentaje }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    
+                    <p class="display-6 fw-bold text-dark mb-1">{{ porcentaje|round(1) }}%</p>
+                    <small class="text-muted">
+                        {{ partidos_jugados }} de {{ total_partidos }} partidos jugados
+                    </small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Pestañas -->
-    <ul class="nav nav-tabs mb-4" id="invitadoTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="jornadas-tab" data-bs-toggle="tab" data-bs-target="#jornadas" type="button" role="tab">
-                <i class="fas fa-calendar-alt me-1"></i> Jornadas
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tabla-tab" data-bs-toggle="tab" data-bs-target="#tabla" type="button" role="tab">
-                <i class="fas fa-trophy me-1"></i> Tabla de Posiciones
-            </button>
-        </li>
-    </ul>
+    <!-- Pestañas de navegación -->
+    <div class="custom-tabs mb-4">
+        <ul class="nav nav-pills mb-4 justify-content-center" id="invitadoTab" role="tablist">
+            <li class="nav-item mx-1" role="presentation">
+                <button class="nav-link active px-4 py-2 rounded-pill" id="jornadas-tab" data-bs-toggle="tab" data-bs-target="#jornadas" type="button" role="tab">
+                    <i class="fas fa-calendar-alt me-2"></i> Jornadas
+                </button>
+            </li>
+            <li class="nav-item mx-1" role="presentation">
+                <button class="nav-link px-4 py-2 rounded-pill" id="tabla-tab" data-bs-toggle="tab" data-bs-target="#tabla" type="button" role="tab">
+                    <i class="fas fa-trophy me-2"></i> Clasificación
+                </button>
+            </li>
+        </ul>
+    </div>
     
+    <!-- Contenido de las pestañas -->
     <div class="tab-content" id="invitadoTabContent">
-        <!-- Tab Jornadas -->
+        <!-- Pestaña de Jornadas -->
         <div class="tab-pane fade show active" id="jornadas" role="tabpanel">
             {% if not jornadas %}
-                <div class="alert alert-info">
-                    No hay jornadas programadas disponibles.
+                <div class="alert alert-light shadow-sm text-center py-4">
+                    <i class="far fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No hay jornadas programadas</h4>
+                    <p class="mb-0">Próximamente se publicará el calendario de partidos</p>
                 </div>
             {% else %}
                 {% for jornada_num, partidos_jornada in jornadas %}
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <div>
-                            <h4 class="mb-0">Jornada {{ jornada_num }}</h4>
-                            {% if total_equipos is odd %}
-                                {% set equipos_jugando = [] %}
-                                {% for partido in partidos_jornada %}
-                                    {% if equipos_jugando.append(partido.equipo_local) %}{% endif %}
-                                    {% if equipos_jugando.append(partido.equipo_visitante) %}{% endif %}
-                                {% endfor %}
-                                {% set todos_equipos = tabla|map(attribute='nombre')|list %}
-                                {% set equipo_descanso = (todos_equipos|reject('in', equipos_jugando)|first) %}
-                                <small class="d-block mt-1">
-                                    <i class="fas fa-moon"></i> Descansa: <strong>{{ equipo_descanso }}</strong>
-                                </small>
-                            {% endif %}
+                <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-calendar-day fs-4 me-3"></i>
+                            <div>
+                                <h4 class="mb-0 fw-normal">Jornada {{ jornada_num }}</h4>
+                                {% if total_equipos is odd %}
+                                    {% set equipos_jugando = [] %}
+                                    {% for partido in partidos_jornada %}
+                                        {% if equipos_jugando.append(partido.equipo_local) %}{% endif %}
+                                        {% if equipos_jugando.append(partido.equipo_visitante) %}{% endif %}
+                                    {% endfor %}
+                                    {% set todos_equipos = tabla|map(attribute='nombre')|list %}
+                                    {% set equipo_descanso = (todos_equipos|reject('in', equipos_jugando)|first) %}
+                                    <small class="d-block mt-1 text-white-50">
+                                        <i class="fas fa-moon"></i> Descansa: <strong>{{ equipo_descanso }}</strong>
+                                    </small>
+                                {% endif %}
+                            </div>
                         </div>
-                        <span class="badge bg-light text-dark">
+                        <span class="badge bg-light text-dark fs-6 py-2 px-3 rounded-pill">
                             {{ partidos_jornada|length }} partido(s)
                         </span>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                            <table class="table table-modern align-middle mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <th>Local</th>
-                                        <th>Resultado</th>
-                                        <th>Visitante</th>
-                                        <th>Estado</th>
+                                        <th class="w-40">Local</th>
+                                        <th class="w-20 text-center">Resultado</th>
+                                        <th class="w-40">Visitante</th>
+                                        <th class="w-20 text-center">Estado</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for partido in partidos_jornada %}
                                     <tr>
-                                        <td>{{ partido.equipo_local }}</td>
-                                        <td>
+                                        <td class="fw-bold">{{ partido.equipo_local }}</td>
+                                        <td class="text-center">
                                             {% if partido.jugado %}
-                                                <span class="badge bg-primary rounded-pill">
+                                                <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">
                                                     {{ partido.goles_local }} - {{ partido.goles_visitante }}
                                                 </span>
                                             {% else %}
-                                                <span class="text-muted">vs</span>
+                                                <span class="text-muted fst-italic">vs</span>
                                             {% endif %}
                                         </td>
-                                        <td>{{ partido.equipo_visitante }}</td>
-                                        <td>
+                                        <td class="fw-bold">{{ partido.equipo_visitante }}</td>
+                                        <td class="text-center">
                                             {% if partido.jugado %}
-                                                <span class="badge bg-success">Jugado</span>
+                                                <span class="badge bg-success bg-opacity-10 text-success py-2 px-3 rounded-pill">
+                                                    <i class="fas fa-check-circle me-1"></i> Jugado
+                                                </span>
                                             {% else %}
-                                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                                <span class="badge bg-warning bg-opacity-10 text-warning py-2 px-3 rounded-pill">
+                                                    <i class="fas fa-clock me-1"></i> Pendiente
+                                                </span>
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -122,62 +168,65 @@
             {% endif %}
         </div>
         
-        <!-- Tab Tabla de Posiciones -->
+        <!-- Pestaña de Tabla de Posiciones -->
         <div class="tab-pane fade" id="tabla" role="tabpanel">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Tabla de Posiciones</h4>
+            <div class="card border-0 shadow-sm">
+                <!-- Encabezado de la tabla de posiciones (opacidad completa) -->
+                <div class="card-header bg-dark text-white py-3" style="opacity: 1;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-trophy fs-4 me-3"></i>
+                        <h4 class="mb-0 fw-normal">Tabla de Clasificación</h4>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0 position-relative">
+                    <!-- Fondo con logo transparente -->
+                    <div class="table-background">
+                        <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="Logo de fondo" class="img-fluid opacity-10">
+                    </div>
+                    
                     {% if not tabla %}
-                        <div class="alert alert-info">
-                            No hay datos disponibles en la tabla de posiciones.
+                        <div class="alert alert-light shadow-sm text-center py-4">
+                            <i class="fas fa-table fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No hay datos disponibles</h4>
+                            <p class="mb-0">La tabla de posiciones se actualizará después de los primeros partidos</p>
                         </div>
                     {% else %}
                         <div class="table-responsive">
-                            <table class="table table-hover table-striped">
+                            <table class="table table-modern table-standings align-middle mb-0">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th>#</th>
+                                        <th class="text-center">POS</th>
                                         <th>Equipo</th>
-                                        <th>PJ</th>
-                                        <th>PG</th>
-                                        <th>PE</th>
-                                        <th>PP</th>
-                                        <th>GF</th>
-                                        <th>GC</th>
-                                        <th>DG</th>
-                                        <th>Pts</th>
+                                        <th class="text-center">PJ</th>
+                                        <th class="text-center">PG</th>
+                                        <th class="text-center">PE</th>
+                                        <th class="text-center">PP</th>
+                                        <th class="text-center">GF</th>
+                                        <th class="text-center">GC</th>
+                                        <th class="text-center">DG</th>
+                                        <th class="text-center fw-bold">Pts</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for equipo in tabla %}
-                                    <tr>
-                                        <td>{{ loop.index }}</td>
+                                    <tr class="{% if loop.index <= 4 %}table-success{% elif loop.index >= loop.length - 2 %}table-danger{% endif %}">
+                                        <td class="text-center fw-bold">{{ loop.index }}</td>
                                         <td>
                                             <strong>{{ equipo.nombre }}</strong>
                                         </td>
-                                        <td>{{ equipo.partidos_jugados }}</td>
-                                        <td>{{ (equipo.puntos // 3) }}</td>
-                                        <td>{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
-                                        <td>{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
-                                        <td>{{ equipo.goles_favor }}</td>
-                                        <td>{{ equipo.goles_contra }}</td>
-                                        <td>{{ equipo.diferencia_goles }}</td>
-                                        <td><strong>{{ equipo.puntos }}</strong></td>
-                                        
+                                        <td class="text-center">{{ equipo.partidos_jugados }}</td>
+                                        <td class="text-center">{{ (equipo.puntos // 3) }}</td>
+                                        <td class="text-center">{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td class="text-center">{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
+                                        <td class="text-center">{{ equipo.goles_favor }}</td>
+                                        <td class="text-center">{{ equipo.goles_contra }}</td>
+                                        <td class="text-center fw-bold">{{ equipo.diferencia_goles }}</td>
+                                        <td class="text-center fw-bold bg-dark text-white">{{ equipo.puntos }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
-                        {% if total_equipos is odd %}
-                            <div class="alert alert-info mt-3">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Este torneo tiene un número impar de equipos. En cada jornada, un equipo descansa.
-                                Los descansos se distribuyen equitativamente entre todos los equipos.
-                            </div>
-                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -186,30 +235,165 @@
 </div>
 
 <style>
-    .badge-clasificacion {
-        background-color: #28a745;
+    /* Estilos para efectos de texto */
+    .text-gradient {
+        background: linear-gradient(45deg, #ffffff, #a5d8ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-fill-color: transparent;
     }
-    .badge-descenso {
-        background-color: #dc3545;
+    
+    .text-shadow {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
-    .card-header {
-        border-radius: 0.5rem 0.5rem 0 0 !important;
+    
+    /* Estilos para iconos en tarjetas */
+    .icon-stats {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: rgba(13, 110, 253, 0.1);
     }
-    .nav-tabs .nav-link {
+    
+    /* Estilos para pestañas */
+    .custom-tabs .nav-pills .nav-link {
+        transition: all 0.3s ease;
+    }
+    
+    .custom-tabs .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+    }
+    
+    /* Estilos para tablas modernas */
+    .table-modern {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+    
+    .table-modern thead th {
+        background-color: #343a40;
+        color: white;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        border: none;
+        position: sticky;
+        top: 0;
+    }
+    
+    .table-modern tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    
+    /* Efecto hover sutil para filas */
+    .table-modern tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    .table-modern td, .table-modern th {
+        padding: 12px 15px;
+        vertical-align: middle;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    /* Estilos para el fondo con logo */
+    .table-background {
+        position: absolute;
+        top: 90px;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 0;
+        opacity: 1; /* Logo al 10% de opacidad */
+        pointer-events: none; /* Permite interactuar con la tabla */
+    }
+    
+    /* Posicionamiento de la tabla sobre el fondo */
+    .table-standings {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Anchuras específicas para columnas */
+    .w-40 {
+        width: 30% !important;
+    }
+    
+    .w-20 {
+        width: 10% !important;
+    }
+    
+    /* Estilos para tarjetas */
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    /* Asegurar legibilidad sobre el fondo */
+    .table-standings tbody td {
+        background-color: rgba(255, 255, 255, 0.822); /* Fondo casi blanco */
+    }
+    
+    /* Estilos para estados especiales */
+    .table-success {
+        background-color: rgba(40, 167, 69, 0.05) !important; /* Verde muy suave */
+    }
+    
+    .table-danger {
+        background-color: rgba(220, 53, 69, 0.05) !important; /* Rojo muy suave */
+    }
+    
+    /* Estilos para badges */
+    .badge-score {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        background-color: #0d6efd;
+        color: white;
         font-weight: 500;
     }
-    .badge.bg-secondary {
-        font-size: 0.85rem;
-        padding: 0.35em 0.65em;
+    
+    /* Media queries para responsividad */
+    @media (max-width: 768px) {
+        .table-modern td, .table-modern th {
+            padding: 8px 10px;
+            font-size: 0.9rem;
+        }
+        
+        .icon-stats {
+            width: 60px;
+            height: 60px;
+        }
     }
 </style>
 
 <script>
-    // Inicializar tooltips
     document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips de Bootstrap
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Efecto hover para tarjetas
+        const statCards = document.querySelectorAll('.card');
+        statCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-5px)';
+                card.style.transition = 'all 0.3s ease';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
         });
     });
 </script>

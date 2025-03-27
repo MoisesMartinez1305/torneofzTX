@@ -33,9 +33,11 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-futbol me-2"></i>"Torneo Fútbol Rápido Fuentezuelas, TX. 2025"
+                <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="Logo Torneo" height="40" class="d-inline-block align-top me-2">
+                Torneo de Fútbol Rápido Fuentezuelas, TX. 2025
             </a>
             <div class="navbar-nav">
                 {% if 'admin_logged_in' in session %}
@@ -54,6 +56,7 @@
                     </a>
                 {% endif %}
             </div>
+                
         </div>
     </nav>
 

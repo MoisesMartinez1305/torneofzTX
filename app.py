@@ -141,13 +141,15 @@ def actualizar_estadisticas(partido):
         else:
             equipo_local.puntos += 1
             equipo_visitante.puntos += 1
+
 with app.app_context():
-	db.create_all()
+    db.create_all()
 
 # Rutas principales
 @app.route('/')
 def index():
-    return render_template('seleccion_modo.html')
+    # Redirigir directamente al modo invitado
+    return redirect(url_for('modo_invitado'))
 
 @app.route('/invitado')
 def modo_invitado():
@@ -173,18 +175,21 @@ def modo_invitado():
     
     # Calcular estadísticas para el dashboard
     total_equipos = len(tabla)
-    partidos_jugados = sum(1 for p in todos_los_partidos if p.jugado)  # Esto es el conteo
+    partidos_jugados = sum(1 for p in todos_los_partidos if p.jugado)
     total_jornadas = max([j[0] for j in jornadas_ordenadas]) if jornadas_ordenadas else 0
+    
+    # Verificar si el admin está logueado para mostrar botón de admin
+    admin_logged_in = 'admin_logged_in' in session
     
     return render_template('modo_invitado.html', 
                          jornadas=jornadas_ordenadas,
                          tabla=tabla,
                          total_equipos=total_equipos,
-                         partidos_jugados=partidos_jugados,  # El conteo
-                         todos_los_partidos=todos_los_partidos,  # La lista completa
-                         total_jornadas=total_jornadas)
+                         partidos_jugados=partidos_jugados,
+                         todos_los_partidos=todos_los_partidos,
+                         total_jornadas=total_jornadas,
+                         admin_logged_in=admin_logged_in)
 
-# Agrega esta ruta junto con las demás rutas de administración
 @app.route('/admin/actualizar-tabla', methods=['POST'])
 @admin_required
 def actualizar_tabla():
@@ -213,7 +218,6 @@ def actualizar_tabla():
         flash(f'Error al actualizar la tabla: {str(e)}', 'danger')
     
     return redirect(url_for('admin_dashboard'))
-
 
 # Rutas de administración
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -351,11 +355,7 @@ def reiniciar_torneo():
 def logout():
     session.clear()
     flash('Has cerrado sesión correctamente', 'info')
-    return redirect(url_for('index'))
-
-# Inicialización de la aplicación
-with app.app_context():
-    db.create_all()
+    return redirect(url_for('modo_invitado'))
 
 if __name__ == '__main__':
     app.run(debug=True)
