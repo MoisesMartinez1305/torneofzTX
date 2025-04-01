@@ -2,471 +2,353 @@
 
 {% block content %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<div class="container mt-3 mt-md-5">
-    <!-- Encabezado principal -->
-    <div class="text-center mb-4 mb-md-5">
-        <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="Logo del torneo" class="img-fluid mb-2 mb-md-3" style="max-width: 150px;">
-        <h1 class="display-4 fw-bold text-white mb-2 mb-md-3 text-shadow">Torneo de Fútbol Rápido 2025</h1>
-        <h2 class="display-5 text-white mb-0 text-gradient">Fuentezuelas, TX - Varonil Libre</h2>
+<div class="container mt-4 mt-md-5" style="background-color: #0d3b66; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+    <!-- Encabezado principal mejorado -->
+    <div class="text-center mb-5">
+        <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="Logo del torneo" class="img-fluid mb-3" style="max-width: 120px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
+        <h1 class="display-5 fw-bold text-white mb-3">TORNEO DE FÚTBOL RÁPIDO<br>FUENTEZUELAS, TX. QRO.</h1>
+        <div class="divider mx-auto bg-white opacity-75" style="height: 2px; width: 120px;"></div>
     </div>
 
-    <!-- Tarjetas de estadísticas -->
-    <div class="row mb-4 mb-md-5 g-3 g-md-4">
-        <!-- Tarjeta de equipos -->
-        <div class="col-lg-4 col-md-6 col-12">
-            <div class="card border-0 shadow-lg h-100">
-                <div class="card-body text-center py-3 py-md-4">
-                    <div class="icon-stats mb-2 mb-md-3">
-                        <i class="fas fa-users fa-2x fa-md-3x text-info"></i>
-                    </div>
-                    <h3 class="h5 card-title text-muted">Equipos</h3>
-                    <p class="display-4 fw-bold text-dark mb-0">{{ total_equipos }}</p>
-                </div>
-            </div>
+    {% if not torneo or not datos_ligas %}
+        <div class="alert alert-light text-center border-0 shadow-sm py-3" style="background-color: rgba(255,255,255,0.9);">
+            <i class="fas fa-info-circle me-2 text-primary"></i>No hay torneos o ligas disponibles actualmente.
         </div>
-        
-        <!-- Tarjeta de jornadas -->
-        <div class="col-lg-4 col-md-6 col-12">
-            <div class="card border-0 shadow-lg h-100">
-                <div class="card-body text-center py-3 py-md-4">
-                    <div class="icon-stats mb-2 mb-md-3">
-                        <i class="fas fa-calendar-alt fa-2x fa-md-3x text-primary"></i>
-                    </div>
-                    <h3 class="h5 card-title text-muted">Jornadas</h3>
-                    <p class="display-4 fw-bold text-dark mb-0">{{ total_jornadas }}</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Tarjeta de progreso -->
-        <div class="col-lg-4 col-md-12 col-12">
-            <div class="card border-0 shadow-lg h-100">
-                <div class="card-body text-center py-3 py-md-4">
-                    <div class="icon-stats mb-2 mb-md-3">
-                        <i class="fas fa-tasks fa-2x fa-md-3x text-success"></i>
-                    </div>
-                    <h3 class="h5 card-title text-muted">Progreso</h3>
-                    
-                    {% set total_partidos = total_jornadas * (total_equipos // 2) %}
-                    {% set partidos_jugados = todos_los_partidos|selectattr('jugado')|list|length %}
-                    {% set porcentaje = (partidos_jugados / total_partidos * 100) if total_partidos > 0 else 0 %}
-                    
-                    <div class="progress mb-2 mb-md-3" style="height: 25px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
-                             role="progressbar" 
-                             style="width: {{ porcentaje }}%" 
-                             aria-valuenow="{{ porcentaje }}" 
-                             aria-valuemin="0" 
-                             aria-valuemax="100">
-                        </div>
-                    </div>
-                    
-                    <p class="display-5 display-md-4 fw-bold text-dark mb-1">{{ porcentaje|round(1) }}%</p>
-                    <small class="text-muted">
-                        {{ partidos_jugados }} de {{ total_partidos }} partidos
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pestañas de navegación -->
-    <div class="custom-tabs mb-3 mb-md-4">
-        <ul class="nav nav-pills mb-3 justify-content-center flex-nowrap overflow-auto" id="invitadoTab" role="tablist" style="white-space: nowrap;">
-            <li class="nav-item mx-1" role="presentation">
-                <button class="nav-link active px-3 px-md-4 py-1 py-md-2 rounded-pill" id="jornadas-tab" data-bs-toggle="tab" data-bs-target="#jornadas" type="button" role="tab">
-                    <i class="fas fa-calendar-alt me-1 me-md-2"></i> Jornadas
-                </button>
-            </li>
-            <li class="nav-item mx-1" role="presentation">
-                <button class="nav-link px-3 px-md-4 py-1 py-md-2 rounded-pill" id="tabla-tab" data-bs-toggle="tab" data-bs-target="#tabla" type="button" role="tab">
-                    <i class="fas fa-trophy me-1 me-md-2"></i> Clasificación
-                </button>
-            </li>
-        </ul>
-    </div>
-    
-    <!-- Contenido de las pestañas -->
-    <div class="tab-content" id="invitadoTabContent">
-        <!-- Pestaña de Jornadas -->
-        <div class="tab-pane fade show active" id="jornadas" role="tabpanel">
-            {% if not jornadas %}
-                <div class="alert alert-light shadow-sm text-center py-3 py-md-4">
-                    <i class="far fa-calendar-times fa-2x fa-md-3x text-muted mb-2 mb-md-3"></i>
-                    <h4 class="text-muted">No hay jornadas programadas</h4>
-                    <p class="mb-0">Próximamente se publicará el calendario</p>
-                </div>
-            {% else %}
-                {% for jornada_num, partidos_jornada in jornadas %}
-                <div class="card border-0 shadow-sm mb-3 mb-md-4 overflow-hidden">
-                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2 py-md-3">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-calendar-day fs-4 me-2 me-md-3"></i>
+    {% else %}
+        <!-- Sección de ligas - Diseño tipo cards modernas -->
+        <div class="row g-4 mb-5">
+            {% for datos in datos_ligas %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card liga-card h-100 border-0 overflow-hidden shadow" 
+                     onclick="document.getElementById('ligaCollapse{{ datos.liga.id }}').classList.toggle('show')"
+                     style="cursor: pointer; transition: all 0.3s ease; background: linear-gradient(135deg, #1a5276 0%, #0d3b66 100%); border: 1px solid rgba(255,255,255,0.1);">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
-                                <h4 class="mb-0 fw-normal fs-5 fs-md-4">Jornada {{ jornada_num }}</h4>
-                                {% if total_equipos is odd %}
-                                    {% set equipos_jugando = [] %}
-                                    {% for partido in partidos_jornada %}
-                                        {% if equipos_jugando.append(partido.equipo_local) %}{% endif %}
-                                        {% if equipos_jugando.append(partido.equipo_visitante) %}{% endif %}
-                                    {% endfor %}
-                                    {% set todos_equipos = tabla|map(attribute='nombre')|list %}
-                                    {% set equipo_descanso = (todos_equipos|reject('in', equipos_jugando)|first) %}
-                                    <small class="d-block mt-1 text-white-50">
-                                        <i class="fas fa-moon"></i> Descansa: <strong>{{ equipo_descanso }}</strong>
-                                    </small>
-                                {% endif %}
+                                <span class="badge bg-white text-dark mb-2 fw-normal">{{ loop.index }}° LIGA</span>
+                                <h3 class="h5 mb-0 text-white">{{ datos.liga.nombre }}</h3>
+                            </div>
+                            <i class="fas fa-trophy fs-4 text-warning"></i>
+                        </div>
+                        
+                        <div class="progress mb-3" style="height: 6px; background-color: rgba(255,255,255,0.2);">
+                            <div class="progress-bar bg-warning" role="progressbar" 
+                                 style="width: {% if datos.total_partidos is defined and datos.total_partidos > 0 %}{{ (datos.partidos_jugados / datos.total_partidos * 100) }}{% else %}0{% endif %}%" 
+                                 aria-valuenow="{{ datos.partidos_jugados }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="{{ datos.total_partidos if datos.total_partidos is defined else 0 }}">
                             </div>
                         </div>
-                        <span class="badge bg-light text-dark fs-6 py-1 py-md-2 px-2 px-md-3 rounded-pill">
-                            {{ partidos_jornada|length }} partido(s)
+                        
+                        <div class="d-flex justify-content-between text-white-80 small mb-3">
+                            <span><i class="fas fa-calendar-alt me-1"></i> {{ datos.total_jornadas if datos.total_jornadas is defined else 0 }} jornadas</span>
+                            <span><i class="fas fa-futbol me-1"></i> {{ datos.partidos_jugados }}/{{ datos.total_partidos if datos.total_partidos is defined else 0 }}</span>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-users me-2 text-white-60"></i>
+                                    <span class="text-white">{{ datos.tabla|length }} equipos</span>
+                                </div>
+                                <span class="badge bg-white text-dark rounded-pill px-3 py-1">
+                                    {% if datos.total_partidos is defined and datos.total_partidos > 0 %}
+                                        {{ ((datos.partidos_jugados / datos.total_partidos * 100)|round(0)) }}%
+                                    {% else %}0%{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Contenido detallado de cada liga -->
+        {% for datos in datos_ligas %}
+        <div class="collapse mb-5" id="ligaCollapse{{ datos.liga.id }}">
+            <div class="card border-0 shadow-sm overflow-hidden mb-4" style="background-color: rgba(255,255,255,0.95);">
+                <div class="card-header py-3" style="background: linear-gradient(135deg, #1a5276 0%, #0d3b66 100%);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="h4 mb-0 text-white">{{ datos.liga.nombre }}</h2>
+                            <small class="text-white-60">
+                                <i class="fas fa-calendar-alt me-1"></i> {{ datos.total_jornadas if datos.total_jornadas is defined else 0 }} jornadas | 
+                                <i class="fas fa-futbol me-1"></i> {{ datos.partidos_jugados }}/{{ datos.total_partidos if datos.total_partidos is defined else 0 }} partidos
+                            </small>
+                        </div>
+                        <span class="badge bg-white text-dark fs-6 py-1 px-3 rounded-pill">
+                            {{ datos.tabla|length }} equipos
                         </span>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-modern align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="w-40">Local</th>
-                                        <th class="w-20 text-center">Resultado</th>
-                                        <th class="w-40">Visitante</th>
-                                        <th class="w-20 text-center">Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for partido in partidos_jornada %}
-                                    <tr>
-                                        <td class="fw-bold">{{ partido.equipo_local }}</td>
-                                        <td class="text-center">
-                                            {% if partido.jugado %}
-                                                <span class="badge bg-primary rounded-pill fs-6 px-2 px-md-3 py-1 py-md-2">
-                                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
-                                                </span>
-                                            {% else %}
-                                                <span class="text-muted fst-italic">vs</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="fw-bold">{{ partido.equipo_visitante }}</td>
-                                        <td class="text-center">
-                                            {% if partido.jugado %}
-                                                <span class="badge bg-success bg-opacity-10 text-success py-1 py-md-2 px-2 px-md-3 rounded-pill">
-                                                    <i class="fas fa-check-circle me-1"></i> Jugado
-                                                </span>
-                                            {% else %}
-                                                <span class="badge bg-warning bg-opacity-10 text-warning py-1 py-md-2 px-2 px-md-3 rounded-pill">
-                                                    <i class="fas fa-clock me-1"></i> Pendiente
-                                                </span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
                 </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-        
-        <!-- Pestaña de Tabla de Posiciones - VERSIÓN COMPLETA CON TODAS LAS COLUMNAS -->
-        <div class="tab-pane fade" id="tabla" role="tabpanel">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-dark text-white py-2 py-md-3">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-trophy fs-4 me-2 me-md-3"></i>
-                        <h4 class="mb-0 fw-normal fs-5 fs-md-4">Tabla de Clasificación</h4>
-                    </div>
-                </div>
-                <div class="card-body p-0 position-relative">
-                    <div class="table-background">
-                        <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="Logo de fondo" class="img-fluid opacity-10">
+                
+                <!-- Pestañas mejoradas -->
+                <ul class="nav nav-tabs-modern" id="liga{{ datos.liga.id }}Tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="jornadas{{ datos.liga.id }}-tab" data-bs-toggle="tab" data-bs-target="#jornadas{{ datos.liga.id }}" type="button" role="tab">
+                            <i class="fas fa-calendar-alt me-2"></i>Jornadas
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tabla{{ datos.liga.id }}-tab" data-bs-toggle="tab" data-bs-target="#tabla{{ datos.liga.id }}" type="button" role="tab">
+                            <i class="fas fa-trophy me-2"></i>Clasificación
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Contenido de pestañas -->
+                <div class="tab-content" id="liga{{ datos.liga.id }}TabContent">
+                    <!-- Pestaña de Jornadas -->
+                    <div class="tab-pane fade show active" id="jornadas{{ datos.liga.id }}" role="tabpanel">
+                        {% if not datos.jornadas %}
+                            <div class="text-center py-5">
+                                <i class="far fa-calendar-times fa-3x text-muted mb-3"></i>
+                                <h4 class="text-muted mb-2">No hay jornadas programadas</h4>
+                                <p class="text-muted">Próximamente se publicará el calendario</p>
+                            </div>
+                        {% else %}
+                            {% for jornada_num, partidos_jornada in datos.jornadas %}
+                            <div class="card border-light mb-3 shadow-sm">
+                                <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">
+                                            <span class="fw-bold">{{ jornada_num }}</span>
+                                        </div>
+                                        <h5 class="mb-0">Jornada {{ jornada_num }}</h5>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">
+                                        {{ partidos_jornada|length }} partido(s)
+                                    </span>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                                        <table class="table table-modern mb-0" style="width: auto;">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="text-center" style="width: 1%; white-space: nowrap;">Hora</th>
+                                                    <th style="width: auto; white-space: nowrap;">Local</th>
+                                                    <th class="text-center" style="width: 1%; white-space: nowrap;">Resultado</th>
+                                                    <th style="width: auto; white-space: nowrap;">Visitante</th>
+                                                    <th class="text-center" style="width: 1%; white-space: nowrap;">Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for partido in partidos_jornada %}
+                                                <tr>
+                                                    <td class="text-center text-muted small" style="width: 1%; white-space: nowrap;">{% if partido.hora %}{{ partido.hora }}{% else %}--:--{% endif %}</td>
+                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">{{ partido.equipo_local }}</td>
+                                                    <td class="text-center" style="width: 1%; white-space: nowrap;">
+                                                        {% if partido.jugado %}
+                                                            <span class="badge bg-primary rounded-pill px-3 py-1">
+                                                                {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="text-muted">vs</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">{{ partido.equipo_visitante }}</td>
+                                                    <td class="text-center" style="width: 1%; white-space: nowrap;">
+                                                        {% if partido.jugado %}
+                                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-2 py-1 rounded">
+                                                                <i class="fas fa-check-circle me-1"></i> Jugado
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 px-2 py-1 rounded">
+                                                                <i class="fas fa-clock me-1"></i> Pendiente
+                                                            </span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                     
-                    {% if not tabla %}
-                        <div class="alert alert-light shadow-sm text-center py-3 py-md-4">
-                            <i class="fas fa-table fa-2x fa-md-3x text-muted mb-2 mb-md-3"></i>
-                            <h4 class="text-muted">No hay datos disponibles</h4>
-                            <p class="mb-0">La tabla se actualizará después de los primeros partidos</p>
+                    <!-- Pestaña de Tabla de Posiciones -->
+                    <div class="tab-pane fade" id="tabla{{ datos.liga.id }}" role="tabpanel">
+                        <div class="p-3">
+                            {% if not datos.tabla %}
+                                <div class="text-center py-5">
+                                    <i class="fas fa-table fa-3x text-muted mb-3"></i>
+                                    <h4 class="text-muted mb-2">No hay datos disponibles</h4>
+                                    <p class="text-muted">La tabla se actualizará después de los primeros partidos</p>
+                                </div>
+                            {% else %}
+                                <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                                    <table class="table table-standings" style="width: auto;">
+                                        <thead>
+                                            <tr class="table-dark">
+                                                <th class="text-center" style="width: 1%; white-space: nowrap;">#</th>
+                                                <th style="width: auto; white-space: nowrap;">Equipo</th>
+                                                <th class="text-center" style="width: 1%; white-space: nowrap;">PJ</th>
+                                                <th class="text-center" style="width: 1%; white-space: nowrap;">PG</th>
+                                                <th class="text-center" style="width: 1%; white-space: nowrap;">PE</th>
+                                                <th class="text-center" style="width: 1%; white-space: nowrap;">PP</th>
+                                                <th class="text-center" style="width: 1%; white-space: nowrap;">GF</th>
+                                                <th class="text-center" style="width: 1%; white-space: nowrap;">GC</th>
+                                                <th class="text-center" style="width: 1%; white-space: nowrap;">DG</th>
+                                                <th class="text-center fw-bold" style="width: 1%; white-space: nowrap;">Pts</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for equipo in datos.tabla %}
+                                            <tr class="{% if loop.index <= 4 %}highlight-top{% elif loop.index >= loop.length - 2 %}highlight-bottom{% endif %}">
+                                                <td class="text-center fw-bold" style="width: 1%; white-space: nowrap;">{{ loop.index }}</td>
+                                                <td style="width: auto; white-space: nowrap;">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="position-relative me-2" style="width: 24px; height: 24px;">
+                                                            <div class="position-absolute top-0 start-0 w-100 h-100 bg-primary opacity-10 rounded"></div>
+                                                            <span class="position-absolute top-50 start-50 translate-middle fw-bold small">{{ loop.index }}</span>
+                                                        </div>
+                                                        <strong>{{ equipo.nombre }}</strong>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center" style="width: 1%; white-space: nowrap;">{{ equipo.partidos_jugados }}</td>
+                                                <td class="text-center" style="width: 1%; white-space: nowrap;">{{ datos.stats_equipos[equipo.nombre]['ganados'] }}</td>
+                                                <td class="text-center" style="width: 1%; white-space: nowrap;">{{ datos.stats_equipos[equipo.nombre]['empatados'] }}</td>
+                                                <td class="text-center" style="width: 1%; white-space: nowrap;">{{ datos.stats_equipos[equipo.nombre]['perdidos'] }}</td>
+                                                <td class="text-center" style="width: 1%; white-space: nowrap;">{{ equipo.goles_favor }}</td>
+                                                <td class="text-center" style="width: 1%; white-space: nowrap;">{{ equipo.goles_contra }}</td>
+                                                <td class="text-center fw-bold" style="width: 1%; white-space: nowrap;">{{ equipo.diferencia_goles }}</td>
+                                                <td class="text-center fw-bold bg-dark text-white" style="width: 1%; white-space: nowrap;">{{ equipo.puntos }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
                         </div>
-                    {% else %}
-                        <div class="table-responsive">
-                            <table class="table table-modern table-standings align-middle mb-0" style="min-width: 650px;">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th class="text-center">POS</th>
-                                        <th>Equipo</th>
-                                        <th class="text-center">PJ</th>
-                                        <th class="text-center">PG</th>
-                                        <th class="text-center">PE</th>
-                                        <th class="text-center">PP</th>
-                                        <th class="text-center">GF</th>
-                                        <th class="text-center">GC</th>
-                                        <th class="text-center">DG</th>
-                                        <th class="text-center fw-bold">Pts</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for equipo in tabla %}
-                                    <tr class="{% if loop.index <= 4 %}table-success{% elif loop.index >= loop.length - 2 %}table-danger{% endif %}">
-                                        <td class="text-center fw-bold">{{ loop.index }}</td>
-                                        <td>
-                                            <strong>{{ equipo.nombre }}</strong>
-                                        </td>
-                                        <td class="text-center">{{ equipo.partidos_jugados }}</td>
-                                        <td class="text-center">{{ (equipo.puntos // 3) }}</td>
-                                        <td class="text-center">{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
-                                        <td class="text-center">{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
-                                        <td class="text-center">{{ equipo.goles_favor }}</td>
-                                        <td class="text-center">{{ equipo.goles_contra }}</td>
-                                        <td class="text-center fw-bold">{{ equipo.diferencia_goles }}</td>
-                                        <td class="text-center fw-bold bg-dark text-white">{{ equipo.puntos }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+        {% endfor %}
+    {% endif %}
 </div>
 
 <style>
-    /* Estilos base */
+    :root {
+        --primary-color: #0d6efd;
+        --secondary-color: #6c757d;
+        --dark-color: #0d3b66;
+        --light-color: #f8f9fa;
+        --success-color: #198754;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+    }
+    
     body {
-        background-color: #012b55;
-        color: #333;
+        background-color: #0a2a4a;
+        color: #f8f9fa;
     }
     
-    .text-gradient {
-        background: linear-gradient(45deg, #ffffff, #a5d8ff);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-fill-color: transparent;
+    .container {
+        background-color: var(--dark-color);
+        color: white;
     }
     
-    .text-shadow {
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    }
-    
-    .icon-stats {
-        width: 60px;
-        height: 60px;
-        margin: 0 auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background-color: rgba(13, 110, 253, 0.1);
-    }
-    
-    .custom-tabs .nav-pills .nav-link {
+    /* Diseño de cards de liga */
+    .liga-card {
+        border-radius: 12px;
+        overflow: hidden;
         transition: all 0.3s ease;
-        border: 1px solid transparent;
+        border: 1px solid rgba(255,255,255,0.1);
     }
     
-    .custom-tabs .nav-pills .nav-link.active {
-        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
-        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
-        border-color: rgba(255, 255, 255, 0.2);
+    .liga-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3) !important;
     }
     
+    /* Tablas mejoradas */
     .table-modern {
+        --bs-table-bg: white;
+        --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+        --bs-table-hover-bg: rgba(0, 0, 0, 0.03);
         border-collapse: separate;
         border-spacing: 0;
-        width: 100%;
     }
     
     .table-modern thead th {
-        background-color: #343a40;
-        color: white;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-        border: none;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-    
-    .table-modern tbody tr {
-        transition: background-color 0.2s ease;
-    }
-    
-    .table-modern tbody tr:hover {
-        background-color: rgba(0, 0, 0, 0.03);
-    }
-    
-    .table-modern td, .table-modern th {
-        padding: 12px 15px;
-        vertical-align: middle;
-        border-right: #012b55;
-        border-top: 1px solid #117ae2;
-    }
-    
-    .table-background {
-        position: absolute;
-        top: 30px;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 0;
-        opacity: 1;
-        pointer-events: none;
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: #495057;
     }
     
     .table-standings {
-        position: relative;
-        z-index: 1;
+        --bs-table-bg: white;
+        color: #212529;
     }
     
-    .w-40 {
-        width: 30% !important;
+    .table-standings thead th {
+        background-color: #2c3e50;
+        color: white;
+        font-weight: 500;
+        vertical-align: middle;
     }
     
-    .w-20 {
-        width: 10% !important;
+    .table-standings tbody tr.highlight-top {
+        background-color: rgba(25, 135, 84, 0.08) !important;
     }
     
-    .card {
-        border-radius: 12px;
-        overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-    }
-    /*tabla fondo*/
-    .table-standings tbody td {
-        background-color: rgba(255, 255, 255, 0.863);
-    }
-    
-    .table-success {
-        background-color: rgba(40, 167, 69, 0.08) !important;
-    }
-    
-    .table-danger {
+    .table-standings tbody tr.highlight-bottom {
         background-color: rgba(220, 53, 69, 0.08) !important;
     }
     
-    /* Estilos para la tabla responsive */
-    .table-responsive {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin-bottom: 20px;
-        border-radius: 0 0 12px 12px;
+    /* Pestañas modernas */
+    .nav-tabs-modern {
+        border-bottom: 1px solid #dee2e6;
+        padding: 0 1rem;
+        background-color: white;
     }
     
-    /* Scroll personalizado para la tabla */
-    .table-responsive::-webkit-scrollbar {
-        height: 8px;
+    .nav-tabs-modern .nav-link {
+        color: #6c757d;
+        font-weight: 500;
+        border-bottom: 3px solid transparent;
     }
     
-    .table-responsive::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
+    .nav-tabs-modern .nav-link.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
     }
     
-    .table-responsive::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 4px;
-    }
-    
-    .table-responsive::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
-    
-    /* Ajustes responsivos */
-    @media (max-width: 1199.98px) {
-        .table-modern td, .table-modern th {
-            padding: 10px 12px;
-        }
-    }
-    
-    @media (max-width: 991.98px) {
-        .display-4 {
-            font-size: 2.8rem !important;
-        }
-        .display-5 {
-            font-size: 2rem !important;
-        }
-        
-        .table-modern td, .table-modern th {
-            padding: 9px 11px;
-        }
-    }
-    
+    /* Ajustes para móviles */
     @media (max-width: 767.98px) {
-        .display-4 {
-            font-size: 2.2rem !important;
-        }
-        .display-5 {
-            font-size: 1.6rem !important;
+        .container {
+            padding: 15px;
         }
         
-        .icon-stats {
-            width: 50px;
-            height: 50px;
+        .liga-card {
+            margin-bottom: 1rem;
         }
         
-        .icon-stats i {
-            font-size: 1.5rem !important;
+        .nav-tabs-modern {
+            overflow-x: auto;
+            flex-wrap: nowrap;
         }
         
-        .table-modern td, .table-modern th {
-            padding: 8px 10px;
-            font-size: 0.85rem;
-        }
-        
-        .table-standings {
-            min-width: 650px;
+        .table-responsive {
+            border-radius: 0;
         }
     }
     
     @media (max-width: 575.98px) {
-        .display-4 {
-            font-size: 1.8rem !important;
-        }
-        .display-5 {
-            font-size: 1.3rem !important;
-        }
-        
-        .card-header h4 {
-            font-size: 1.1rem !important;
-        }
-        
-        .icon-stats {
-            width: 40px;
-            height: 40px;
-        }
-        
-        .icon-stats i {
-            font-size: 1.2rem !important;
-        }
-        
-        .table-modern td, .table-modern th {
-            padding: 6px 8px;
+        .table-modern th, 
+        .table-modern td {
+            padding: 0.5rem;
             font-size: 0.8rem;
         }
         
-        .table-standings {
-            min-width: 600px;
-        }
-        
-        .w-40 {
-            width: 35% !important;
-        }
-        
-        .w-20 {
-            width: 15% !important;
+        h1.display-5 {
+            font-size: 1.8rem;
         }
     }
 </style>
@@ -475,29 +357,32 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Inicializar tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
         
-        // Efecto hover para tarjetas
-        const statCards = document.querySelectorAll('.card');
-        statCards.forEach(card => {
-            card.addEventListener('mouseenter', () => {
-                card.style.transform = 'translateY(-5px)';
-                card.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.15)';
-            });
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = '';
-                card.style.boxShadow = '';
-            });
-        });
+        // Mostrar automáticamente la primera liga
+        if (document.querySelector('.collapse')) {
+            const firstCollapse = document.querySelector('.collapse');
+            new bootstrap.Collapse(firstCollapse, {toggle: true});
+        }
         
-        // Indicador visual para tablas desplazables
-        const scrollableTables = document.querySelectorAll('.table-responsive');
-        scrollableTables.forEach(table => {
-            if (table.scrollWidth > table.clientWidth) {
-                table.insertAdjacentHTML('afterend', '<div class="text-center text-muted mb-3"><small>Desliza para ver más columnas <i class="fas fa-arrow-right"></i></small></div>');
-            }
+        // Mejorar interacción de las cards
+        document.querySelectorAll('.liga-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const targetId = this.getAttribute('onclick').match(/'(.*?)'/)[1];
+                const targetElement = document.getElementById(targetId);
+                
+                // Desplazamiento suave al elemento
+                targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+                
+                // Resaltar la sección abierta
+                document.querySelectorAll('.collapse').forEach(collapse => {
+                    if (collapse.id !== targetId) {
+                        bootstrap.Collapse.getInstance(collapse)?.hide();
+                    }
+                });
+            });
         });
     });
 </script>

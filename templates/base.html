@@ -10,6 +10,7 @@
         body {
             background-color: #022547;
             padding-bottom: 60px;
+            color: #f8f9fa;
         }
         .navbar-brand {
             font-weight: bold;
@@ -24,13 +25,68 @@
         }
         .table-responsive {
             margin-top: 20px;
+            background-color: #03396c;
+            border-radius: 8px;
+            overflow: hidden;
         }
         .badge {
             font-size: 0.9em;
         }
+        .card {
+            background-color: #03396c;
+            border: 1px solid #035b96;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #035b96;
+            border-bottom: 1px solid #035b96;
+        }
+        .table {
+            color: #f8f9fa;
+            margin-bottom: 0;
+        }
+        .table th {
+            background-color: #035b96;
+            border-color: #035b96;
+        }
+        .table td, .table th {
+            border-color: #035b96;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .liga-container {
+            margin-bottom: 3rem;
+            border: 1px solid #035b96;
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: #03396c;
+        }
+        .liga-header {
+            background-color: #035b96;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .form-control, .form-select {
+            background-color: #022547;
+            border-color: #035b96;
+            color: #f8f9fa;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #03396c;
+            border-color: #02a9f7;
+            color: #f8f9fa;
+            box-shadow: 0 0 0 0.25rem rgba(2, 169, 247, 0.25);
+        }
         @media (max-width: 767px) {
             .navbar-collapse {
                 text-align: center;
+            }
+            .liga-container {
+                padding: 0.5rem;
             }
         }
     </style>
@@ -52,6 +108,11 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
                                 <i class="fas fa-tachometer-alt me-1"></i>Panel Admin
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('crear_torneo') }}">
+                                <i class="fas fa-plus-circle me-1"></i>Crear Torneo
                             </a>
                         </li>
                         <li class="nav-item">
@@ -98,6 +159,26 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Función para inicializar tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Inicializar popovers
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl);
+            });
+        });
+        
+        // Función para confirmar acciones importantes
+        function confirmAction(message) {
+            return confirm(message || '¿Estás seguro de realizar esta acción?');
+        }
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

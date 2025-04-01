@@ -3,49 +3,182 @@
 {% block extra_css %}
 <style>
     .admin-panel {
-        background-color: #b8b5b5;
+        background-color: #f8f9fa;
         border-radius: 8px;
         padding: 20px;
         margin-top: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     }
+    
     .admin-nav {
-        margin-bottom: 20px;
+        margin-bottom: 25px;
     }
+    
+    .admin-nav .nav-tabs {
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .admin-nav .nav-link {
+        color: #495057;
+        font-weight: 500;
+        border: none;
+        padding: 12px 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .admin-nav .nav-link:hover {
+        color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+    
+    .admin-nav .nav-link.active {
+        color: #0d6efd;
+        background-color: transparent;
+        border-bottom: 3px solid #0d6efd;
+    }
+    
     .admin-actions .btn {
-        margin-right: 5px;
-        margin-bottom: 5px;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        min-width: 120px;
     }
-    /* Asegurando que las tabs y botones se comporten bien en dispositivos pequeños */
+    
+    .admin-card {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .admin-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .admin-card-header {
+        background-color: #0d6efd;
+        color: white;
+        border-radius: 8px 8px 0 0 !important;
+        padding: 15px 20px;
+    }
+    
+    /* Ajustes responsivos */
     @media (max-width: 767px) {
-        .admin-nav ul {
-            padding-left: 0;
+        .admin-panel {
+            padding: 15px;
+            margin-top: 15px;
         }
+        
+        .admin-nav .nav-link {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+        }
+        
+        .admin-actions .btn {
+            min-width: 100%;
+            margin-right: 0;
+        }
+    }
+    
+    @media (max-width: 575px) {
+        .admin-panel {
+            padding: 10px;
+        }
+        
         .admin-nav .nav-item {
-            text-align: center;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        
+        .admin-nav .nav-link {
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .admin-nav .nav-link.active {
+            border-bottom: 1px solid #0d6efd;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid admin-panel">
-    <h2 class="mb-4"><i class="fas fa-cog me-2"></i>{% block admin_title %}Panel de Administración{% endblock %}</h2>
+<div class="container admin-panel">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="fas fa-cog me-2"></i>{% block admin_title %}Panel de Administración{% endblock %}
+        </h2>
+        <div class="d-flex align-items-center">
+            <span class="badge bg-primary me-2">
+                <i class="fas fa-user-shield me-1"></i>Admin
+            </span>
+            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-danger">
+                <i class="fas fa-sign-out-alt me-1"></i>Salir
+            </a>
+        </div>
+    </div>
     
     <div class="admin-nav">
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}" 
+                   href="{{ url_for('admin_dashboard') }}">
                     <i class="fas fa-home me-1"></i>Inicio
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" href="{{ url_for('crear_torneo') }}">
+                <a class="nav-link {% if request.endpoint == 'crear_torneo' %}active{% endif %}" 
+                   href="{{ url_for('crear_torneo') }}">
                     <i class="fas fa-plus-circle me-1"></i>Crear Torneo
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'actualizar_tabla' %}active{% endif %}" 
+                   href="{{ url_for('actualizar_tabla') }}">
+                    <i class="fas fa-sync-alt me-1"></i>Actualizar Tablas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'reiniciar_torneo' %}active{% endif %}" 
+                   href="{{ url_for('reiniciar_torneo') }}">
+                    <i class="fas fa-trash-alt me-1"></i>Reiniciar Torneo
                 </a>
             </li>
         </ul>
     </div>
     
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show mb-4">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
     {% block admin_content %}{% endblock %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Activar tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Confirmación para acciones importantes
+        document.querySelectorAll('.confirm-action').forEach(function(element) {
+            element.addEventListener('click', function(e) {
+                if (!confirm('¿Estás seguro de realizar esta acción?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

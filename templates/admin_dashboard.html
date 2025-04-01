@@ -16,236 +16,291 @@
         {% endif %}
     {% endwith %}
 
-    <!-- Panel de control superior -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">
-                    <i class="fas fa-tachometer-alt me-2"></i>Panel de Control
-                </h4>
-                <div class="admin-actions">
-                    <a href="{{ url_for('crear_torneo') }}" class="btn btn-success me-2">
-                        <i class="fas fa-plus-circle me-1"></i>Nuevo Torneo
-                    </a>
-                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalReiniciar">
-                        <i class="fas fa-sync-alt me-1"></i>Reiniciar Torneo
-                    </button>
-                </div>
-            </div>
+    {% if not torneo or not datos_ligas %}
+        <div class="alert alert-info text-center py-4">
+            <i class="fas fa-info-circle fa-3x mb-3 text-primary"></i>
+            <h3>No hay torneos activos</h3>
+            <p class="lead">Comienza creando un nuevo torneo con sus respectivas ligas</p>
+            <a href="{{ url_for('crear_torneo') }}" class="btn btn-primary btn-lg mt-3">
+                <i class="fas fa-plus-circle me-2"></i>Crear Nuevo Torneo
+            </a>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4 col-sm-6 col-12 mb-3">
-                    <div class="card text-white bg-info h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">Equipos Registrados</h5>
-                            <p class="card-text display-6">{{ total_equipos }}</p>
-                            {% if total_equipos is odd %}
-                                <small class="d-block">(Torneo con descansos)</small>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 col-12 mb-3">
-                    <div class="card text-white bg-success h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">Partidos Jugados</h5>
-                            <p class="card-text display-6">{{ partidos_jugados }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-6 col-12 mb-3">
-                    <div class="card text-white bg-primary h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">Jornadas Programadas</h5>
-                            <p class="card-text display-6">{{ total_jornadas }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pestañas -->
-    <ul class="nav nav-tabs mb-4" id="adminTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="admin-jornadas-tab" data-bs-toggle="tab" data-bs-target="#admin-jornadas" type="button" role="tab">
-                <i class="fas fa-calendar-alt me-1"></i>Jornadas
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="admin-tabla-tab" data-bs-toggle="tab" data-bs-target="#admin-tabla" type="button" role="tab">
-                <i class="fas fa-table me-1"></i>Tabla de Posiciones
-            </button>
-        </li>
-    </ul>
-    
-    <div class="tab-content" id="adminTabContent">
-        <!-- Tab Jornadas -->
-        <div class="tab-pane fade show active" id="admin-jornadas" role="tabpanel">
-            {% if not jornadas %}
-                <div class="alert alert-info">
-                    No hay jornadas programadas. Por favor crea un nuevo torneo.
-                </div>
-            {% else %}
-                {% for jornada_num, partidos_jornada in jornadas %}
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <div>
-                            <h4 class="mb-0">
-                                <i class="fas fa-calendar-day me-2"></i>Jornada {{ jornada_num }}
-                            </h4>
-                            {% if total_equipos is odd %}
-                                {% set equipos_jugando = [] %}
-                                {% for partido in partidos_jornada %}
-                                    {% if equipos_jugando.append(partido.equipo_local) %}{% endif %}
-                                    {% if equipos_jugando.append(partido.equipo_visitante) %}{% endif %}
-                                {% endfor %}
-                                {% set todos_equipos = tabla|map(attribute='nombre')|list %}
-                                {% set equipo_descanso = (todos_equipos|reject('in', equipos_jugando)|first) %}
-                                <small class="d-block mt-1">
-                                    <i class="fas fa-moon"></i> Equipo que descansa: <strong>{{ equipo_descanso }}</strong>
-                                </small>
-                            {% endif %}
-                        </div>
-                        <span class="badge bg-light text-dark">
-                            {{ partidos_jornada|length }} partido(s)
-                        </span>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Local</th>
-                                        <th>Resultado</th>
-                                        <th>Visitante</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for partido in partidos_jornada %}
-                                    <tr>
-                                        <td class="fw-bold">{{ partido.equipo_local }}</td>
-                                        <td>
-                                            {% if partido.jugado %}
-                                                <span class="badge bg-primary rounded-pill fs-6">
-                                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
-                                                </span>
-                                            {% else %}
-                                                <span class="text-muted">vs</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="fw-bold">{{ partido.equipo_visitante }}</td>
-                                        <td>
-                                            {% if partido.jugado %}
-                                                <span class="badge bg-success">Jugado</span>
-                                            {% else %}
-                                                <span class="badge bg-warning text-dark">Pendiente</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalResultado{{ partido.id }}">
-                                                {% if partido.jugado %}
-                                                    <i class="fas fa-edit me-1"></i>Editar
-                                                {% else %}
-                                                    <i class="fas fa-plus me-1"></i>Agregar
-                                                {% endif %}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-        
-        <!-- Tab Tabla de Posiciones -->
-        <div class="tab-pane fade" id="admin-tabla" role="tabpanel">
-            <div class="card">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+    {% else %}
+        <!-- Panel de control superior -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">
-                        <i class="fas fa-trophy me-2"></i>Tabla de Posiciones
+                        <i class="fas fa-tachometer-alt me-2"></i>Panel de Control - {{ torneo.nombre }}
                     </h4>
-                    <div>
+                    <div class="admin-actions">
+                        <a href="{{ url_for('crear_torneo') }}" class="btn btn-success me-2">
+                            <i class="fas fa-plus-circle me-1"></i>Nuevo Torneo
+                        </a>
+                        <button class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#modalReiniciar">
+                            <i class="fas fa-sync-alt me-1"></i>Reiniciar Torneo
+                        </button>
                         <form action="{{ url_for('actualizar_tabla') }}" method="POST" style="display: inline;">
-                            <button type="submit" class="btn btn-success me-2">
-                                <i class="fas fa-sync-alt me-1"></i>Actualizar
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-sync-alt me-1"></i>Actualizar Tablas
                             </button>
                         </form>
                     </div>
                 </div>
-                <div class="card-body">
-                    {% if not tabla %}
-                        <div class="alert alert-info">
-                            No hay datos disponibles. Por favor crea un torneo y registra resultados.
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 col-sm-6 col-12 mb-3">
+                        <div class="card text-white bg-info h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Ligas Activas</h5>
+                                <p class="card-text display-6">{{ datos_ligas|length }}</p>
+                            </div>
                         </div>
-                    {% else %}
-                        <div class="table-responsive">
-                            <table class="table table-hover table-striped">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Equipo</th>
-                                        <th>PJ</th>
-                                        <th>PG</th>
-                                        <th>PE</th>
-                                        <th>PP</th>
-                                        <th>GF</th>
-                                        <th>GC</th>
-                                        <th>DG</th>
-                                        <th>Pts</th>
-                                        {% if total_equipos is odd %}<th>Descansos</th>{% endif %}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for equipo in tabla %}
-                                    <tr>
-                                        <td>{{ loop.index }}</td>
-                                        <td>
-                                            <strong>{{ equipo.nombre }}</strong>
-                                            {% if loop.index <= 4 %}
-                                                <span class="badge bg-success ms-2">Clasificación</span>
-                                            {% elif loop.index >= (tabla|length - 2) %}
-                                                <span class="badge bg-danger ms-2">Descenso</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ equipo.partidos_jugados }}</td>
-                                        <td>{{ (equipo.puntos // 3) }}</td>
-                                        <td>{{ equipo.partidos_jugados - (equipo.puntos // 3) - ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
-                                        <td>{{ ((equipo.puntos % 3) if equipo.puntos % 3 != 0 else 0) }}</td>
-                                        <td>{{ equipo.goles_favor }}</td>
-                                        <td>{{ equipo.goles_contra }}</td>
-                                        <td>{{ equipo.diferencia_goles }}</td>
-                                        <td><strong class="text-primary">{{ equipo.puntos }}</strong></td>
-                                        {% if total_equipos is odd %}
-                                            <td>
-                                                {% set descansos = total_jornadas - equipo.partidos_jugados %}
-                                                {% if descansos > 0 %}
-                                                    <span class="badge bg-secondary" data-bs-toggle="tooltip" 
-                                                          title="Este equipo ha descansado {{ descansos }} vez{{ 'es' if descansos > 1 else '' }}">
-                                                        <i class="fas fa-moon"></i> {{ descansos }} vez{{ 'es' if descansos > 1 else '' }}
-                                                    </span>
-                                                {% else %}
-                                                    <span class="badge bg-light text-dark">-</span>
-                                                {% endif %}
-                                            </td>
-                                        {% endif %}
-                                    </tr>
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-12 mb-3">
+                        <div class="card text-white bg-success h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Equipos Totales</h5>
+                                <p class="card-text display-6">
+                                    {% set total_equipos = [] %}
+                                    {% for datos in datos_ligas %}
+                                        {% for equipo in datos.tabla %}
+                                            {% if total_equipos.append(1) %}{% endif %}
+                                        {% endfor %}
                                     {% endfor %}
-                                </tbody>
-                            </table>
+                                    {{ total_equipos|length }}
+                                </p>
+                            </div>
                         </div>
-                    {% endif %}
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-12 mb-3">
+                        <div class="card text-white bg-primary h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Partidos Jugados</h5>
+                                <p class="card-text display-6">
+                                    {% set total_partidos = 0 %}
+                                    {% for datos in datos_ligas %}
+                                        {% set total_partidos = total_partidos + datos.partidos_jugados %}
+                                    {% endfor %}
+                                    {{ total_partidos }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-12 mb-3">
+                        <div class="card text-white bg-purple h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Jornadas</h5>
+                                <p class="card-text display-6">
+                                    {% set max_jornadas = 0 %}
+                                    {% for datos in datos_ligas %}
+                                        {% if datos.total_jornadas > max_jornadas %}
+                                            {% set max_jornadas = datos.total_jornadas %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {{ max_jornadas }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Contenido por liga -->
+        {% for datos in datos_ligas %}
+        <div class="card mb-5">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-trophy me-2"></i>{{ datos.liga.nombre }}
+                </h4>
+                <span class="badge bg-light text-dark fs-6">
+                    {{ datos.tabla|length }} equipos | {{ datos.partidos_jugados }} partidos jugados
+                </span>
+            </div>
+            
+            <div class="card-body">
+                <!-- Pestañas por liga -->
+                <ul class="nav nav-tabs mb-4" id="liga{{ datos.liga.id }}Tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="jornadas{{ datos.liga.id }}-tab" data-bs-toggle="tab" 
+                                data-bs-target="#jornadas{{ datos.liga.id }}" type="button" role="tab">
+                            <i class="fas fa-calendar-alt me-1"></i>Jornadas
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tabla{{ datos.liga.id }}-tab" data-bs-toggle="tab" 
+                                data-bs-target="#tabla{{ datos.liga.id }}" type="button" role="tab">
+                            <i class="fas fa-table me-1"></i>Tabla de Posiciones
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="liga{{ datos.liga.id }}TabContent">
+                    <!-- Tab Jornadas -->
+                    <div class="tab-pane fade show active" id="jornadas{{ datos.liga.id }}" role="tabpanel">
+                        {% if not datos.jornadas %}
+                            <div class="alert alert-info">
+                                No hay jornadas programadas para esta liga.
+                            </div>
+                        {% else %}
+                            {% for jornada_num, partidos_jornada in datos.jornadas %}
+                            <div class="card mb-4">
+                                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-calendar-day me-2"></i>Jornada {{ jornada_num }}
+                                        </h5>
+                                        {% if datos.tabla|length is odd %}
+                                            {% set equipos_jugando = [] %}
+                                            {% for partido in partidos_jornada %}
+                                                {% if equipos_jugando.append(partido.equipo_local) %}{% endif %}
+                                                {% if equipos_jugando.append(partido.equipo_visitante) %}{% endif %}
+                                            {% endfor %}
+                                            {% set todos_equipos = datos.tabla|map(attribute='nombre')|list %}
+                                            {% set equipo_descanso = (todos_equipos|reject('in', equipos_jugando)|first) %}
+                                            <small class="d-block mt-1">
+                                                <i class="fas fa-moon"></i> Descansa: <strong>{{ equipo_descanso }}</strong>
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                    <span class="badge bg-light text-dark">
+                                        {{ partidos_jornada|length }} partido(s)
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                                        <table class="table table-hover align-middle" style="width: auto;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: auto; white-space: nowrap;">Local</th>
+                                                    <th style="width: 1%; white-space: nowrap;">Resultado</th>
+                                                    <th style="width: auto; white-space: nowrap;">Visitante</th>
+                                                    <th style="width: 1%; white-space: nowrap;">Estado</th>
+                                                    <th style="width: 1%; white-space: nowrap;">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for partido in partidos_jornada %}
+                                                <tr>
+                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">{{ partido.equipo_local }}</td>
+                                                    <td style="width: 1%; white-space: nowrap;">
+                                                        {% if partido.jugado %}
+                                                            <span class="badge bg-primary rounded-pill fs-6">
+                                                                {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="text-muted">vs</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">{{ partido.equipo_visitante }}</td>
+                                                    <td style="width: 1%; white-space: nowrap;">
+                                                        {% if partido.jugado %}
+                                                            <span class="badge bg-success">Jugado</span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td style="width: 1%; white-space: nowrap;">
+                                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" 
+                                                                data-bs-target="#modalResultado{{ partido.id }}">
+                                                            {% if partido.jugado %}
+                                                                <i class="fas fa-edit me-1"></i>Editar
+                                                            {% else %}
+                                                                <i class="fas fa-plus me-1"></i>Agregar
+                                                            {% endif %}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Tab Tabla de Posiciones -->
+                    <div class="tab-pane fade" id="tabla{{ datos.liga.id }}" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-trophy me-2"></i>Tabla de Posiciones - {{ datos.liga.nombre }}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if not datos.tabla %}
+                                    <div class="alert alert-info">
+                                        No hay datos disponibles para esta liga.
+                                    </div>
+                                {% else %}
+                                    <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                                        <table class="table table-hover table-striped" style="width: auto;">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th style="width: 1%; white-space: nowrap;">#</th>
+                                                    <th style="width: auto; white-space: nowrap;">Equipo</th>
+                                                    <th style="width: 1%; white-space: nowrap;">PJ</th>
+                                                    <th style="width: 1%; white-space: nowrap;">PG</th>
+                                                    <th style="width: 1%; white-space: nowrap;">PE</th>
+                                                    <th style="width: 1%; white-space: nowrap;">PP</th>
+                                                    <th style="width: 1%; white-space: nowrap;">GF</th>
+                                                    <th style="width: 1%; white-space: nowrap;">GC</th>
+                                                    <th style="width: 1%; white-space: nowrap;">DG</th>
+                                                    <th style="width: 1%; white-space: nowrap;">Pts</th>
+                                                    {% if datos.tabla|length is odd %}<th style="width: 1%; white-space: nowrap;">Descansos</th>{% endif %}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for equipo in datos.tabla %}
+                                                <tr class="{% if loop.index <= 4 %}table-success{% elif loop.index >= (datos.tabla|length - 2) %}table-danger{% endif %}">
+                                                    <td style="width: 1%; white-space: nowrap;">{{ loop.index }}</td>
+                                                    <td style="width: auto; white-space: nowrap;">
+                                                        <strong>{{ equipo.nombre }}</strong>
+                                                        {% if loop.index <= 4 %}
+                                                            <span class="badge bg-success ms-2">Clasificación</span>
+                                                        {% elif loop.index >= (datos.tabla|length - 2) %}
+                                                            <span class="badge bg-danger ms-2">Descenso</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td style="width: 1%; white-space: nowrap;">{{ equipo.partidos_jugados }}</td>
+                                                    <td style="width: 1%; white-space: nowrap;">{{ datos.stats_equipos[equipo.nombre]['ganados'] }}</td>
+                                                    <td style="width: 1%; white-space: nowrap;">{{ datos.stats_equipos[equipo.nombre]['empatados'] }}</td>
+                                                    <td style="width: 1%; white-space: nowrap;">{{ datos.stats_equipos[equipo.nombre]['perdidos'] }}</td>
+                                                    <td style="width: 1%; white-space: nowrap;">{{ equipo.goles_favor }}</td>
+                                                    <td style="width: 1%; white-space: nowrap;">{{ equipo.goles_contra }}</td>
+                                                    <td style="width: 1%; white-space: nowrap;">{{ equipo.diferencia_goles }}</td>
+                                                    <td style="width: 1%; white-space: nowrap;"><strong class="text-primary">{{ equipo.puntos }}</strong></td>
+                                                    {% if datos.tabla|length is odd %}
+                                                        <td style="width: 1%; white-space: nowrap;">
+                                                            {% set descansos = datos.total_jornadas - equipo.partidos_jugados %}
+                                                            {% if descansos > 0 %}
+                                                                <span class="badge bg-secondary" data-bs-toggle="tooltip" 
+                                                                      title="Este equipo ha descansado {{ descansos }} vez{{ 'es' if descansos > 1 else '' }}">
+                                                                    <i class="fas fa-moon"></i> {{ descansos }} vez{{ 'es' if descansos > 1 else '' }}
+                                                                </span>
+                                                            {% else %}
+                                                                <span class="badge bg-light text-dark">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    {% endif %}
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
 </div>
 
 <!-- Modal para reiniciar torneo -->
@@ -260,8 +315,8 @@
             </div>
             <form action="{{ url_for('reiniciar_torneo') }}" method="POST">
                 <div class="modal-body">
-                    <p>¿Estás seguro que deseas reiniciar el torneo?</p>
-                    <p class="text-danger"><strong>Advertencia:</strong> Esta acción eliminará todos los resultados y estadísticas actuales.</p>
+                    <p>¿Estás seguro que deseas reiniciar el torneo completo?</p>
+                    <p class="text-danger"><strong>Advertencia:</strong> Esta acción eliminará todas las ligas, equipos y resultados.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -277,57 +332,131 @@
 </div>
 
 <!-- Modales para editar/agregar resultados -->
-{% if jornadas %}
-    {% for jornada_num, partidos_jornada in jornadas %}
-        {% for partido in partidos_jornada %}
-        <div class="modal fade" id="modalResultado{{ partido.id }}" tabindex="-1" aria-labelledby="modalResultadoLabel{{ partido.id }}" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="modalResultadoLabel{{ partido.id }}">
-                            {% if partido.jugado %}Editar{% else %}Agregar{% endif %} Resultado
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+{% if torneo and datos_ligas %}
+    {% for datos in datos_ligas %}
+        {% if datos.jornadas %}
+            {% for jornada_num, partidos_jornada in datos.jornadas %}
+                {% for partido in partidos_jornada %}
+                <div class="modal fade" id="modalResultado{{ partido.id }}" tabindex="-1" aria-labelledby="modalResultadoLabel{{ partido.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title" id="modalResultadoLabel{{ partido.id }}">
+                                    {% if partido.jugado %}Editar{% else %}Agregar{% endif %} Resultado
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form action="{{ url_for('actualizar_resultado', partido_id=partido.id) }}" method="POST">
+                                <div class="modal-body">
+                                    <h6 class="text-center mb-4">{{ datos.liga.nombre }} - Jornada {{ jornada_num }}</h6>
+                                    <div class="row align-items-center mb-3">
+                                        <div class="col-md-5 text-end">
+                                            <h5>{{ partido.equipo_local }}</h5>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" class="form-control text-center" name="goles_local" 
+                                                   value="{{ partido.goles_local if partido.jugado else '0' }}" min="0" required>
+                                        </div>
+                                        <div class="col-md-5 text-center">
+                                            <span class="fs-4">vs</span>
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-5 text-end">
+                                            <h5>{{ partido.equipo_visitante }}</h5>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" class="form-control text-center" name="goles_visitante" 
+                                                   value="{{ partido.goles_visitante if partido.jugado else '0' }}" min="0" required>
+                                        </div>
+                                        <div class="col-md-5"></div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        <i class="fas fa-times me-1"></i> Cancelar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i> Guardar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <form action="{{ url_for('actualizar_resultado', partido_id=partido.id) }}" method="POST">
-                        <div class="modal-body">
-                            <div class="row align-items-center mb-3">
-                                <div class="col-md-5 text-end">
-                                    <h5>{{ partido.equipo_local }}</h5>
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="number" class="form-control text-center" name="goles_local" 
-                                           value="{{ partido.goles_local if partido.jugado else '0' }}" min="0" required>
-                                </div>
-                                <div class="col-md-5 text-center">
-                                    <span class="fs-4">vs</span>
-                                </div>
-                            </div>
-                            <div class="row align-items-center">
-                                <div class="col-md-5 text-end">
-                                    <h5>{{ partido.equipo_visitante }}</h5>
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="number" class="form-control text-center" name="goles_visitante" 
-                                           value="{{ partido.goles_visitante if partido.jugado else '0' }}" min="0" required>
-                                </div>
-                                <div class="col-md-5"></div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="fas fa-times me-1"></i> Cancelar
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i> Guardar
-                            </button>
-                        </div>
-                    </form>
                 </div>
-            </div>
-        </div>
-        {% endfor %}
+                {% endfor %}
+            {% endfor %}
+        {% endif %}
     {% endfor %}
 {% endif %}
 
+<style>
+    .bg-purple {
+        background-color: #6f42c1;
+    }
+    
+    .table-success {
+        background-color: rgba(25, 135, 84, 0.1) !important;
+    }
+    
+    .table-danger {
+        background-color: rgba(220, 53, 69, 0.1) !important;
+    }
+    
+    .card-header h4, .card-header h5 {
+        font-weight: 600;
+    }
+    
+    .nav-tabs .nav-link {
+        font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+        .admin-actions .btn {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .card-header .badge {
+            margin-top: 10px;
+            align-self: flex-start;
+        }
+        
+        /* Estilos para tablas responsivas */
+        .table-responsive {
+            -webkit-overflow-scrolling: touch;
+            overflow-x: auto;
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Activar la primera pestaña de cada liga
+        document.querySelectorAll('.nav-tabs .nav-link').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-bs-target');
+                const tabPane = document.querySelector(tabId);
+                
+                if (tabPane.querySelector('.table-responsive')) {
+                    setTimeout(function() {
+                        tabPane.querySelector('.table-responsive').scrollLeft = 0;
+                    }, 100);
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

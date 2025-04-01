@@ -13,16 +13,19 @@
         <!-- Cuerpo del formulario -->
         <div class="card-body p-3 p-md-4">
             <form method="POST" action="{{ url_for('crear_torneo') }}">
-                <!-- Campo: Número de equipos -->
-                <div class="mb-3">
-                    <label for="num_equipos" class="form-label fw-medium">Número de Equipos</label>
-                    <input type="number" class="form-control form-control-lg" id="num_equipos" name="num_equipos" 
-                           min="2" max="20" required onchange="generarCamposEquipos()">
-                    <small class="text-muted">Mínimo 2, máximo 20 equipos</small>
+                <!-- Campo: Número de ligas -->
+                <div class="mb-4">
+                    <label for="num_ligas" class="form-label fw-medium">Número de Ligas</label>
+                    <select class="form-select form-select-lg" id="num_ligas" name="num_ligas" required onchange="generarCamposLigas()">
+                        {% for i in range(1, 7) %}
+                            <option value="{{ i }}">{{ i }} liga{% if i > 1 %}s{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Máximo 6 ligas por torneo</small>
                 </div>
-                
-                <!-- Contenedor dinámico para equipos -->
-                <div id="equipos-container" class="mb-3 mb-md-4 row g-2">
+
+                <!-- Contenedor dinámico para ligas -->
+                <div id="ligas-container">
                     <!-- Los campos se generarán aquí con JS -->
                 </div>
                 
@@ -41,13 +44,28 @@
 </div>
 
 <style>
-    /* Estilos responsivos */
+    .liga-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #dee2e6;
+    }
+    
+    .liga-header {
+        background-color: #e9ecef;
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
     @media (max-width: 768px) {
         .card-header h4 {
             font-size: 1.25rem !important;
         }
         
-        .form-control-lg {
+        .form-select-lg, .form-control-lg {
             padding: 0.5rem 1rem;
             font-size: 1rem;
         }
@@ -56,6 +74,10 @@
             padding: 0.5rem 1rem;
             font-size: 1rem;
         }
+        
+        .liga-section {
+            padding: 1rem;
+        }
     }
     
     @media (max-width: 576px) {
@@ -63,16 +85,78 @@
             padding: 1rem !important;
         }
         
-        #equipos-container .mb-3 {
+        .equipos-container .mb-3 {
             margin-bottom: 0.5rem !important;
         }
     }
 </style>
 
 <script>
-    function generarCamposEquipos() {
-        const numEquipos = document.getElementById('num_equipos').value;
-        const container = document.getElementById('equipos-container');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Generar campos iniciales
+        generarCamposLigas();
+    });
+
+    function generarCamposLigas() {
+        const numLigas = document.getElementById('num_ligas').value;
+        const container = document.getElementById('ligas-container');
+        container.innerHTML = '';
+        
+        // Validación rápida
+        if (numLigas < 1 || numLigas > 6) return;
+        
+        // Generar secciones para cada liga
+        for (let i = 1; i <= numLigas; i++) {
+            const ligaDiv = document.createElement('div');
+            ligaDiv.className = 'liga-section';
+            ligaDiv.id = `liga-${i}-section`;
+            
+            // Encabezado de la liga
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'liga-header d-flex justify-content-between align-items-center';
+            headerDiv.innerHTML = `
+                <span>Liga ${i}</span>
+                <small class="text-muted">Obligatorio</small>
+            `;
+            
+            // Nombre de la liga
+            const nombreDiv = document.createElement('div');
+            nombreDiv.className = 'mb-3';
+            nombreDiv.innerHTML = `
+                <label for="nombre_liga_${i}" class="form-label">Nombre de la Liga</label>
+                <input type="text" class="form-control" id="nombre_liga_${i}" 
+                       name="nombre_liga_${i}" value="Liga ${i}" required>
+            `;
+            
+            // Número de equipos
+            const equiposDiv = document.createElement('div');
+            equiposDiv.className = 'mb-3';
+            equiposDiv.innerHTML = `
+                <label for="num_equipos_${i}" class="form-label">Número de Equipos</label>
+                <input type="number" class="form-control" id="num_equipos_${i}" 
+                       name="num_equipos_${i}" min="2" max="20" required
+                       onchange="generarCamposEquipos(${i})">
+                <small class="text-muted">Mínimo 2, máximo 20 equipos</small>
+            `;
+            
+            // Contenedor para nombres de equipos
+            const equiposContainer = document.createElement('div');
+            equiposContainer.className = 'row g-2 equipos-container';
+            equiposContainer.id = `equipos-container-${i}`;
+            
+            // Ensamblar la sección
+            ligaDiv.appendChild(headerDiv);
+            ligaDiv.appendChild(nombreDiv);
+            ligaDiv.appendChild(equiposDiv);
+            ligaDiv.appendChild(equiposContainer);
+            
+            container.appendChild(ligaDiv);
+        }
+    }
+
+    function generarCamposEquipos(ligaNum) {
+        const numEquipos = document.getElementById(`num_equipos_${ligaNum}`).value;
+        const container = document.getElementById(`equipos-container-${ligaNum}`);
         container.innerHTML = '';
         
         // Validación rápida
@@ -89,13 +173,13 @@
             const label = document.createElement('label');
             label.className = 'form-label';
             label.textContent = `Equipo ${i}`;
-            label.htmlFor = `equipo_${i}`;
+            label.htmlFor = `equipo_${ligaNum}_${i}`;
             
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'form-control';
-            input.id = `equipo_${i}`;
-            input.name = `equipo_${i}`;
+            input.id = `equipo_${ligaNum}_${i}`;
+            input.name = `equipo_${ligaNum}_${i}`;
             input.required = true;
             input.placeholder = `Nombre del equipo ${i}`;
             
