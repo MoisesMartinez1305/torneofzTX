@@ -43,8 +43,8 @@ class Partido(db.Model):
     jugado = db.Column(db.Boolean, default=False)
 # Usuario administrador
 ADMIN_USER = {
-    "username": "admin",
-    "password": generate_password_hash("admin123")
+    "username": "Moy",
+    "password": generate_password_hash("5de8619a2f")
 }
 
 # Decorador para rutas de administrador
@@ -86,7 +86,6 @@ def crear_calendario(equipos, liga_id):
                     liga_id=liga_id,
                     equipo_local=local,
                     equipo_visitante=visitante,
-                    hora="19:00"  # Hora por defecto
                 )
                 db.session.add(partido)
         
@@ -106,7 +105,6 @@ def crear_calendario(equipos, liga_id):
                         liga_id=liga_id,
                         equipo_local=local,
                         equipo_visitante=visitante,
-                        hora="19:00"  # Hora por defecto
                     )
                     db.session.add(partido)
             

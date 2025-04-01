@@ -138,25 +138,10 @@
                     <i class="fas fa-sync-alt me-1"></i>Actualizar Tablas
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'reiniciar_torneo' %}active{% endif %}" 
-                   href="{{ url_for('reiniciar_torneo') }}">
-                    <i class="fas fa-trash-alt me-1"></i>Reiniciar Torneo
-                </a>
-            </li>
         </ul>
     </div>
     
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show mb-4">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+   
     
     {% block admin_content %}{% endblock %}
 </div>
