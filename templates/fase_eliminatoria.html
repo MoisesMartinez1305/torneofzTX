@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Fase Eliminatoria - {{ categoria.nombre }}</h2>
+    
+    {% for fase in ['cuartos', 'semifinal', 'final'] %}
+        {% set partidos_fase = partidos_eliminatoria|selectattr('fase', 'equalto', fase)|list %}
+        {% if partidos_fase %}
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4>{{ fase|capitalize }} de Final</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Local</th>
+                                    <th>Resultado</th>
+                                    <th>Visitante</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for partido in partidos_fase %}
+                                <tr>
+                                    <td>{{ partido.equipo_local }}</td>
+                                    <td>
+                                        {% if partido.jugado %}
+                                            {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                        {% else %}
+                                            vs
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ partido.equipo_visitante }}</td>
+                                    <td>{{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Por definir' }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" 
+                                                data-bs-target="#modalResultadoCopa{{ partido.id }}">
+                                            {% if partido.jugado %}Editar{% else %}Agregar{% endif %}
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+<form method="POST">
+    <div>
+        <label for="nombre_categoria" style="color: white;">Nombre de la categoría:</label>
+        <input type="text" id="nombre_categoria" name="nombre_categoria" required>
+    </div>
+    <div>
+        <label for="tipo_categoria">Tipo de categoría:</label>
+        <select id="tipo_categoria" name="tipo_categoria">
+            <option value="liga">Liga</option>
+            <option value="copa">Copa</option>
+        </select>
+    </div>
+    <div>
+        <label>Equipos existentes:</label>
+        {% for equipo in equipos %}
+            <div>
+                <input type="checkbox" id="equipo_{{ equipo.id }}" name="equipos_existentes" value="{{ equipo.id }}">
+                <label for="equipo_{{ equipo.id }}">{{ equipo.nombre }}</label>
+            </div>
+        {% endfor %}
+    </div>
+    <button type="submit">Crear Categoría</button>
+</form>
