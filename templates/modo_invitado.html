@@ -159,38 +159,42 @@
                                              aria-labelledby="heading{{ datos.categoria.id }}{{ jornada_num }}" 
                                              data-bs-parent="#accordionJornadas{{ datos.categoria.id }}">
                                             <div class="accordion-body p-0">
-                                                <div class="table-responsive">
-                                                    <table class="table table-hover align-middle mb-0">
-                                                        <thead class="table-light">
+                                                <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                                                    <table class="table table-striped table-hover align-middle">
+                                                        <thead class="table-dark">
                                                             <tr>
-                                                                <th style="width: 30%;">Local</th>
-                                                                <th style="width: 10%;">Resultado</th>
-                                                                <th style="width: 30%;">Visitante</th>
-                                                                <th style="width: 15%;">Estado</th>
+                                                                <th style="width: auto; white-space: nowrap;">Local</th>
+                                                                <th class="text-center" style="width: 1%; white-space: nowrap;">Resultado</th>
+                                                                <th style="width: auto; white-space: nowrap;">Visitante</th>
+                                                                <th class="text-center" style="width: 1%; white-space: nowrap;">Estado</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             {% for partido in partidos_jornada %}
-                                                            <tr>
-                                                                <td class="fw-bold">{{ partido.equipo_local }}</td>
-                                                                <td>
-                                                                    {% if partido.jugado %}
-                                                                        <span class="badge bg-primary rounded-pill">
-                                                                            {{ partido.goles_local }} - {{ partido.goles_visitante }}
-                                                                        </span>
-                                                                    {% else %}
-                                                                        <span class="text-muted">vs</span>
-                                                                    {% endif %}
-                                                                </td>
-                                                                <td class="fw-bold">{{ partido.equipo_visitante }}</td>
-                                                                <td>
-                                                                    {% if partido.jugado %}
-                                                                        <span class="badge bg-success">Jugado</span>
-                                                                    {% else %}
-                                                                        <span class="badge bg-warning text-dark">Pendiente</span>
-                                                                    {% endif %}
-                                                                </td>
-                                                            </tr>
+                                                                <tr>
+                                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">{{ partido.equipo_local }}</td>
+                                                                    <td class="text-center" style="width: 1%; white-space: nowrap;">
+                                                                        {% if partido.jugado %}
+                                                                            <span class="badge bg-primary rounded-pill px-3 py-1">
+                                                                                {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                                                            </span>
+                                                                        {% else %}
+                                                                            <span class="text-muted">VS</span>
+                                                                        {% endif %}
+                                                                    </td>
+                                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">{{ partido.equipo_visitante }}</td>
+                                                                    <td class="text-center" style="width: 1%; white-space: nowrap;">
+                                                                        {% if partido.jugado %}
+                                                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-2 py-1 rounded">
+                                                                                <i class="fas fa-check-circle me-1"></i> Jugado
+                                                                            </span>
+                                                                        {% else %}
+                                                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 px-2 py-1 rounded">
+                                                                                <i class="fas fa-clock me-1"></i> Pendiente
+                                                                            </span>
+                                                                        {% endif %}
+                                                                    </td>
+                                                                </tr>
                                                             {% endfor %}
                                                         </tbody>
                                                     </table>
@@ -687,6 +691,20 @@
             font-size: 0.75rem;
         }
         
+    }
+
+    /* Asegurar que las tablas sean completamente visibles en pantallas pequeñas */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Desplazamiento suave en dispositivos móviles */
+    }
+
+    /* Ajustar el tamaño de las celdas en pantallas pequeñas */
+    @media (max-width: 575.98px) {
+        .table th, .table td {
+            font-size: 0.85rem; /* Reducir el tamaño de fuente */
+            white-space: nowrap; /* Evitar que el texto se corte */
+        }
     }
 </style>
 
