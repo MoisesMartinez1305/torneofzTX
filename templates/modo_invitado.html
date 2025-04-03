@@ -2,6 +2,9 @@
 
 {% block content %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<head>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+</head>
 <div class="container mt-4 mt-md-5" style="background-color: #0d3b66; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
     <!-- Encabezado principal mejorado -->
     <div class="text-center mb-5">
@@ -325,7 +328,7 @@
                                             <h4 class="h5 mb-3 text-center"><i class="fas fa-table me-2"></i>Clasificación</h4>
                                             <div class="table-responsive">
                                                 <table class="table table-sm table-standings">
-                                                    <thead>
+                                                    <thead style="color: rgb(1, 15, 27);">
                                                         <tr class="table-dark">
                                                             <th class="text-center">POS</th>
                                                             <th>Equipo</th>
@@ -488,6 +491,19 @@
 <style>
     /* Tus estilos CSS existentes se mantienen igual */
     /* ... */
+
+    /* Cambiar el color de la columna "G" (Ganados) a un azul más claro */
+    .table-standings th:nth-child(4),
+    .table-standings td:nth-child(4) {
+        color: #5dade2 !important; /* Azul más claro */
+        font-weight: bold;
+    }
+    /* Cambiar el color de la columna "GF" (Goles a Favor) a un verde más claro */
+    .table-standings th:nth-child(7),
+    .table-standings td:nth-child(7) {
+        color: #28a745 !important; /* Verde más claro */
+        font-weight: bold;
+    }
 </style>
 
 <script>
