@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <div class="container mt-4 mt-md-5" style="background-color: #0d3b66; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
     <!-- Encabezado principal mejorado -->
     <div class="text-center mb-5">
@@ -218,6 +218,7 @@
                                     <p class="text-muted">La tabla se actualizará después de los primeros partidos</p>
                                 </div>
                             {% else %}
+                                <!-- Tabla de posiciones -->
                                 <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
                                     <table class="table table-standings" style="width: auto;">
                                         <thead>
@@ -237,8 +238,10 @@
                                         <tbody>
                                             {% for equipo in datos.tabla %}
                                             <tr>
-                                                <td class="text-center">{{ loop.index }}</td>
-                                                <td>{{ equipo.nombre }}</td>
+                                                <td class="text-center fw-bold" style="background-color: #007bff; color: white; border-radius: 5px;">
+                                                    {{ loop.index }}
+                                                </td>
+                                                <td class="fw-bold">{{ equipo.nombre }}</td>
                                                 <td class="text-center">{{ equipo.partidos_jugados }}</td>
                                                 <td class="text-center" style="color: rgb(3, 84, 235);">
                                                     {{ datos.stats_equipos[equipo.nombre]['ganados'] }}
