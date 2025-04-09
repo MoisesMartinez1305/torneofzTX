@@ -902,4 +902,4 @@ if __name__ == '__main__':
             torneo = Torneo(nombre="Torneo Principal", formato_liga="ida_vuelta")
             db.session.add(torneo)
             db.session.commit()
-    app.run(debug=True, port=8000)
+    app.run(debug=True)
