@@ -1,0 +1,29 @@
+{% extends "base_admin.html" %}
+
+{% block admin_title %}Actualizar Resultado{% endblock %}
+
+{% block admin_content %}
+<div class="container mt-4">
+    <h2 class="mb-4" style="color: black;">Actualizar Resultado</h2>
+    <form method="POST" action="{{ url_for('actualizar_resultado', partido_id=partido.id) }}">
+        <div class="mb-3">
+            <label for="equipo_local" class="form-label" style="color: black;">Equipo Local</label>
+            <input type="text" style="color: black;" class="form-control" id="equipo_local" value="{{ partido.equipo_local }}" disabled>
+        </div>
+        <div class="mb-3">
+            <label for="goles_local" class="form-label" style="color: black;">Goles Local</label>
+            <input type="number" class="form-control" id="goles_local" name="goles_local" value="{{ partido.goles_local or 0 }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="equipo_visitante" class="form-label" style="color: black;">Equipo Visitante</label>
+            <input type="text" style="color: black;" class="form-control" id="equipo_visitante" value="{{ partido.equipo_visitante }}" disabled>
+        </div>
+        <div class="mb-3">
+            <label for="goles_visitante" class="form-label" style="color: black;">Goles Visitante</label>
+            <input type="number" class="form-control" id="goles_visitante" name="goles_visitante" value="{{ partido.goles_visitante or 0 }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

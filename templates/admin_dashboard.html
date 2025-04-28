@@ -4,7 +4,7 @@
 
 {% block admin_content %}
 <div class="container-fluid mt-4">
-    {% if not torneo or (not datos_ligas and not datos_grupos_copa) %}
+    {% if not torneo or not datos_ligas %}
         <div class="alert alert-info text-center py-5">
             <i class="fas fa-info-circle fa-3x mb-3 text-primary"></i>
             <h3>No hay torneos activos</h3>
@@ -24,10 +24,7 @@
                         </h4>
                         <small class="opacity-75">
                             <i class="fas fa-info-circle me-1"></i>
-                            Tipo: {{ torneo.tipo|capitalize }} | 
-                            {% if torneo.tipo == 'mixto' %}
-                                Orden: {{ 'Liga primero' if torneo.orden_fases == 'liga_primero' else 'Copa primero' }}
-                            {% endif %}
+                            Formato: {{ 'Ida y Vuelta' if torneo.formato_liga == 'ida_vuelta' else 'Solo Ida' }}
                         </small>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
@@ -45,594 +42,218 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body py-3">
-                <div class="row g-3">
-                    <!-- Estadísticas de Liga -->
-                    {% if datos_ligas %}
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-white bg-info h-100 border-0 shadow-sm">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h5 class="card-title">Ligas Activas</h5>
-                                        <p class="card-text display-6 mb-0">{{ datos_ligas|length }}</p>
-                                    </div>
-                                    <i class="fas fa-list-ol fa-3x opacity-50"></i>
-                                </div>
-                                <div class="mt-2 small">
-                                    {% set total_partidos_liga = 0 %}
-                                    {% set partidos_jugados_liga = 0 %}
-                                    {% for datos in datos_ligas %}
-                                        {% set total_partidos_liga = total_partidos_liga + datos.total_partidos %}
-                                        {% set partidos_jugados_liga = partidos_jugados_liga + datos.partidos_jugados %}
-                                    {% endfor %}
-                                    <div class="progress" style="height: 5px;">
-                                        <div class="progress-bar bg-white" role="progressbar" 
-                                             style="width: {{ (partidos_jugados_liga / total_partidos_liga * 100) if total_partidos_liga > 0 else 0 }}%"></div>
-                                    </div>
-                                    <span>{{ partidos_jugados_liga }}/{{ total_partidos_liga }} partidos</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
+        </div>
 
-                    <!-- Estadísticas de Copa -->
-                    {% if datos_grupos_copa %}
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-white bg-purple h-100 border-0 shadow-sm">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h5 class="card-title">Grupos Copa</h5>
-                                        <p class="card-text display-6 mb-0">{{ datos_grupos_copa|length }}</p>
-                                    </div>
-                                    <i class="fas fa-trophy fa-3x opacity-50"></i>
-                                </div>
-                                <div class="mt-2 small">
-                                    {% set total_partidos_copa = 0 %}
-                                    {% set partidos_jugados_copa = 0 %}
-                                    {% for datos in datos_grupos_copa %}
-                                        {% set total_partidos_copa = total_partidos_copa + datos.partidos|length %}
-                                        {% set partidos_jugados_copa = partidos_jugados_copa + datos.partidos_jugados %}
-                                    {% endfor %}
-                                    <div class="progress" style="height: 5px;">
-                                        <div class="progress-bar bg-white" role="progressbar" 
-                                             style="width: {{ (partidos_jugados_copa / total_partidos_copa * 100) if total_partidos_copa > 0 else 0 }}%"></div>
-                                    </div>
-                                    <span>{{ partidos_jugados_copa }}/{{ total_partidos_copa }} partidos</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Equipos totales -->
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-white bg-success h-100 border-0 shadow-sm">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h5 class="card-title">Equipos Totales</h5>
-                                        <p class="card-text display-6 mb-0">
-                                            {% set total_equipos = 0 %}
-                                            {% if datos_ligas %}
-                                                {% for datos in datos_ligas %}
-                                                    {% set total_equipos = total_equipos + datos.tabla|length %}
-                                                {% endfor %}
-                                            {% endif %}
-                                            {% if datos_grupos_copa %}
-                                                {% for datos in datos_grupos_copa %}
-                                                    {% set total_equipos = total_equipos + datos.tabla|length %}
-                                                {% endfor %}
-                                            {% endif %}
-                                            {{ total_equipos }}
-                                        </p>
-                                    </div>
-                                    <i class="fas fa-users fa-3x opacity-50"></i>
-                                </div>
-                                <div class="mt-2 small">
-                                    <span>
-                                        {% if datos_ligas %}
-                                            {{ datos_ligas|length }} liga{{ 's' if datos_ligas|length > 1 else '' }}
-                                        {% endif %}
-                                        {% if datos_grupos_copa %}
-                                            {% if datos_ligas %}y{% endif %}
-                                            {{ datos_grupos_copa|length }} grupo{{ 's' if datos_grupos_copa|length > 1 else '' }} copa
-                                        {% endif %}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Eliminatorias -->
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-white bg-danger h-100 border-0 shadow-sm">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h5 class="card-title">Eliminatorias</h5>
-                                        <p class="card-text display-6 mb-0">
-                                            {% if partidos_eliminatoria %}
-                                                {{ partidos_eliminatoria|length }} partido{{ 's' if partidos_eliminatoria|length > 1 else '' }}
-                                            {% else %}
-                                                0
-                                            {% endif %}
-                                        </p>
-                                    </div>
-                                    <i class="fas fa-chevron-right fa-3x opacity-50"></i>
-                                </div>
-                                <div class="mt-2 small">
-                                    {% if partidos_eliminatoria %}
-                                        {% set jugados = partidos_eliminatoria|selectattr('jugado')|list %}
-                                        <div class="progress" style="height: 5px;">
-                                            <div class="progress-bar bg-white" role="progressbar" 
-                                                 style="width: {{ (jugados|length / partidos_eliminatoria|length * 100) if partidos_eliminatoria|length > 0 else 0 }}%"></div>
-                                        </div>
-                                        <span>{{ jugados|length }}/{{ partidos_eliminatoria|length }} jugados</span>
-                                    {% else %}
-                                        <span>No iniciadas</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Botones para expandir/contraer todas las jornadas -->
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-primary me-2" id="expandAll">
+                <i class="fas fa-plus-circle me-1"></i>Expandir Todas
+            </button>
+            <button class="btn btn-secondary" id="collapseAll">
+                <i class="fas fa-minus-circle me-1"></i>Contraer Todas
+            </button>
         </div>
 
         <!-- Contenido por liga -->
-        {% if datos_ligas %}
-        <div class="row mb-4">
-            <div class="col-12">
-                <h3 class="mb-3"><i class="fas fa-table me-2"></i>Ligas</h3>
-            </div>
-        </div>
-        
-        {% for datos in datos_ligas %}
-        <div class="card mb-5 border-0 shadow">
-            <div class="card-header bg-dark text-white py-3">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-                    <div class="mb-2 mb-md-0">
-                        <h4 class="mb-0">
-                            <i class="fas fa-trophy me-2"></i>{{ datos.categoria.nombre }}
-                        </h4>
-                        <small class="opacity-75">
-                            <i class="fas fa-info-circle me-1"></i>
-                            {{ datos.tabla|length }} equipos | 
-                            {{ datos.partidos_jugados }}/{{ datos.total_partidos }} partidos | 
-                            {{ datos.total_jornadas }} jornadas
-                        </small>
-                    </div>
-                    <div class="d-flex">
-                        <button class="btn btn-sm btn-outline-light me-2" onclick="expandAllJornadas('{{ datos.categoria.id }}')">
-                            <i class="fas fa-expand me-1"></i>Expandir
-                        </button>
-                        <button class="btn btn-sm btn-outline-light" onclick="collapseAllJornadas('{{ datos.categoria.id }}')">
-                            <i class="fas fa-compress me-1"></i>Colapsar
-                        </button>
-                    </div>
+        {% for liga in datos_ligas %}
+            <div class="card mb-4 border-0 shadow">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">{{ liga.categoria.nombre }}</h5>
                 </div>
-            </div>
-            
-            <div class="card-body">
-                <!-- Pestañas por liga -->
-                <ul class="nav nav-tabs mb-4" id="liga{{ datos.categoria.id }}Tab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="jornadas{{ datos.categoria.id }}-tab" data-bs-toggle="tab" 
-                                data-bs-target="#jornadas{{ datos.categoria.id }}" type="button" role="tab">
-                            <i class="fas fa-calendar-alt me-1"></i>Jornadas
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="tabla{{ datos.categoria.id }}-tab" data-bs-toggle="tab" 
-                                data-bs-target="#tabla{{ datos.categoria.id }}" type="button" role="tab">
-                            <i class="fas fa-table me-1"></i>Tabla de Posiciones
-                        </button>
-                    </li>
-                </ul>
-                
-                <div class="tab-content" id="liga{{ datos.categoria.id }}TabContent">
-                    <!-- Tab Jornadas -->
-                    <div class="tab-pane fade show active" id="jornadas{{ datos.categoria.id }}" role="tabpanel">
-                        {% if not datos.jornadas %}
-                            <div class="alert alert-info">
-                                No hay jornadas programadas para esta liga.
-                            </div>
-                        {% else %}
-                            <div class="accordion" id="accordionJornadas{{ datos.categoria.id }}">
-                                {% for jornada_num, partidos_jornada in datos.jornadas %}
-                                <div class="accordion-item border-0 mb-3 shadow-sm">
-                                    <h2 class="accordion-header" id="heading{{ datos.categoria.id }}{{ jornada_num }}">
-                                        <button class="accordion-button collapsed bg-light" type="button" 
-                                                data-bs-toggle="collapse" 
-                                                data-bs-target="#collapse{{ datos.categoria.id }}{{ jornada_num }}" 
-                                                aria-expanded="false" 
-                                                aria-controls="collapse{{ datos.categoria.id }}{{ jornada_num }}">
-                                            <div class="d-flex justify-content-between w-100 align-items-center">
-                                                <div>
-                                                    <span class="badge bg-primary me-2">Jornada {{ jornada_num }}</span>
-                                                    {% if datos.tabla|length is odd %}
-                                                        {% set equipos_jugando = [] %}
-                                                        {% for partido in partidos_jornada %}
-                                                            {% if equipos_jugando.append(partido.equipo_local) %}{% endif %}
-                                                            {% if equipos_jugando.append(partido.equipo_visitante) %}{% endif %}
-                                                        {% endfor %}
-                                                        {% set todos_equipos = datos.tabla|map(attribute='nombre')|list %}
-                                                        {% set equipo_descanso = (todos_equipos|reject('in', equipos_jugando)|first) %}
-                                                        <small class="text-muted ms-2">
-                                                            <i class="fas fa-moon"></i> Descansa: <strong>{{ equipo_descanso }}</strong>
-                                                        </small>
-                                                    {% endif %}
-                                                </div>
-                                                <span class="badge bg-secondary">
-                                                    {{ partidos_jornada|length }} partido{{ 's' if partidos_jornada|length > 1 else '' }}
-                                                </span>
-                                            </div>
-                                        </button>
-                                    </h2>
-                                    <div id="collapse{{ datos.categoria.id }}{{ jornada_num }}" 
-                                         class="accordion-collapse collapse" 
-                                         aria-labelledby="heading{{ datos.categoria.id }}{{ jornada_num }}" 
-                                         data-bs-parent="#accordionJornadas{{ datos.categoria.id }}">
-                                        <div class="accordion-body p-0">
-                                            <div class="table-responsive">
-                                                <table class="table table-hover align-middle mb-0">
-                                                    <thead class="table-light">
-                                                        <tr>
-                                                            <th style="width: 30%;">Local</th>
-                                                            <th style="width: 10%;">Resultado</th>
-                                                            <th style="width: 30%;">Visitante</th>
-                                                            <th style="width: 15%;">Estado</th>
-                                                            <th style="width: 15%;">Acciones</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {% for partido in partidos_jornada %}
-                                                        <tr>
-                                                            <td class="fw-bold">{{ partido.equipo_local }}</td>
-                                                            <td>
-                                                                {% if partido.jugado %}
-                                                                    <span class="badge bg-primary rounded-pill">
-                                                                        {{ partido.goles_local }} - {{ partido.goles_visitante }}
-                                                                    </span>
-                                                                {% else %}
-                                                                    <span class="text-muted">vs</span>
-                                                                {% endif %}
-                                                            </td>
-                                                            <td class="fw-bold">{{ partido.equipo_visitante }}</td>
-                                                            <td>
-                                                                {% if partido.jugado %}
-                                                                    <span class="badge bg-success">Jugado</span>
-                                                                {% else %}
-                                                                    <span class="badge bg-warning text-dark">Pendiente</span>
-                                                                {% endif %}
-                                                            </td>
-                                                            <td>
-                                                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" 
-                                                                        data-bs-target="#modalResultado{{ partido.id }}">
-                                                                    {% if partido.jugado %}
-                                                                        <i class="fas fa-edit me-1"></i>Editar
-                                                                    {% else %}
-                                                                        <i class="fas fa-plus me-1"></i>Agregar
-                                                                    {% endif %}
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+                <div class="card-body">
+<!-- Barra de progreso -->
+<div class="mb-3">
+    <div class="progress mb-3" style="height: 6px; background-color: rgba(255,255,255,0.2);">
+        <div class="progress-bar bg-success" role="progressbar" 
+             style="width: {% if liga.total_partidos > 0 %}{{ (liga.partidos_jugados / liga.total_partidos * 100) }}{% else %}0{% endif %}%" 
+             aria-valuenow="{{ liga.partidos_jugados }}" 
+             aria-valuemin="0" 
+             aria-valuemax="{{ liga.total_partidos }}">
+        </div>
+    </div>
+    <p class="text-center text-muted small" style="color: white !important;">
+        Progreso: {{ liga.partidos_jugados }} / {{ liga.total_partidos }} partidos jugados
+    </p>
+</div>
+
+                    <!-- Botón para mostrar/ocultar la tabla de clasificación -->
+                    <button class="btn btn-outline-primary mb-3 toggle-table" data-target="#tablaClasificacion{{ liga.categoria.id }}">
+                        <i class="fas fa-table me-1"></i>Mostrar/Ocultar Tabla de Clasificación
+                    </button>
+
+                    <!-- Tabla de clasificación -->
+                    <div id="tablaClasificacion{{ liga.categoria.id }}" class="d-none">
+                        <h6>Tabla de Clasificación</h6>
+                        <div class="table-responsive">
+                            <table class="table table-standings" style="width: auto;">
+                                <thead>
+                                    <tr class="table-dark">
+                                        <th class="text-center" style="width: 1%; white-space: nowrap;">POS</th>
+                                        <th style="width: auto; white-space: nowrap;">EQUIPO</th>
+                                        <th class="text-center" style="width: 1%; white-space: nowrap;">PJ</th>
+                                        <th class="text-center" style="width: 1%; white-space: nowrap; color: rgb(3, 84, 235);">G</th>
+                                        <th class="text-center" style="width: 1%; white-space: nowrap;">E</th>
+                                        <th class="text-center" style="width: 1%; white-space: nowrap; color: red;">P</th>
+                                        <th class="text-center" style="width: 1%; white-space: nowrap; color: green;">GF</th>
+                                        <th class="text-center" style="width: 1%; white-space: nowrap; color: red;">GC</th>
+                                        <th class="text-center" style="width: 1%; white-space: nowrap;">DG</th>
+                                        <th class="text-center" style="width: 1%; white-space: nowrap; font-weight: bold;">PTS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for equipo in liga.tabla %}
+                                    <tr>
+                                        <td class="text-center fw-bold" style="background-color: #007bff; color: white; border-radius: 5px;">
+                                            {{ loop.index }}
+                                        </td>
+                                        <td class="fw-bold">{{ equipo.nombre }}</td>
+                                        <td class="text-center">{{ equipo.partidos_jugados }}</td>
+                                        <td class="text-center" style="color: rgb(3, 84, 235);">
+                                            {% set stats = calcular_estadisticas_equipo(equipo) %}
+                                            {{ stats['ganados'] }}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ stats['empatados'] }}
+                                        </td>
+                                        <td class="text-center" style="color: red;">
+                                            {{ stats['perdidos'] }}
+                                        </td>
+                                        <td class="text-center" style="color: green;">
+                                            {{ equipo.goles_favor }}
+                                        </td>
+                                        <td class="text-center" style="color: red;">
+                                            {{ equipo.goles_contra }}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ equipo.diferencia_goles }}
+                                        </td>
+                                        <td class="text-center fw-bold">
+                                            {{ equipo.puntos }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    
-                    <!-- Tab Tabla de Posiciones -->
-                    <div class="tab-pane fade" id="tabla{{ datos.categoria.id }}" role="tabpanel">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-trophy me-2"></i>Tabla de Posiciones - {{ datos.categoria.nombre }}
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                {% if not datos.tabla %}
-                                    <div class="alert alert-info">
-                                        No hay datos disponibles para esta liga.
+
+                    <!-- Jornadas -->
+                    <div class="accordion" id="accordionLiga{{ liga.categoria.id }}">
+                        {% for jornada_num, partidos_jornada in liga.jornadas %}
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h2 class="accordion-header" id="headingLiga{{ liga.categoria.id }}Jornada{{ jornada_num }}">
+                                <button class="accordion-button collapsed bg-light" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#collapseLiga{{ liga.categoria.id }}Jornada{{ jornada_num }}" 
+                                        aria-expanded="false" 
+                                        aria-controls="collapseLiga{{ liga.categoria.id }}Jornada{{ jornada_num }}">
+                                    <div class="d-flex justify-content-between w-100 align-items-center">
+                                        <div>
+                                            <span class="badge bg-primary me-2">Jornada {{ jornada_num }}</span>
+                                            {% if liga.tiene_descanso %}
+                                                {% set equipos_jugando = [] %}
+                                                {% for partido in partidos_jornada %}
+                                                    {% if partido.equipo_local and partido.equipo_local != "Descanso" %}
+                                                        {% if equipos_jugando.append(partido.equipo_local) %}{% endif %}
+                                                    {% endif %}
+                                                    {% if partido.equipo_visitante and partido.equipo_visitante != "Descanso" %}
+                                                        {% if equipos_jugando.append(partido.equipo_visitante) %}{% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% set todos_equipos = liga.tabla|map(attribute='nombre')|list %}
+                                                {% set equipo_descanso = (todos_equipos|reject('in', equipos_jugando)|first) %}
+                                                {% if equipo_descanso %}
+                                                    <small class="text-muted ms-2">
+                                                        <i class="fas fa-moon"></i> Descansa: <strong>{{ equipo_descanso }}</strong>
+                                                    </small>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                        <span class="badge bg-secondary">
+                                            {{ partidos_jornada|length }} partido{{ 's' if partidos_jornada|length > 1 else '' }}
+                                        </span>
                                     </div>
-                                {% else %}
+                                </button>
+                            </h2>
+                            <div id="collapseLiga{{ liga.categoria.id }}Jornada{{ jornada_num }}" 
+                                 class="accordion-collapse collapse" 
+                                 aria-labelledby="headingLiga{{ liga.categoria.id }}Jornada{{ jornada_num }}" 
+                                 data-bs-parent="#accordionLiga{{ liga.categoria.id }}">
+                                <div class="accordion-body p-0">
                                     <div class="table-responsive">
-                                        <table class="table table-hover table-striped">
+                                        <table class="table table-striped table-hover align-middle">
                                             <thead class="table-dark">
                                                 <tr>
-                                                    <th>POS</th>
-                                                    <th>Equipo</th>
-                                                    <th>PJ</th>
-                                                    <th>PG</th>
-                                                    <th>PE</th>
-                                                    <th>PP</th>
-                                                    <th>GF</th>
-                                                    <th>GC</th>
-                                                    <th>DG</th>
-                                                    <th>Pts</th>
-                                                  
+                                                    <th style="width: auto; white-space: nowrap;">Local</th>
+                                                    <th class="text-center" style="width: 1%; white-space: nowrap;">Resultado</th>
+                                                    <th style="width: auto; white-space: nowrap;">Visitante</th>
+                                                    <th class="text-center" style="width: 1%; white-space: nowrap;">Estado</th>
+                                                    <th class="text-center" style="width: 1%; white-space: nowrap;">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {% for equipo in datos.tabla %}
-                                                <tr class="{% if loop.index <= 4 %}table-success{% elif loop.index >= (datos.tabla|length - 2) %}table-danger{% endif %}">
-                                                    <td>{{ loop.index }}</td>
-                                                    <td>
-                                                        <strong>{{ equipo.nombre }}</strong>
-                                                        {% if loop.index <= 4 %}
-                                                            <span class="badge bg-success ms-2">Clasificación</span>
-                                                        {% elif loop.index >= (datos.tabla|length - 2) %}
-                                                            <span class="badge bg-danger ms-2">Descenso</span>
+                                                {% for partido in partidos_jornada %}
+                                                <tr>
+                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">
+                                                        {% if partido.equipo_local == "Descanso" %}
+                                                            <i class="fas fa-moon text-muted"></i> Descanso
+                                                        {% else %}
+                                                            {{ partido.equipo_local }}
                                                         {% endif %}
                                                     </td>
-                                                    <td>{{ equipo.partidos_jugados }}</td>
-                                                    <td>{{ datos.stats_equipos[equipo.nombre]['ganados'] }}</td>
-                                                    <td>{{ datos.stats_equipos[equipo.nombre]['empatados'] }}</td>
-                                                    <td>{{ datos.stats_equipos[equipo.nombre]['perdidos'] }}</td>
-                                                    <td>{{ equipo.goles_favor }}</td>
-                                                    <td>{{ equipo.goles_contra }}</td>
-                                                    <td>{{ equipo.diferencia_goles }}</td>
-                                                    <td><strong class="text-primary">{{ equipo.puntos }}</strong></td>
-                                                    
+                                                    <td class="text-center" style="width: 1%; white-space: nowrap;">
+                                                        {% if partido.jugado and not partido.es_descanso %}
+                                                            <span class="badge bg-primary rounded-pill px-3 py-1">
+                                                                {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                                            </span>
+                                                        {% elif partido.es_descanso %}
+                                                            <span class="text-muted">-</span>
+                                                        {% else %}
+                                                            <span class="text-muted">VS</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">
+                                                        {% if partido.equipo_visitante == "Descanso" %}
+                                                            <i class="fas fa-moon text-muted"></i> Descanso
+                                                        {% else %}
+                                                            {{ partido.equipo_visitante }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center" style="width: 1%; white-space: nowrap;">
+                                                        {% if partido.jugado and not partido.es_descanso %}
+                                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-2 py-1 rounded">
+                                                                <i class="fas fa-check-circle me-1"></i> Jugado
+                                                            </span>
+                                                        {% elif partido.es_descanso %}
+                                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 px-2 py-1 rounded">
+                                                                <i class="fas fa-moon me-1"></i> Descanso
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 px-2 py-1 rounded">
+                                                                <i class="fas fa-clock me-1"></i> Pendiente
+                                                            </span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if not partido.es_descanso %}
+                                                            <a href="{{ url_for('actualizar_resultado', partido_id=partido.id) }}" class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-edit"></i> Editar
+                                                            </a>
+                                                        {% endif %}
+                                                    </td>
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>
                                         </table>
                                     </div>
-                                {% endif %}
+                                </div>
                             </div>
                         </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
-        </div>
         {% endfor %}
-        {% endif %}
-
-        <!-- Sección de Copa -->
-        {% if datos_grupos_copa %}
-        <div class="row mb-4">
-            <div class="col-12">
-                <h3 class="mb-3"><i class="fas fa-trophy me-2"></i>Fase de Copa</h3>
-            </div>
-        </div>
-        
-        <!-- Pestañas de grupos -->
-        <ul class="nav nav-tabs mb-4" id="copaTab" role="tablist">
-            {% for datos in datos_grupos_copa %}
-            <li class="nav-item" role="presentation">
-                <button class="nav-link {% if loop.first %}active{% endif %}" id="grupo{{ datos.grupo.id }}-tab" 
-                        data-bs-toggle="tab" data-bs-target="#grupo{{ datos.grupo.id }}" type="button" role="tab">
-                    <i class="fas fa-users me-1"></i>{{ datos.grupo.nombre }}
-                </button>
-            </li>
-            {% endfor %}
-            
-            <!-- Pestaña para eliminatorias -->
-            {% if partidos_eliminatoria %}
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="eliminatorias-tab" data-bs-toggle="tab" 
-                        data-bs-target="#eliminatorias" type="button" role="tab">
-                    <i class="fas fa-chevron-right me-1"></i>Eliminatorias
-                </button>
-            </li>
-            {% endif %}
-        </ul>
-        
-        <!-- Contenido de pestañas -->
-        <div class="tab-content" id="copaTabContent">
-            {% for datos in datos_grupos_copa %}
-            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="grupo{{ datos.grupo.id }}" role="tabpanel">
-                <div class="card border-0 shadow mb-4">
-                    <div class="card-header bg-dark text-white py-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h4 class="mb-0">
-                                    <i class="fas fa-users me-2"></i>{{ datos.grupo.nombre }} - {{ datos.categoria.nombre }}
-                                </h4>
-                                <small class="opacity-75">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    {{ datos.partidos_jugados }}/{{ datos.partidos|length }} partidos jugados
-                                </small>
-                            </div>
-                            <span class="badge bg-light text-dark fs-6">
-                                {{ datos.tabla|length }} equipos
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="card-body">
-                        <div class="row">
-                            <!-- Tabla de posiciones -->
-                            <div class="col-md-6 mb-4 mb-md-0">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-secondary text-white">
-                                        <h5 class="mb-0"><i class="fas fa-table me-2"></i>Clasificación</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive">
-                                            <table class="table table-hover">
-                                                <thead class="table-dark">
-                                                    <tr>
-                                                        <th>POS</th>
-                                                        <th>Equipo</th>
-                                                        <th>PJ</th>
-                                                        <th>PTS</th>
-                                                        <th>DG</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for equipo in datos.tabla %}
-                                                    <tr class="{% if loop.index <= 2 %}table-success{% endif %}">
-                                                        <td>{{ loop.index }}</td>
-                                                        <td>{{ equipo.nombre }}</td>
-                                                        <td>{{ equipo.partidos_jugados }}</td>
-                                                        <td><strong>{{ equipo.puntos }}</strong></td>
-                                                        <td>{{ equipo.diferencia_goles }}</td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Partidos del grupo -->
-                            <div class="col-md-6">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-secondary text-white">
-                                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Partidos</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        {% if not datos.partidos %}
-                                            <div class="alert alert-info mb-0">
-                                                No hay partidos programados para este grupo.
-                                            </div>
-                                        {% else %}
-                                            <div class="list-group list-group-flush">
-                                                {% for partido in datos.partidos %}
-                                                <div class="list-group-item border-0 py-2 px-0">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="badge bg-light text-dark me-3">{{ loop.index }}</span>
-                                                            <div>
-                                                                <div class="fw-bold">{{ partido.equipo_local }}</div>
-                                                                <div class="fw-bold">{{ partido.equipo_visitante }}</div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="text-end">
-                                                            {% if partido.jugado %}
-                                                                <span class="badge bg-primary rounded-pill px-3 py-1">
-                                                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
-                                                                </span>
-                                                                <div class="small text-muted mt-1">
-                                                                    <i class="fas fa-check-circle text-success me-1"></i>Finalizado
-                                                                </div>
-                                                            {% else %}
-                                                                <span class="badge bg-secondary rounded-pill px-3 py-1">VS</span>
-                                                                <div class="small text-muted mt-1">
-                                                                    {% if partido.fecha %}
-                                                                        <i class="fas fa-clock text-warning me-1"></i>
-                                                                        {{ partido.fecha.strftime('%d/%m %H:%M') }}
-                                                                    {% else %}
-                                                                        <i class="fas fa-question-circle me-1"></i>Por definir
-                                                                    {% endif %}
-                                                                </div>
-                                                            {% endif %}
-                                                        </div>
-                                                    </div>
-                                                    <div class="d-flex justify-content-end mt-2">
-                                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" 
-                                                                data-bs-target="#modalResultadoCopa{{ partido.id }}">
-                                                            {% if partido.jugado %}
-                                                                <i class="fas fa-edit me-1"></i>Editar
-                                                            {% else %}
-                                                                <i class="fas fa-plus me-1"></i>Agregar
-                                                            {% endif %}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-            
-            <!-- Pestaña de eliminatorias -->
-            {% if partidos_eliminatoria %}
-            <div class="tab-pane fade" id="eliminatorias" role="tabpanel">
-                <div class="card border-0 shadow">
-                    <div class="card-header bg-dark text-white py-3">
-                        <h4 class="mb-0">
-                            <i class="fas fa-chevron-right me-2"></i>Fase Eliminatoria
-                        </h4>
-                    </div>
-                    
-                    <div class="card-body">
-                        <div class="row">
-                            {% for fase in ['cuartos', 'semifinal', 'final'] %}
-                                {% set fase_partidos = partidos_eliminatoria|selectattr('fase', 'equalto', fase)|list %}
-                                {% if fase_partidos %}
-                                <div class="col-lg-4 col-md-6 mb-4">
-                                    <div class="card h-100 border-0 shadow-sm">
-                                        <div class="card-header bg-secondary text-white">
-                                            <h5 class="mb-0 text-center text-uppercase">{{ fase }}</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="list-group list-group-flush">
-                                                {% for partido in fase_partidos %}
-                                                <div class="list-group-item border-0 py-2 px-0">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="badge bg-light text-dark me-3">{{ loop.index }}</span>
-                                                            <div>
-                                                                <div class="fw-bold">{{ partido.equipo_local }}</div>
-                                                                <div class="fw-bold">{{ partido.equipo_visitante }}</div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="text-end">
-                                                            {% if partido.jugado %}
-                                                                <span class="badge bg-primary rounded-pill px-3 py-1">
-                                                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
-                                                                </span>
-                                                                <div class="small text-muted mt-1">
-                                                                    <i class="fas fa-check-circle text-success me-1"></i>Finalizado
-                                                                </div>
-                                                            {% else %}
-                                                                <span class="badge bg-secondary rounded-pill px-3 py-1">VS</span>
-                                                                <div class="small text-muted mt-1">
-                                                                    {% if partido.fecha %}
-                                                                        <i class="fas fa-clock text-warning me-1"></i>
-                                                                        {{ partido.fecha.strftime('%d/%m %H:%M') }}
-                                                                    {% else %}
-                                                                        <i class="fas fa-question-circle me-1"></i>Por definir
-                                                                    {% endif %}
-                                                                </div>
-                                                            {% endif %}
-                                                        </div>
-                                                    </div>
-                                                    <div class="d-flex justify-content-end mt-2">
-                                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" 
-                                                                data-bs-target="#modalResultadoCopa{{ partido.id }}">
-                                                            {% if partido.jugado %}
-                                                                <i class="fas fa-edit me-1"></i>Editar
-                                                            {% else %}
-                                                                <i class="fas fa-plus me-1"></i>Agregar
-                                                            {% endif %}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-        {% endif %}
     {% endif %}
 </div>
 
@@ -664,312 +285,29 @@
     </div>
 </div>
 
-<!-- Modales para editar/agregar resultados de liga -->
-{% if torneo and datos_ligas %}
-    {% for datos in datos_ligas %}
-        {% if datos.jornadas %}
-            {% for jornada_num, partidos_jornada in datos.jornadas %}
-                {% for partido in partidos_jornada %}
-                <div class="modal fade" id="modalResultado{{ partido.id }}" tabindex="-1" aria-labelledby="modalResultadoLabel{{ partido.id }}" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header bg-primary text-white">
-                                <h5 class="modal-title" id="modalResultadoLabel{{ partido.id }}">
-                                    {% if partido.jugado %}Editar{% else %}Agregar{% endif %} Resultado
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <form action="{{ url_for('actualizar_resultado', partido_id=partido.id) }}" method="POST">
-                                <div class="modal-body">
-                                    <h6 class="text-center mb-4" style="color: black;">{{ datos.categoria.nombre }} - Jornada {{ jornada_num }}</h6>
-                                    <div class="row align-items-center mb-3">
-                                        <div class="col-md-5 text-end">
-                                            <h5 style="color: black;">{{ partido.equipo_local }}</h5>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="number" class="form-control text-center" name="goles_local" 
-                                                   value="{{ partido.goles_local if partido.jugado else '0' }}" min="0" required>
-                                        </div>
-                                        <div class="col-md-5 text-center">
-                                            <span class="fs-4" style="color: black;">vs</span>
-                                        </div>
-                                    </div>
-                                    <div class="row align-items-center">
-                                        <div class="col-md-5 text-end">
-                                            <h5 style="color: black;">{{ partido.equipo_visitante }}</h5>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="number" class="form-control text-center" name="goles_visitante" 
-                                                   value="{{ partido.goles_visitante if partido.jugado else '0' }}" min="0" required>
-                                        </div>
-                                        <div class="col-md-5"></div>
-                                    </div>
-                    
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                        <i class="fas fa-times me-1"></i> Cancelar
-                                    </button>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-save me-1"></i> Guardar
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
-{% endif %}
-
-<!-- Modales para editar/agregar resultados de copa -->
-{% if datos_grupos_copa %}
-    {% for datos in datos_grupos_copa %}
-        {% for partido in datos.partidos %}
-        <div class="modal fade" id="modalResultadoCopa{{ partido.id }}" tabindex="-1" aria-labelledby="modalResultadoCopaLabel{{ partido.id }}" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="modalResultadoCopaLabel{{ partido.id }}">
-                            {% if partido.jugado %}Editar{% else %}Agregar{% endif %} Resultado
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="{{ url_for('actualizar_resultado_copa', partido_id=partido.id) }}" method="POST">
-                        <div class="modal-body">
-                            <h6 class="text-center mb-4">
-                                {{ datos.categoria.nombre }} - 
-                                {% if partido.grupo_id %}
-                                    {{ datos.grupo.nombre }}
-                                {% else %}
-                                    {{ partido.fase|capitalize }}
-                                {% endif %}
-                            </h6>
-                            <div class="row align-items-center mb-3">
-                                <div class="col-md-5 text-end">
-                                    <h5>{{ partido.equipo_local }}</h5>
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="number" class="form-control text-center" name="goles_local" 
-                                           value="{{ partido.goles_local if partido.jugado else '0' }}" min="0" required>
-                                </div>
-                                <div class="col-md-5 text-center">
-                                    <span class="fs-4">vs</span>
-                                </div>
-                            </div>
-                            <div class="row align-items-center">
-                                <div class="col-md-5 text-end">
-                                    <h5>{{ partido.equipo_visitante }}</h5>
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="number" class="form-control text-center" name="goles_visitante" 
-                                           value="{{ partido.goles_visitante if partido.jugado else '0' }}" min="0" required>
-                                </div>
-                                <div class="col-md-5"></div>
-                            </div>
-                            <div class="row mt-4">
-                                <div class="col-md-6">
-                                    <label for="fecha_copa{{ partido.id }}" class="form-label">Fecha</label>
-                                    <input type="date" class="form-control" id="fecha_copa{{ partido.id }}" name="fecha" 
-                                           value="{{ partido.fecha.strftime('%Y-%m-%d') if partido.fecha else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="hora_copa{{ partido.id }}" class="form-label">Hora</label>
-                                    <input type="time" class="form-control" id="hora_copa{{ partido.id }}" name="hora" 
-                                           value="{{ partido.hora if partido.hora else '19:00' }}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="fas fa-times me-1"></i> Cancelar
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i> Guardar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    {% endfor %}
-{% endif %}
-
-{% if partidos_eliminatoria %}
-    {% for partido in partidos_eliminatoria %}
-    <div class="modal fade" id="modalResultadoCopa{{ partido.id }}" tabindex="-1" aria-labelledby="modalResultadoCopaLabel{{ partido.id }}" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="modalResultadoCopaLabel{{ partido.id }}">
-                        {% if partido.jugado %}Editar{% else %}Agregar{% endif %} Resultado
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ url_for('actualizar_resultado_copa', partido_id=partido.id) }}" method="POST">
-                    <div class="modal-body">
-                        <h6 class="text-center mb-4">
-                            {{ partido.categoria.nombre }} - {{ partido.fase|capitalize }}
-                        </h6>
-                        <div class="row align-items-center mb-3">
-                            <div class="col-md-5 text-end">
-                                <h5>{{ partido.equipo_local }}</h5>
-                            </div>
-                            <div class="col-md-2">
-                                <input type="number" class="form-control text-center" name="goles_local" 
-                                       value="{{ partido.goles_local if partido.jugado else '0' }}" min="0" required>
-                            </div>
-                            <div class="col-md-5 text-center">
-                                <span class="fs-4">vs</span>
-                            </div>
-                        </div>
-                        <div class="row align-items-center">
-                            <div class="col-md-5 text-end">
-                                <h5>{{ partido.equipo_visitante }}</h5>
-                            </div>
-                            <div class="col-md-2">
-                                <input type="number" class="form-control text-center" name="goles_visitante" 
-                                       value="{{ partido.goles_visitante if partido.jugado else '0' }}" min="0" required>
-                            </div>
-                            <div class="col-md-5"></div>
-                        </div>
-                        <div class="row mt-4">
-                            <div class="col-md-6">
-                                <label for="fecha_elim{{ partido.id }}" class="form-label">Fecha</label>
-                                <input type="date" class="form-control" id="fecha_elim{{ partido.id }}" name="fecha" 
-                                       value="{{ partido.fecha.strftime('%Y-%m-%d') if partido.fecha else '' }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="hora_elim{{ partido.id }}" class="form-label">Hora</label>
-                                <input type="time" class="form-control" id="hora_elim{{ partido.id }}" name="hora" 
-                                       value="{{ partido.hora if partido.hora else '19:00' }}">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-1"></i> Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i> Guardar
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-{% endif %}
-
-<style>
-    .bg-purple {
-        background-color: #6f42c1;
-    }
-    
-    .table-success {
-        background-color: rgba(25, 135, 84, 0.1) !important;
-    }
-    
-    .table-danger {
-        background-color: rgba(220, 53, 69, 0.1) !important;
-    }
-    
-    .card-header h4, .card-header h5 {
-        font-weight: 600;
-    }
-    
-    .nav-tabs .nav-link {
-        font-weight: 500;
-    }
-    
-    .accordion-button:not(.collapsed) {
-        background-color: rgba(13, 110, 253, 0.1);
-        color: #0d6efd;
-    }
-    
-    .accordion-button:focus {
-        box-shadow: none;
-        border-color: rgba(0,0,0,.125);
-    }
-    
-    @media (max-width: 768px) {
-        .admin-actions .btn {
-            margin-bottom: 10px;
-            width: 100%;
-        }
-        
-        .card-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        .card-header .badge {
-            margin-top: 10px;
-            align-self: flex-start;
-        }
-        
-        /* Estilos para tablas responsivas */
-        .table-responsive {
-            -webkit-overflow-scrolling: touch;
-            overflow-x: auto;
-            width: 100%;
-        }
-    }
-    
-    @media (max-width: 576px) {
-        .card-header h4 {
-            font-size: 1.2rem;
-        }
-        
-        .nav-tabs .nav-link {
-            padding: 0.5rem;
-            font-size: 0.9rem;
-        }
-    }
-</style>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+    // Mostrar/Ocultar tabla de clasificación
+    document.querySelectorAll('.toggle-table').forEach(button => {
+        button.addEventListener('click', () => {
+            const target = document.querySelector(button.dataset.target);
+            target.classList.toggle('d-none');
         });
-        
-        // Activar la primera pestaña de cada liga
-        document.querySelectorAll('.nav-tabs .nav-link').forEach(function(tab) {
-            tab.addEventListener('click', function() {
-                const tabId = this.getAttribute('data-bs-target');
-                const tabPane = document.querySelector(tabId);
-                
-                if (tabPane.querySelector('.table-responsive')) {
-                    setTimeout(function() {
-                        tabPane.querySelector('.table-responsive').scrollLeft = 0;
-                    }, 100);
-                }
-            });
-        });
-        
-        // Función para expandir todas las jornadas
-        window.expandAllJornadas = function(categoriaId) {
-            const accordion = document.getElementById('accordionJornadas' + categoriaId);
-            if (accordion) {
-                const collapses = accordion.querySelectorAll('.accordion-collapse');
-                collapses.forEach(collapse => {
-                    new bootstrap.Collapse(collapse, {show: true});
-                });
+    });
+
+    // Expandir todas las jornadas
+    document.getElementById('expandAll').addEventListener('click', () => {
+        document.querySelectorAll('.accordion-collapse').forEach(collapse => {
+            if (!collapse.classList.contains('show')) {
+                new bootstrap.Collapse(collapse, { show: true });
             }
-        };
-        
-        
-        // Activar el primer tab de copa si existe
-        if (document.querySelector('#copaTab .nav-link')) {
-            const firstTab = document.querySelector('#copaTab .nav-link');
-            new bootstrap.Tab(firstTab).show();
-        }
+        });
+    });
+
+    // Contraer todas las jornadas
+    document.getElementById('collapseAll').addEventListener('click', () => {
+        document.querySelectorAll('.accordion-collapse.show').forEach(collapse => {
+            new bootstrap.Collapse(collapse, { hide: true });
+        });
     });
 </script>
 {% endblock %}
