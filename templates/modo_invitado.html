@@ -5,6 +5,67 @@
 <head>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
+
+<style>
+    /* Estilos para móviles */
+    @media (max-width: 768px) {
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            display: block;
+            width: 100%;
+        }
+        
+        .table {
+            min-width: 600px;
+        }
+        
+        .accordion-body {
+            padding: 0;
+        }
+        
+        .btn {
+            white-space: nowrap;
+        }
+        
+        .liga-card {
+            margin-bottom: 15px;
+        }
+        
+        .nav-tabs-modern .nav-link {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+    }
+    
+    /* Estilos generales */
+    .overflow-auto {
+        overflow-x: auto !important;
+    }
+    
+    .progress {
+        height: 6px;
+        background-color: rgba(255,255,255,0.2);
+    }
+    
+    .progress-bar {
+        background-color: #28a745;
+    }
+    
+    .table-standings th, .table-standings td {
+        white-space: nowrap;
+    }
+    
+    .liga-card {
+        transition: all 0.3s ease;
+    }
+    
+    .liga-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+</style>
+
 <div class="container mt-4 mt-md-5" style="background-color: #0d3b66; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
     <!-- Encabezado principal mejorado -->
     <div class="text-center mb-5">
@@ -29,7 +90,7 @@
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card liga-card h-100 border-0 overflow-hidden shadow" 
                      onclick="document.getElementById('ligaCollapse{{ datos.categoria.id }}').classList.toggle('show')"
-                     style="cursor: pointer; transition: all 0.3s ease; background: linear-gradient(135deg, #00baf3 0%, #0b669e 100%);">
+                     style="cursor: pointer; background: linear-gradient(135deg, #00baf3 0%, #0b669e 100%);">
                     <div class="card-body p-4 d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
@@ -43,7 +104,7 @@
                         </div>
                         
                         <!-- Barra de progreso -->
-                        <div class="progress mb-3" style="height: 6px; background-color: rgba(255,255,255,0.2);">
+                        <div class="progress mb-3">
                             <div class="progress-bar bg-warning" role="progressbar" 
                                  style="width: {% if datos.total_partidos > 0 %}{{ (datos.partidos_jugados / datos.total_partidos * 100) }}{% else %}0{% endif %}%" 
                                  aria-valuenow="{{ datos.partidos_jugados }}" 
@@ -197,23 +258,23 @@
                                                                     <table class="table table-striped table-hover align-middle">
                                                                         <thead class="table-dark">
                                                                             <tr>
-                                                                                <th style="width: auto; white-space: nowrap;">Local</th>
-                                                                                <th class="text-center" style="width: 1%; white-space: nowrap;">Resultado</th>
-                                                                                <th style="width: auto; white-space: nowrap;">Visitante</th>
-                                                                                <th class="text-center" style="width: 1%; white-space: nowrap;">Estado</th>
+                                                                                <th>Local</th>
+                                                                                <th class="text-center">Resultado</th>
+                                                                                <th>Visitante</th>
+                                                                                <th class="text-center">Estado</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
                                                                             {% for partido in partidos_jornada %}
                                                                                 <tr>
-                                                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">
+                                                                                    <td class="fw-bold">
                                                                                         {% if partido.equipo_local == "Descanso" %}
                                                                                             <i class="fas fa-moon text-muted"></i> Descanso
                                                                                         {% else %}
                                                                                             {{ partido.equipo_local }}
                                                                                         {% endif %}
                                                                                     </td>
-                                                                                    <td class="text-center" style="width: 1%; white-space: nowrap;">
+                                                                                    <td class="text-center">
                                                                                         {% if partido.jugado and not partido.es_descanso %}
                                                                                             <span class="badge bg-primary rounded-pill px-3 py-1">
                                                                                                 {{ partido.goles_local }} - {{ partido.goles_visitante }}
@@ -224,14 +285,14 @@
                                                                                             <span class="text-muted">VS</span>
                                                                                         {% endif %}
                                                                                     </td>
-                                                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">
+                                                                                    <td class="fw-bold">
                                                                                         {% if partido.equipo_visitante == "Descanso" %}
                                                                                             <i class="fas fa-moon text-muted"></i> Descanso
                                                                                         {% else %}
                                                                                             {{ partido.equipo_visitante }}
                                                                                         {% endif %}
                                                                                     </td>
-                                                                                    <td class="text-center" style="width: 1%; white-space: nowrap;">
+                                                                                    <td class="text-center">
                                                                                         {% if partido.jugado and not partido.es_descanso %}
                                                                                             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-2 py-1 rounded">
                                                                                                 <i class="fas fa-check-circle me-1"></i> Jugado
@@ -313,27 +374,27 @@
                                              aria-labelledby="heading{{ datos.categoria.id }}{{ jornada_num }}" 
                                              data-bs-parent="#accordionJornadas{{ datos.categoria.id }}">
                                             <div class="accordion-body p-0">
-                                                <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                                                <div class="table-responsive">
                                                     <table class="table table-striped table-hover align-middle">
                                                         <thead class="table-dark">
                                                             <tr>
-                                                                <th style="width: auto; white-space: nowrap;">Local</th>
-                                                                <th class="text-center" style="width: 1%; white-space: nowrap;">Resultado</th>
-                                                                <th style="width: auto; white-space: nowrap;">Visitante</th>
-                                                                <th class="text-center" style="width: 1%; white-space: nowrap;">Estado</th>
+                                                                <th>Local</th>
+                                                                <th class="text-center">Resultado</th>
+                                                                <th>Visitante</th>
+                                                                <th class="text-center">Estado</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             {% for partido in partidos_jornada %}
                                                                 <tr>
-                                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">
+                                                                    <td class="fw-bold">
                                                                         {% if partido.equipo_local == "Descanso" %}
                                                                             <i class="fas fa-moon text-muted"></i> Descanso
                                                                         {% else %}
                                                                             {{ partido.equipo_local }}
                                                                         {% endif %}
                                                                     </td>
-                                                                    <td class="text-center" style="width: 1%; white-space: nowrap;">
+                                                                    <td class="text-center">
                                                                         {% if partido.jugado and not partido.es_descanso %}
                                                                             <span class="badge bg-primary rounded-pill px-3 py-1">
                                                                                 {{ partido.goles_local }} - {{ partido.goles_visitante }}
@@ -344,14 +405,14 @@
                                                                             <span class="text-muted">VS</span>
                                                                         {% endif %}
                                                                     </td>
-                                                                    <td class="fw-bold" style="width: auto; white-space: nowrap;">
+                                                                    <td class="fw-bold">
                                                                         {% if partido.equipo_visitante == "Descanso" %}
                                                                             <i class="fas fa-moon text-muted"></i> Descanso
                                                                         {% else %}
                                                                             {{ partido.equipo_visitante }}
                                                                         {% endif %}
                                                                     </td>
-                                                                    <td class="text-center" style="width: 1%; white-space: nowrap;">
+                                                                    <td class="text-center">
                                                                         {% if partido.jugado and not partido.es_descanso %}
                                                                             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-2 py-1 rounded">
                                                                                 <i class="fas fa-check-circle me-1"></i> Jugado
@@ -393,19 +454,19 @@
                                         </div>
                                         <div class="card-body p-0">
                                             <div class="table-responsive">
-                                                <table class="table table-standings" style="width: auto;">
+                                                <table class="table table-standings">
                                                     <thead>
                                                         <tr class="table-dark">
-                                                            <th class="text-center" style="width: 1%; white-space: nowrap;">POS</th>
-                                                            <th style="width: auto; white-space: nowrap;">EQUIPO</th>
-                                                            <th class="text-center" style="width: 1%; white-space: nowrap;">PJ</th>
-                                                            <th class="text-center" style="width: 1%; white-space: nowrap; color: rgb(3, 84, 235);">G</th>
-                                                            <th class="text-center" style="width: 1%; white-space: nowrap;">E</th>
-                                                            <th class="text-center" style="width: 1%; white-space: nowrap; color: red;">P</th>
-                                                            <th class="text-center" style="width: 1%; white-space: nowrap; color: green;">GF</th>
-                                                            <th class="text-center" style="width: 1%; white-space: nowrap; color: red;">GC</th>
-                                                            <th class="text-center" style="width: 1%; white-space: nowrap;">DG</th>
-                                                            <th class="text-center" style="width: 1%; white-space: nowrap; font-weight: bold;">PTS</th>
+                                                            <th class="text-center">POS</th>
+                                                            <th>EQUIPO</th>
+                                                            <th class="text-center">PJ</th>
+                                                            <th class="text-center" style="color: rgb(3, 84, 235);">G</th>
+                                                            <th class="text-center">E</th>
+                                                            <th class="text-center" style="color: red;">P</th>
+                                                            <th class="text-center" style="color: green;">GF</th>
+                                                            <th class="text-center" style="color: red;">GC</th>
+                                                            <th class="text-center">DG</th>
+                                                            <th class="text-center fw-bold">PTS</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -457,19 +518,19 @@
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
-                                        <table class="table table-standings" style="width: auto;">
+                                        <table class="table table-standings">
                                             <thead>
                                                 <tr class="table-dark">
-                                                    <th class="text-center" style="width: 1%; white-space: nowrap;">POS</th>
-                                                    <th style="width: auto; white-space: nowrap;">EQUIPO</th>
-                                                    <th class="text-center" style="width: 1%; white-space: nowrap;">PJ</th>
-                                                    <th class="text-center" style="width: 1%; white-space: nowrap; color: rgb(3, 84, 235);">G</th>
-                                                    <th class="text-center" style="width: 1%; white-space: nowrap;">E</th>
-                                                    <th class="text-center" style="width: 1%; white-space: nowrap; color: red;">P</th>
-                                                    <th class="text-center" style="width: 1%; white-space: nowrap; color: green;">GF</th>
-                                                    <th class="text-center" style="width: 1%; white-space: nowrap; color: red;">GC</th>
-                                                    <th class="text-center" style="width: 1%; white-space: nowrap;">DG</th>
-                                                    <th class="text-center" style="width: 1%; white-space: nowrap; font-weight: bold;">PTS</th>
+                                                    <th class="text-center">POS</th>
+                                                    <th>EQUIPO</th>
+                                                    <th class="text-center">PJ</th>
+                                                    <th class="text-center" style="color: rgb(3, 84, 235);">G</th>
+                                                    <th class="text-center">E</th>
+                                                    <th class="text-center" style="color: red;">P</th>
+                                                    <th class="text-center" style="color: green;">GF</th>
+                                                    <th class="text-center" style="color: red;">GC</th>
+                                                    <th class="text-center">DG</th>
+                                                    <th class="text-center fw-bold">PTS</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -520,20 +581,20 @@
                                 </div>
                             {% else %}
                                 <!-- Tabla de posiciones -->
-                                <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                                    <table class="table table-standings" style="width: auto;">
+                                <div class="table-responsive">
+                                    <table class="table table-standings">
                                         <thead>
                                             <tr class="table-dark">
-                                                <th class="text-center" style="width: 1%; white-space: nowrap;">POS</th>
-                                                <th style="width: auto; white-space: nowrap;">EQUIPO</th>
-                                                <th class="text-center" style="width: 1%; white-space: nowrap;">PJ</th>
-                                                <th class="text-center" style="width: 1%; white-space: nowrap; color: rgb(3, 84, 235);">G</th>
-                                                <th class="text-center" style="width: 1%; white-space: nowrap;">E</th>
-                                                <th class="text-center" style="width: 1%; white-space: nowrap; color: red;">P</th>
-                                                <th class="text-center" style="width: 1%; white-space: nowrap; color: green;">GF</th>
-                                                <th class="text-center" style="width: 1%; white-space: nowrap; color: red;">GC</th>
-                                                <th class="text-center" style="width: 1%; white-space: nowrap;">DG</th>
-                                                <th class="text-center" style="width: 1%; white-space: nowrap; font-weight: bold;">PTS</th>
+                                                <th class="text-center">POS</th>
+                                                <th>EQUIPO</th>
+                                                <th class="text-center">PJ</th>
+                                                <th class="text-center" style="color: rgb(3, 84, 235);">G</th>
+                                                <th class="text-center">E</th>
+                                                <th class="text-center" style="color: red;">P</th>
+                                                <th class="text-center" style="color: green;">GF</th>
+                                                <th class="text-center" style="color: red;">GC</th>
+                                                <th class="text-center">DG</th>
+                                                <th class="text-center fw-bold">PTS</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -581,21 +642,9 @@
     {% endif %}
 </div>
 
-<style>
-    /* Estilos generales */
-    .liga-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-    
-    .progress-bar {
-        transition: width 0.4s ease;
-    }
-</style>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-// Función para manejar el cambio de texto en los botones de pestaña
+        // Función para manejar el cambio de texto en los botones de pestaña
         function handleTabButtonText(tabId, isActive) {
             const button = document.getElementById(tabId + '-tab');
             if (button) {
@@ -646,12 +695,6 @@
             });
         });
 
-        // Inicializar tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
         // Mostrar automáticamente la primera liga
         if (document.querySelector('.collapse')) {
             const firstCollapse = document.querySelector('.collapse');
@@ -673,30 +716,6 @@
                         bootstrap.Collapse.getInstance(collapse)?.hide();
                     }
                 });
-});
-        });
-    });
-
-        // Mostrar automáticamente la primera liga
-        if (document.querySelector('.collapse')) {
-            const firstCollapse = document.querySelector('.collapse');
-            new bootstrap.Collapse(firstCollapse, {toggle: true});
-        }
-        
-        // Mejorar interacción de las cards
-        document.querySelectorAll('.liga-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const targetId = this.getAttribute('onclick').match(/'(.*?)'/)[1];
-                const targetElement = document.getElementById(targetId);
-                
-                // Desplazamiento suave al elemento
-                targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
-                
-                // Resaltar la sección abierta
-                document.querySelectorAll('.collapse').forEach(collapse => {
-                    if (collapse.id !== targetId) {
-                        bootstrap.Collapse.getInstance(collapse)?.hide();
-                    }
             });
         });
     });
