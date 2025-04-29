@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import os
-from itertools import combinations, zip_longest
+from itertools import combinations
 import random
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -18,43 +18,31 @@ db = SQLAlchemy(app)
 class Torneo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False, default="Torneo Principal")
-    formato_liga = db.Column(db.String(20), default="ida_vuelta")  # 'ida_vuelta', 'solo_ida'
+    formato_liga = db.Column(db.String(20), default="ida_vuelta")
     categorias = db.relationship('Categoria', backref='torneo', lazy=True)
-    grupos_copa = db.relationship('GrupoCopa', backref='torneo', lazy=True)
 
 class Categoria(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50), nullable=False)
-    tiene_liga = db.Column(db.Boolean, default=True)
-    tiene_copa = db.Column(db.Boolean, default=False)
-    num_grupos_copa = db.Column(db.Integer, default=0)
+    tiene_grupos = db.Column(db.Boolean, default=False)
+    num_grupos = db.Column(db.Integer, default=1)
     torneo_id = db.Column(db.Integer, db.ForeignKey('torneo.id'), nullable=False)
     equipos = db.relationship('Equipo', backref='categoria', lazy=True)
     partidos = db.relationship('Partido', backref='categoria', lazy=True)
+    grupos = db.relationship('Grupo', backref='categoria', lazy=True)
 
-class GrupoCopa(db.Model):
+class Grupo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50), nullable=False)
     categoria_id = db.Column(db.Integer, db.ForeignKey('categoria.id'), nullable=False)
-    torneo_id = db.Column(db.Integer, db.ForeignKey('torneo.id'), nullable=False)
-    equipos = db.relationship('EquipoCopa', backref='grupo', lazy=True)
-    partidos = db.relationship('PartidoCopa', backref='grupo', lazy=True)
+    equipos = db.relationship('Equipo', backref='grupo', lazy=True)
+    partidos = db.relationship('Partido', backref='grupo', lazy=True)
 
 class Equipo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50), nullable=False)
     categoria_id = db.Column(db.Integer, db.ForeignKey('categoria.id'), nullable=False)
-    puntos = db.Column(db.Integer, default=0)
-    goles_favor = db.Column(db.Integer, default=0)
-    goles_contra = db.Column(db.Integer, default=0)
-    diferencia_goles = db.Column(db.Integer, default=0)
-    partidos_jugados = db.Column(db.Integer, default=0)
-
-class EquipoCopa(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(50), nullable=False)
-    grupo_id = db.Column(db.Integer, db.ForeignKey('grupo_copa.id'), nullable=False)
-    categoria_id = db.Column(db.Integer, db.ForeignKey('categoria.id'), nullable=False)
+    grupo_id = db.Column(db.Integer, db.ForeignKey('grupo.id'), nullable=True)
     puntos = db.Column(db.Integer, default=0)
     goles_favor = db.Column(db.Integer, default=0)
     goles_contra = db.Column(db.Integer, default=0)
@@ -65,26 +53,16 @@ class Partido(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     jornada = db.Column(db.Integer, nullable=False)
     fecha = db.Column(db.DateTime)
+    hora = db.Column(db.String(10))
     categoria_id = db.Column(db.Integer, db.ForeignKey('categoria.id'), nullable=False)
-    equipo_local = db.Column(db.String(50), nullable=False)
-    equipo_visitante = db.Column(db.String(50), nullable=False)
+    grupo_id = db.Column(db.Integer, db.ForeignKey('grupo.id'), nullable=True)
+    equipo_local = db.Column(db.String(50), nullable=True)
+    equipo_visitante = db.Column(db.String(50), nullable=True)
     goles_local = db.Column(db.Integer)
     goles_visitante = db.Column(db.Integer)
     jugado = db.Column(db.Boolean, default=False)
-    es_descanso = db.Column(db.Boolean, default=False)  # Nuevo campo para identificar descansos
-    equipo_descansa = db.Column(db.String(50))  # Nuevo campo para guardar qué equipo descansa
-
-class PartidoCopa(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    fase = db.Column(db.String(20), nullable=False)  # 'grupos', 'octavos', 'cuartos', 'semifinal', 'final'
-    grupo_id = db.Column(db.Integer, db.ForeignKey('grupo_copa.id'), nullable=True)
-    categoria_id = db.Column(db.Integer, db.ForeignKey('categoria.id'), nullable=False)
-    fecha = db.Column(db.DateTime)
-    equipo_local = db.Column(db.String(50), nullable=False)
-    equipo_visitante = db.Column(db.String(50), nullable=False)
-    goles_local = db.Column(db.Integer)
-    goles_visitante = db.Column(db.Integer)
-    jugado = db.Column(db.Boolean, default=False)
+    es_descanso = db.Column(db.Boolean, default=False)
+    equipo_descansa = db.Column(db.String(50))
 
 # Usuario administrador
 ADMIN_USER = {
@@ -102,183 +80,132 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Funciones auxiliares mejoradas
-def crear_calendario_liga(equipos, categoria_id, formato_liga="ida_vuelta"):
+# Función para calcular progreso
+def calcular_progreso(partidos):
+    partidos_jugados = sum(1 for p in partidos if p.jugado and not p.es_descanso)
+    total_partidos = sum(1 for p in partidos if not p.es_descanso)
+    return partidos_jugados, total_partidos
+
+
+# Función para crear el calendario de una liga
+def crear_calendario_liga(equipos, categoria_id, grupo_id=None, formato_liga="ida_vuelta"):
     n = len(equipos)
     if n < 2:
         flash('Se necesitan al menos 2 equipos para crear una liga', 'danger')
         return
 
-    # Si el número de equipos es impar, agregar un equipo ficticio "Descanso"
     tiene_descanso = n % 2 != 0
+    equipos_originales = equipos.copy()
+
+    # Si hay un número impar de equipos, se calcula el descanso
     if tiene_descanso:
-        equipos.append("Descanso")
-        n += 1
+        equipos_originales.append(None)  # None representa el descanso
 
-    fecha_inicio = datetime.now()
-    jornadas = defaultdict(list)
-    descansos = defaultdict(list)  # Almacenar los equipos en descanso
-    jornada_actual = 1
+    num_jornadas = len(equipos_originales) - 1
+    jornadas = []
 
-    # Generar el calendario usando el algoritmo de round-robin
-    for i in range(n - 1):  # n-1 jornadas para "solo ida"
-        for j in range(n // 2):
-            local = equipos[j]
-            visitante = equipos[-(j + 1)]
+    for i in range(num_jornadas):
+        jornada = []
+        descanso = equipos_originales[0]  # El primer equipo descansa en esta jornada
+        for j in range(len(equipos_originales) // 2):
+            if i % 2 == 0:  # Jornadas pares: el primer equipo es local
+                local = equipos_originales[j]
+                visitante = equipos_originales[-(j + 1)]
+            else:  # Jornadas impares: el primer equipo es visitante
+                local = equipos_originales[-(j + 1)]
+                visitante = equipos_originales[j]
+            if local and visitante and local != visitante:  # Evitar enfrentamientos consigo mismo
+                jornada.append((local, visitante))
+        jornadas.append((descanso, jornada))
+        # Rotar los equipos para la siguiente jornada
+        equipos_originales = [equipos_originales[0]] + equipos_originales[-1:] + equipos_originales[1:-1]
 
-            # Si uno de los equipos es "Descanso", registrar el descanso
-            if local == "Descanso" or visitante == "Descanso":
-                equipo_descansa = visitante if local == "Descanso" else local
-                descansos[jornada_actual].append(equipo_descansa)
-            else:
-                # Alternar local y visitante para que sea equitativo
-                if jornada_actual % 2 == 0:
-                    local, visitante = visitante, local
-
-                partido = Partido(
-                    jornada=jornada_actual,
-                    categoria_id=categoria_id,
-                    equipo_local=local,
-                    equipo_visitante=visitante,
-                    fecha=fecha_inicio + timedelta(days=(jornada_actual - 1) * 7)
-                )
-                db.session.add(partido)
-                jornadas[jornada_actual].append(partido)
-
-        # Rotar los equipos para la siguiente jornada (excepto el primero)
-        equipos = [equipos[0]] + [equipos[-1]] + equipos[1:-1]
-        jornada_actual += 1
-
-    # Crear partidos de vuelta solo si es ida y vuelta
+    # Para la vuelta (ida y vuelta)
     if formato_liga == "ida_vuelta":
-        num_jornadas_ida = jornada_actual - 1
-        for j in range(1, num_jornadas_ida + 1):
-            for partido in jornadas[j]:
-                fecha_partido = fecha_inicio + timedelta(days=(j + num_jornadas_ida - 1) * 7)
-                partido_vuelta = Partido(
-                    jornada=j + num_jornadas_ida,
-                    categoria_id=categoria_id,
-                    equipo_local=partido.equipo_visitante,
-                    equipo_visitante=partido.equipo_local,
-                    fecha=fecha_partido
-                )
-                db.session.add(partido_vuelta)
+        jornadas_vuelta = []
+        for descanso, jornada in jornadas:
+            jornada_vuelta = [(visitante, local) for local, visitante in jornada]
+            jornadas_vuelta.append((descanso, jornada_vuelta))
+        jornadas.extend(jornadas_vuelta)
 
-    # Guardar los cambios en la base de datos
+    # Guardar los partidos en la base de datos
+    fecha_inicio = datetime.now()
+    for i, (descanso, jornada) in enumerate(jornadas, 1):
+        # Registrar el equipo que descansa en esta jornada
+        if descanso:
+            partido_descanso = Partido(
+                jornada=i,
+                categoria_id=categoria_id,
+                grupo_id=grupo_id,
+                equipo_local=None,
+                equipo_visitante=None,
+                fecha=fecha_inicio + timedelta(days=(i - 1) * 7),
+                es_descanso=True,
+                equipo_descansa=descanso
+            )
+            db.session.add(partido_descanso)
+
+        # Registrar los partidos de la jornada
+        for local, visitante in jornada:
+            if local is None or visitante is None:
+                continue  # Evitar errores si hay un equipo vacío
+            partido = Partido(
+                jornada=i,
+                categoria_id=categoria_id,
+                grupo_id=grupo_id,
+                equipo_local=local,
+                equipo_visitante=visitante,
+                fecha=fecha_inicio + timedelta(days=(i - 1) * 7),
+                es_descanso=False
+            )
+            db.session.add(partido)
+
     db.session.commit()
 
-    # Mostrar los descansos en la parte superior de cada jornada
-    for jornada, equipos_descansan in descansos.items():
-        print(f"Jornada {jornada}: Equipos en descanso: {', '.join(equipos_descansan)}")
+# Resto del código permanece igual...
 
-def crear_fase_grupos_copa(equipos, categoria_id, num_grupos=4):
-    fecha_inicio = datetime.now()
+def crear_grupos_liga(equipos, categoria_id, num_grupos=1, formato_liga="ida_vuelta"):
+    if num_grupos < 1:
+        return []
+        
     random.shuffle(equipos)
     equipos_por_grupo = len(equipos) // num_grupos
-    categoria = Categoria.query.get(categoria_id)
     grupos = []
     
     for i in range(num_grupos):
-        grupo = GrupoCopa(
+        grupo = Grupo(
             nombre=f"Grupo {chr(65+i)}",
-            categoria_id=categoria_id,
-            torneo_id=categoria.torneo_id
-        )
+            categoria_id=categoria_id)
         db.session.add(grupo)
         db.session.flush()
         
         grupo_equipos = equipos[i*equipos_por_grupo:(i+1)*equipos_por_grupo]
-        for equipo in grupo_equipos:
-            db.session.add(EquipoCopa(
-                nombre=equipo,
-                grupo_id=grupo.id,
-                categoria_id=categoria_id
-            ))
-        
-        # Crear partidos de ida
-        fecha_actual = fecha_inicio
-        for local, visitante in combinations(grupo_equipos, 2):
-            db.session.add(PartidoCopa(
-                fase="grupos",
-                grupo_id=grupo.id,
+        for equipo_nombre in grupo_equipos:
+            equipo = Equipo(
+                nombre=equipo_nombre,
                 categoria_id=categoria_id,
-                equipo_local=local,
-                equipo_visitante=visitante,
-                fecha=fecha_actual
-            ))
-            fecha_actual += timedelta(days=7)  # 1 semana entre partidos
+                grupo_id=grupo.id)
+            db.session.add(equipo)
         
-        # Crear partidos de vuelta
-        fecha_actual = fecha_inicio + timedelta(days=len(list(combinations(grupo_equipos, 2))) * 7)
-        for visitante, local in combinations(grupo_equipos, 2):
-            db.session.add(PartidoCopa(
-                fase="grupos",
-                grupo_id=grupo.id,
-                categoria_id=categoria_id,
-                equipo_local=local,
-                equipo_visitante=visitante,
-                fecha=fecha_actual
-            ))
-            fecha_actual += timedelta(days=7)  # Incrementar la fecha para el siguiente partido
-        
+        crear_calendario_liga(grupo_equipos, categoria_id, grupo.id, formato_liga)
         grupos.append(grupo)
     
     return grupos
 
-def crear_fase_eliminatoria(categoria_id, equipos_clasificados):
-    """Crea la fase eliminatoria de la copa (cuartos, semifinal, final)"""
-    if len(equipos_clasificados) < 2:
+def revertir_estadisticas(partido):
+    if partido.es_descanso:
         return
+        
+    equipo_local = Equipo.query.filter_by(
+        nombre=partido.equipo_local, 
+        categoria_id=partido.categoria_id,
+        grupo_id=partido.grupo_id).first()
+    equipo_visitante = Equipo.query.filter_by(
+        nombre=partido.equipo_visitante,
+        categoria_id=partido.categoria_id,
+        grupo_id=partido.grupo_id).first()
     
-    categoria = Categoria.query.get(categoria_id)
-    num_partidos = len(equipos_clasificados) // 2
-    fases = {
-        8: "cuartos",
-        4: "semifinal",
-        2: "final"
-    }
-    
-    fase_actual = fases.get(len(equipos_clasificados), "eliminatoria")
-    fecha_inicio = datetime.now() + timedelta(days=7)
-    
-    # Emparejar equipos (1° vs último, 2° vs penúltimo, etc.)
-    emparejamientos = list(zip_longest(
-        equipos_clasificados[:num_partidos],
-        reversed(equipos_clasificados[num_partidos:]),
-        fillvalue=None
-    ))
-    
-    for i, (local, visitante) in enumerate(emparejamientos):
-        if local and visitante:
-            db.session.add(PartidoCopa(
-                fase=fase_actual,
-                categoria_id=categoria_id,
-                equipo_local=local,
-                equipo_visitante=visitante,
-                fecha=fecha_inicio + timedelta(days=i*7)
-            ))
-
-def revertir_estadisticas(partido, es_copa=False):
-    if es_copa:
-        equipo_local = EquipoCopa.query.filter_by(
-            nombre=partido.equipo_local, 
-            categoria_id=partido.categoria_id
-        ).first()
-        equipo_visitante = EquipoCopa.query.filter_by(
-            nombre=partido.equipo_visitante,
-            categoria_id=partido.categoria_id
-        ).first()
-    else:
-        equipo_local = Equipo.query.filter_by(
-            nombre=partido.equipo_local, 
-            categoria_id=partido.categoria_id
-        ).first()
-        equipo_visitante = Equipo.query.filter_by(
-            nombre=partido.equipo_visitante,
-            categoria_id=partido.categoria_id
-        ).first()
-    
-    if equipo_local and equipo_visitante and not partido.es_descanso:
+    if equipo_local and equipo_visitante:
         equipo_local.goles_favor -= partido.goles_local or 0
         equipo_local.goles_contra -= partido.goles_visitante or 0
         equipo_visitante.goles_favor -= partido.goles_visitante or 0
@@ -297,27 +224,20 @@ def revertir_estadisticas(partido, es_copa=False):
         equipo_local.partidos_jugados -= 1
         equipo_visitante.partidos_jugados -= 1
 
-def actualizar_estadisticas(partido, es_nuevo=True, es_copa=False):
-    if es_copa:
-        equipo_local = EquipoCopa.query.filter_by(
-            nombre=partido.equipo_local,
-            categoria_id=partido.categoria_id
-        ).first()
-        equipo_visitante = EquipoCopa.query.filter_by(
-            nombre=partido.equipo_visitante,
-            categoria_id=partido.categoria_id
-        ).first()
-    else:
-        equipo_local = Equipo.query.filter_by(
-            nombre=partido.equipo_local,
-            categoria_id=partido.categoria_id
-        ).first()
-        equipo_visitante = Equipo.query.filter_by(
-            nombre=partido.equipo_visitante,
-            categoria_id=partido.categoria_id
-        ).first()
+def actualizar_estadisticas(partido, es_nuevo=True):
+    if partido.es_descanso:
+        return
+        
+    equipo_local = Equipo.query.filter_by(
+        nombre=partido.equipo_local,
+        categoria_id=partido.categoria_id,
+        grupo_id=partido.grupo_id).first()
+    equipo_visitante = Equipo.query.filter_by(
+        nombre=partido.equipo_visitante,
+        categoria_id=partido.categoria_id,
+        grupo_id=partido.grupo_id).first()
     
-    if equipo_local and equipo_visitante and not partido.es_descanso:
+    if equipo_local and equipo_visitante:
         if es_nuevo:
             equipo_local.partidos_jugados += 1
             equipo_visitante.partidos_jugados += 1
@@ -339,22 +259,14 @@ def actualizar_estadisticas(partido, es_nuevo=True, es_copa=False):
                 equipo_local.puntos += 1
                 equipo_visitante.puntos += 1
 
-def calcular_estadisticas_equipo(equipo, es_copa=False):
-    if es_copa:
-        partidos = PartidoCopa.query.filter(
-            ((PartidoCopa.equipo_local == equipo.nombre) | 
-             (PartidoCopa.equipo_visitante == equipo.nombre)) & 
-            (PartidoCopa.jugado == True) &
-            (PartidoCopa.categoria_id == equipo.categoria_id)
-        ).all()
-    else:
-        partidos = Partido.query.filter(
-            ((Partido.equipo_local == equipo.nombre) | 
-             (Partido.equipo_visitante == equipo.nombre)) & 
-            (Partido.jugado == True) &
-            (Partido.categoria_id == equipo.categoria_id) &
-            (Partido.es_descanso == False)  # Excluir partidos de descanso
-        ).all()
+def calcular_estadisticas_equipo(equipo):
+    partidos = Partido.query.filter(
+        ((Partido.equipo_local == equipo.nombre) | 
+         (Partido.equipo_visitante == equipo.nombre)) & 
+        (Partido.jugado == True) &
+        (Partido.categoria_id == equipo.categoria_id) &
+        ((Partido.grupo_id == equipo.grupo_id) | (Partido.grupo_id.is_(None))) &
+        (Partido.es_descanso == False)).all()
     
     stats = {'ganados': 0, 'empatados': 0, 'perdidos': 0}
     
@@ -375,28 +287,19 @@ def calcular_estadisticas_equipo(equipo, es_copa=False):
     
     return stats
 
-def calcular_stats_para_tabla(tabla, es_copa=False):
-    return {equipo.nombre: calcular_estadisticas_equipo(equipo, es_copa) for equipo in tabla}
+@app.context_processor
+def utility_processor():
+    return dict(calcular_estadisticas_equipo=calcular_estadisticas_equipo)
 
-def obtener_tabla_general_copa(categoria_id):
-    grupos = GrupoCopa.query.filter_by(categoria_id=categoria_id).all()
-    todos_equipos = []
-    
-    for grupo in grupos:
-        equipos = EquipoCopa.query.filter_by(grupo_id=grupo.id).order_by(
-            EquipoCopa.puntos.desc(),
-            EquipoCopa.diferencia_goles.desc(),
-            EquipoCopa.goles_favor.desc()
-        ).all()
-        todos_equipos.extend(equipos)
-    
-    tabla_general = sorted(todos_equipos, key=lambda e: (-e.puntos, -e.diferencia_goles, -e.goles_favor))
-    
-    return tabla_general
+def calcular_stats_para_tabla(tabla):
+    return {equipo.nombre: calcular_estadisticas_equipo(equipo) for equipo in tabla}
 
-def obtener_clasificados_copa(categoria_id, num_clasificados=8):
-    tabla_general = obtener_tabla_general_copa(categoria_id)
-    return [equipo.nombre for equipo in tabla_general[:num_clasificados]]
+def obtener_tabla_final(categoria_id):
+    equipos = Equipo.query.filter_by(categoria_id=categoria_id).order_by(
+        Equipo.puntos.desc(),
+        Equipo.diferencia_goles.desc(),
+        Equipo.goles_favor.desc()).all()
+    return equipos
 
 # Crear tablas automáticamente al iniciar la aplicación
 with app.app_context():
@@ -416,56 +319,90 @@ def favicon():
 def index():
     return redirect(url_for('modo_invitado'))
 
+# Corrección en la organización de los enfrentamientos para que se muestren correctamente
+
 @app.route('/modo-invitado')
 def modo_invitado():
-    # Obtener el torneo principal
     torneo = Torneo.query.first()
     if not torneo:
         flash('No hay torneos creados aún', 'info')
-        return render_template('modo_invitado.html', datos_ligas=[], datos_grupos_copa=[])
+        return render_template('modo_invitado.html', datos_ligas=[])
 
-    # Obtener todas las categorías del torneo
     categorias = Categoria.query.filter_by(torneo_id=torneo.id).all()
-
     datos_ligas = []
+
     for categoria in categorias:
-        # Obtener los equipos y partidos de la categoría
-        equipos = Equipo.query.filter_by(categoria_id=categoria.id).order_by(
-            Equipo.puntos.desc(),
-            Equipo.diferencia_goles.desc(),
-            Equipo.goles_favor.desc()
-        ).all()
-        partidos = Partido.query.filter_by(categoria_id=categoria.id).all()
+        if categoria.tiene_grupos:
+            grupos = Grupo.query.filter_by(categoria_id=categoria.id).all()
+            datos_grupos = []
 
-        # Organizar los partidos por jornada
-        jornadas = defaultdict(list)
-        descansos = defaultdict(list)  # Almacenar los equipos en descanso
-        for partido in partidos:
-            if partido.es_descanso:
-                descansos[partido.jornada].append(partido.equipo_descansa)
-            else:
-                jornadas[partido.jornada].append(partido)
-        jornadas_ordenadas = sorted(jornadas.items())
+            for grupo in grupos:
+                equipos = Equipo.query.filter_by(grupo_id=grupo.id).order_by(
+                    Equipo.puntos.desc(),
+                    Equipo.diferencia_goles.desc(),
+                    Equipo.goles_favor.desc()).all()
+                partidos = Partido.query.filter_by(grupo_id=grupo.id).order_by(Partido.jornada, Partido.hora).all()
 
-        # Calcular estadísticas de los equipos
-        stats_equipos = {}
-        for equipo in equipos:
-            stats_equipos[equipo.nombre] = calcular_estadisticas_equipo(equipo)
+                jornadas = defaultdict(list)
+                descansos = defaultdict(list)
+                for partido in partidos:
+                    if partido.es_descanso:
+                        descansos[partido.jornada].append(partido.equipo_descansa)
+                    else:
+                        jornadas[partido.jornada].append(partido)
+                jornadas_ordenadas = sorted(jornadas.items())
 
-        # Agregar los datos de la categoría
-        datos_ligas.append({
-            'categoria': categoria,
-            'tabla': equipos,
-            'jornadas': jornadas_ordenadas,
-            'descansos': descansos,  # Incluir los descansos
-            'total_partidos': len(partidos),
-            'partidos_jugados': sum(1 for p in partidos if p.jugado),
-            'total_equipos': len(equipos),
-            'stats_equipos': stats_equipos,
-            'tiene_descanso': any(p.es_descanso for p in partidos)  # Indicar si hay descansos
-        })
+                stats_equipos = calcular_stats_para_tabla(equipos)
 
-    return render_template('modo_invitado.html', torneo=torneo, datos_ligas=datos_ligas, datos_grupos_copa=[])
+                datos_grupos.append({
+                    'grupo': grupo,
+                    'tabla': equipos,
+                    'jornadas': jornadas_ordenadas,
+                    'descansos': descansos,
+                    'total_partidos': len([p for p in partidos if not p.es_descanso]),
+                    'partidos_jugados': sum(1 for p in partidos if p.jugado and not p.es_descanso),
+                    'total_equipos': len(equipos),
+                    'stats_equipos': stats_equipos,
+                    'tiene_descanso': len(equipos) % 2 != 0
+                })
+
+            datos_ligas.append({
+                'categoria': categoria,
+                'tiene_grupos': True,
+                'grupos': datos_grupos
+            })
+        else:
+            equipos = Equipo.query.filter_by(categoria_id=categoria.id).order_by(
+                Equipo.puntos.desc(),
+                Equipo.diferencia_goles.desc(),
+                Equipo.goles_favor.desc()).all()
+            partidos = Partido.query.filter_by(categoria_id=categoria.id).order_by(Partido.jornada, Partido.hora).all()
+
+            jornadas = defaultdict(list)
+            descansos = defaultdict(list)
+            for partido in partidos:
+                if partido.es_descanso:
+                    descansos[partido.jornada].append(partido.equipo_descansa)
+                else:
+                    jornadas[partido.jornada].append(partido)
+            jornadas_ordenadas = sorted(jornadas.items())
+
+            stats_equipos = calcular_stats_para_tabla(equipos)
+
+            datos_ligas.append({
+                'categoria': categoria,
+                'tiene_grupos': False,
+                'tabla': equipos,
+                'jornadas': jornadas_ordenadas,
+                'descansos': descansos,
+                'total_partidos': len([p for p in partidos if not p.es_descanso]),
+                'partidos_jugados': sum(1 for p in partidos if p.jugado and not p.es_descanso),
+                'total_equipos': len(equipos),
+                'stats_equipos': stats_equipos,
+                'tiene_descanso': len(equipos) % 2 != 0
+            })
+
+    return render_template('modo_invitado.html', torneo=torneo, datos_ligas=datos_ligas)
 
 # Rutas de administración
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -490,85 +427,90 @@ def admin_dashboard():
     torneo = Torneo.query.first()
     if not torneo:
         return redirect(url_for('crear_torneo_admin'))
-    
+
     datos_ligas = []
-    datos_grupos_copa = []
-    
+
     categorias = Categoria.query.filter_by(torneo_id=torneo.id).all()
     for categoria in categorias:
-        if categoria.tiene_liga:
-            equipos = Equipo.query.filter_by(categoria_id=categoria.id).all()
-            partidos = Partido.query.filter_by(categoria_id=categoria.id).all()
-            
-            jornadas = {}
-            for partido in partidos:
-                if partido.jornada not in jornadas:
-                    jornadas[partido.jornada] = []
-                jornadas[partido.jornada].append(partido)
-            
-            jornadas_ordenadas = sorted(jornadas.items())
-            
-            tabla = Equipo.query.filter_by(categoria_id=categoria.id).order_by(
-                Equipo.puntos.desc(),
-                Equipo.diferencia_goles.desc(),
-                Equipo.goles_favor.desc()
-            ).all()
-            
-            total_equipos = len(equipos)
-            partidos_jugados = sum(1 for p in partidos if p.jugado)
-            total_partidos = len(partidos)
-            total_jornadas = max([j[0] for j in jornadas_ordenadas]) if jornadas_ordenadas else 0
-            
-            stats_equipos = calcular_stats_para_tabla(tabla)
-            
+        if categoria.tiene_grupos:
+            grupos = Grupo.query.filter_by(categoria_id=categoria.id).all()
+
+            datos_grupos = []
+            for grupo in grupos:
+                equipos = Equipo.query.filter_by(grupo_id=grupo.id).order_by(
+                    Equipo.puntos.desc(),
+                    Equipo.diferencia_goles.desc(),
+                    Equipo.goles_favor.desc()).all()
+                partidos = Partido.query.filter_by(grupo_id=grupo.id).order_by(Partido.jornada).all()
+
+                # Calcular progreso
+                partidos_jugados, total_partidos = calcular_progreso(partidos)
+
+                jornadas = defaultdict(list)
+                for partido in partidos:
+                    if not partido.es_descanso:
+                        jornadas[partido.jornada].append({
+                            'equipo_local': partido.equipo_local,
+                            'equipo_visitante': partido.equipo_visitante,
+                            'goles_local': partido.goles_local,
+                            'goles_visitante': partido.goles_visitante,
+                            'jugado': partido.jugado,
+                            'id': partido.id
+                        })
+
+                jornadas_ordenadas = sorted(jornadas.items())
+
+                datos_grupos.append({
+                    'grupo': grupo,
+                    'tabla': equipos,  # Tabla de clasificación
+                    'jornadas': jornadas_ordenadas,
+                    'total_partidos': total_partidos,
+                    'partidos_jugados': partidos_jugados,
+                    'total_equipos': len(equipos)
+                })
+
             datos_ligas.append({
                 'categoria': categoria,
-                'jornadas': jornadas_ordenadas,
-                'tabla': tabla,
-                'stats_equipos': stats_equipos,
-                'total_equipos': total_equipos,
-                'partidos_jugados': partidos_jugados,
-                'total_partidos': total_partidos,
-                'total_jornadas': total_jornadas,
-                'tiene_descanso': any(p.es_descanso for p in partidos)
+                'tiene_grupos': True,
+                'grupos': datos_grupos
             })
-        
-        if categoria.tiene_copa:
-            grupos = GrupoCopa.query.filter_by(categoria_id=categoria.id).all()
-            for grupo in grupos:
-                equipos = EquipoCopa.query.filter_by(grupo_id=grupo.id).all()
-                partidos = PartidoCopa.query.filter_by(grupo_id=grupo.id).order_by(PartidoCopa.id).all()
-                
-                tabla = EquipoCopa.query.filter_by(grupo_id=grupo.id).order_by(
-                    EquipoCopa.puntos.desc(),
-                    EquipoCopa.diferencia_goles.desc(),
-                    EquipoCopa.goles_favor.desc()
-                ).all()
-                
-                partidos_jugados = sum(1 for p in partidos if p.jugado)
-                
-                stats_equipos = calcular_stats_para_tabla(tabla, es_copa=True)
-                
-                datos_grupos_copa.append({
-                    'categoria': categoria,
-                    'grupo': grupo,
-                    'partidos': partidos,
-                    'tabla': tabla,
-                    'stats_equipos': stats_equipos,
-                    'partidos_jugados': partidos_jugados
-                })
-    
-    # Obtener datos de fase eliminatoria si existe
-    partidos_eliminatoria = PartidoCopa.query.filter(
-        PartidoCopa.categoria_id.in_([c.id for c in categorias]),
-        PartidoCopa.fase.in_(['cuartos', 'semifinal', 'final'])
-    ).order_by(PartidoCopa.fase, PartidoCopa.id).all()
-    
-    return render_template('admin_dashboard.html', 
-                         torneo=torneo,
-                         datos_ligas=datos_ligas,
-                         datos_grupos_copa=datos_grupos_copa,
-                         partidos_eliminatoria=partidos_eliminatoria)
+        else:
+            equipos = Equipo.query.filter_by(categoria_id=categoria.id).order_by(
+                Equipo.puntos.desc(),
+                Equipo.diferencia_goles.desc(),
+                Equipo.goles_favor.desc()).all()
+            partidos = Partido.query.filter_by(categoria_id=categoria.id).order_by(Partido.jornada).all()
+
+            # Calcular progreso
+            partidos_jugados, total_partidos = calcular_progreso(partidos)
+
+            jornadas = defaultdict(list)
+            for partido in partidos:
+                if not partido.es_descanso:
+                    jornadas[partido.jornada].append({
+                        'equipo_local': partido.equipo_local,
+                        'equipo_visitante': partido.equipo_visitante,
+                        'goles_local': partido.goles_local,
+                        'goles_visitante': partido.goles_visitante,
+                        'jugado': partido.jugado,
+                        'id': partido.id
+                    })
+
+            jornadas_ordenadas = sorted(jornadas.items())
+
+            datos_ligas.append({
+                'categoria': categoria,
+                'tiene_grupos': False,
+                'tabla': equipos,  # Tabla de clasificación
+                'jornadas': jornadas_ordenadas,
+                'total_partidos': total_partidos,
+                'partidos_jugados': partidos_jugados,
+                'total_equipos': len(equipos)
+            })
+
+    return render_template('admin_dashboard.html',
+                           torneo=torneo,
+                           datos_ligas=datos_ligas)
 
 @app.route('/admin/crear-torneo', methods=['GET', 'POST'])
 @admin_required
@@ -588,10 +530,8 @@ def crear_torneo_admin():
 
             # Limpiar datos anteriores
             db.session.query(Partido).delete()
-            db.session.query(PartidoCopa).delete()
             db.session.query(Equipo).delete()
-            db.session.query(EquipoCopa).delete()
-            db.session.query(GrupoCopa).delete()
+            db.session.query(Grupo).delete()
             db.session.query(Categoria).delete()
 
             # Crear o actualizar torneo
@@ -602,8 +542,7 @@ def crear_torneo_admin():
             else:
                 torneo = Torneo(
                     nombre=nombre_torneo,
-                    formato_liga=formato_liga
-                )
+                    formato_liga=formato_liga)
                 db.session.add(torneo)
             
             db.session.flush()
@@ -612,26 +551,23 @@ def crear_torneo_admin():
             for i in range(1, num_categorias + 1):
                 nombre_categoria = request.form.get(f'nombre_categoria_{i}', f'Categoría {i}')
                 num_equipos = int(request.form.get(f'num_equipos_categoria_{i}', 0))
-                tiene_liga = request.form.get(f'tiene_liga_{i}') == 'on'
-                tiene_copa = request.form.get(f'tiene_copa_{i}') == 'on'
-                num_grupos_copa = int(request.form.get(f'num_grupos_categoria_{i}', 0)) if tiene_copa else 0
+                tiene_grupos = request.form.get(f'tiene_grupos_{i}') == 'on'
+                num_grupos = int(request.form.get(f'num_grupos_categoria_{i}', 1)) if tiene_grupos else 1
 
                 if num_equipos < 2:
                     flash(f'La categoría {nombre_categoria} debe tener al menos 2 equipos.', 'danger')
                     return redirect(url_for('crear_torneo_admin'))
 
-                if tiene_copa and (num_equipos < 4 or num_equipos % num_grupos_copa != 0):
-                    flash(f'Para la copa en {nombre_categoria}, el número de equipos debe ser divisible entre el número de grupos.', 'danger')
+                if tiene_grupos and (num_equipos < num_grupos * 2 or num_equipos % num_grupos != 0):
+                    flash(f'Para grupos en {nombre_categoria}, el número de equipos debe ser divisible entre el número de grupos.', 'danger')
                     return redirect(url_for('crear_torneo_admin'))
 
                 # Crear categoría
                 categoria = Categoria(
                     nombre=nombre_categoria,
-                    tiene_liga=tiene_liga,
-                    tiene_copa=tiene_copa,
-                    num_grupos_copa=num_grupos_copa,
-                    torneo_id=torneo.id
-                )
+                    tiene_grupos=tiene_grupos,
+                    num_grupos=num_grupos,
+                    torneo_id=torneo.id)
                 db.session.add(categoria)
                 db.session.flush()
 
@@ -642,19 +578,15 @@ def crear_torneo_admin():
                     nombres_equipos.append(nombre_equipo)
 
                 # Crear equipos y competiciones según configuración
-                if tiene_liga:
+                if tiene_grupos:
+                    crear_grupos_liga(nombres_equipos, categoria.id, num_grupos, formato_liga)
+                else:
                     for nombre in nombres_equipos:
                         db.session.add(Equipo(
                             nombre=nombre,
-                            categoria_id=categoria.id
-                        ))
+                            categoria_id=categoria.id))
                     
-                    # Crear calendario de liga con el formato seleccionado
-                    crear_calendario_liga(nombres_equipos, categoria.id, formato_liga)
-
-                if tiene_copa:
-                    # Crear fase de grupos de copa
-                    crear_fase_grupos_copa(nombres_equipos, categoria.id, num_grupos_copa)
+                    crear_calendario_liga(nombres_equipos, categoria.id, None, formato_liga)
 
             db.session.commit()
             flash('Torneo creado exitosamente.', 'success')
@@ -679,18 +611,16 @@ def actualizar_resultado(partido_id):
         try:
             goles_local = int(request.form.get('goles_local', 0))
             goles_visitante = int(request.form.get('goles_visitante', 0))
-            hora = request.form.get('hora', '19:00')
             
             if goles_local < 0 or goles_visitante < 0:
                 flash('Los goles no pueden ser negativos', 'danger')
                 return redirect(url_for('admin_dashboard'))
             
             if partido.jugado:
-                revertir_estadisticas(partido)
+                revertir_estadisticas(partido)  # Revertir estadísticas previas
             
             partido.goles_local = goles_local
             partido.goles_visitante = goles_visitante
-            partido.hora = hora
             partido.jugado = True
             
             actualizar_estadisticas(partido, es_nuevo=not partido.jugado)
@@ -707,68 +637,17 @@ def actualizar_resultado(partido_id):
         return redirect(url_for('admin_dashboard'))
     
     categoria = Categoria.query.get(partido.categoria_id)
+    grupo = Grupo.query.get(partido.grupo_id) if partido.grupo_id else None
     return render_template('editar_partido.html', 
-                         partido=partido,
-                         categoria=categoria)
-
-@app.route('/admin/actualizar-resultado-copa/<int:partido_id>', methods=['GET', 'POST'])
-@admin_required
-def actualizar_resultado_copa(partido_id):
-    partido = PartidoCopa.query.get_or_404(partido_id)
-    
-    if request.method == 'POST':
-        try:
-            goles_local = int(request.form.get('goles_local', 0))
-            goles_visitante = int(request.form.get('goles_visitante', 0))
-            hora = request.form.get('hora', '19:00')
-            
-            if goles_local < 0 or goles_visitante < 0:
-                flash('Los goles no pueden ser negativos', 'danger')
-                return redirect(url_for('admin_dashboard'))
-            
-            if partido.jugado:
-                revertir_estadisticas(partido, es_copa=True)
-            
-            partido.goles_local = goles_local
-            partido.goles_visitante = goles_visitante
-            partido.hora = hora
-            partido.jugado = True
-            
-            actualizar_estadisticas(partido, es_nuevo=not partido.jugado, es_copa=True)
-            
-            # Si es el último partido de grupos y se está actualizando, crear fase eliminatoria
-            if partido.fase == "grupos":
-                grupo = GrupoCopa.query.get(partido.grupo_id)
-                partidos_grupo = PartidoCopa.query.filter_by(grupo_id=grupo.id, fase="grupos").all()
-                
-                if all(p.jugado for p in partidos_grupo):
-                    equipos_clasificados = obtener_clasificados_copa(grupo.categoria_id)
-                    crear_fase_eliminatoria(grupo.categoria_id, equipos_clasificados)
-            
-            db.session.commit()
-            flash('Resultado actualizado correctamente', 'success')
-        except ValueError:
-            db.session.rollback()
-            flash('Los goles deben ser números enteros positivos', 'danger')
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error al actualizar resultado: {str(e)}', 'danger')
-        
-        return redirect(url_for('admin_dashboard'))
-    
-    grupo = GrupoCopa.query.get(partido.grupo_id) if partido.grupo_id else None
-    categoria = Categoria.query.get(partido.categoria_id)
-    return render_template('editar_partido_copa.html', 
-                         partido=partido,
-                         grupo=grupo,
-                         categoria=categoria)
+                           partido=partido,
+                           categoria=categoria,
+                           grupo=grupo)
 
 @app.route('/admin/actualizar-tabla', methods=['GET', 'POST'])
 @admin_required
 def actualizar_tabla():
     try:
         equipos = Equipo.query.all()
-        equipos_copa = EquipoCopa.query.all()
         
         for equipo in equipos:
             equipo.puntos = 0
@@ -777,21 +656,10 @@ def actualizar_tabla():
             equipo.diferencia_goles = 0
             equipo.partidos_jugados = 0
         
-        for equipo in equipos_copa:
-            equipo.puntos = 0
-            equipo.goles_favor = 0
-            equipo.goles_contra = 0
-            equipo.diferencia_goles = 0
-            equipo.partidos_jugados = 0
-        
         partidos = Partido.query.filter_by(jugado=True).all()
         for partido in partidos:
-            if not partido.es_descanso:  # Ignorar partidos de descanso
+            if not partido.es_descanso:
                 actualizar_estadisticas(partido, es_nuevo=True)
-        
-        partidos_copa = PartidoCopa.query.filter_by(jugado=True).all()
-        for partido in partidos_copa:
-            actualizar_estadisticas(partido, es_nuevo=True, es_copa=True)
         
         db.session.commit()
         flash('Tablas de posiciones actualizadas correctamente', 'success')
@@ -806,11 +674,9 @@ def actualizar_tabla():
 def reiniciar_torneo():
     try:
         db.session.query(Partido).delete()
-        db.session.query(PartidoCopa).delete()
         db.session.query(Equipo).delete()
-        db.session.query(EquipoCopa).delete()
+        db.session.query(Grupo).delete()
         db.session.query(Categoria).delete()
-        db.session.query(GrupoCopa).delete()
         torneo = Torneo.query.first()
         if torneo:
             torneo.nombre = "Torneo Principal"
@@ -846,49 +712,6 @@ def editar_hora(partido_id):
     
     return redirect(url_for('admin_dashboard'))
 
-@app.route('/admin/editar-hora-copa/<int:partido_id>', methods=['POST'])
-@admin_required
-def editar_hora_copa(partido_id):
-    partido = PartidoCopa.query.get_or_404(partido_id)
-    
-    try:
-        nueva_hora = request.form.get('hora')
-        nueva_fecha = request.form.get('fecha')
-        
-        if nueva_hora:
-            partido.hora = nueva_hora
-        
-        if nueva_fecha:
-            partido.fecha = datetime.strptime(nueva_fecha, '%Y-%m-%d')
-        
-        db.session.commit()
-        flash('Fecha y hora actualizadas correctamente', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error al actualizar: {str(e)}', 'danger')
-    
-    return redirect(url_for('admin_dashboard'))
-
-@app.route('/admin/avanzar-fase-copa/<int:categoria_id>', methods=['POST'])
-@admin_required
-def avanzar_fase_copa(categoria_id):
-    try:
-        categoria = Categoria.query.get_or_404(categoria_id)
-        
-        # Obtener los equipos clasificados de la fase anterior
-        equipos_clasificados = obtener_clasificados_copa(categoria_id)
-        
-        # Crear la siguiente fase
-        crear_fase_eliminatoria(categoria_id, equipos_clasificados)
-        
-        db.session.commit()
-        flash('Fase eliminatoria creada correctamente', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error al avanzar fase: {str(e)}', 'danger')
-    
-    return redirect(url_for('admin_dashboard'))
-
 @app.route('/logout')
 def logout():
     session.clear()
@@ -896,10 +719,4 @@ def logout():
     return redirect(url_for('modo_invitado'))
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        if not Torneo.query.first():
-            torneo = Torneo(nombre="Torneo Principal", formato_liga="ida_vuelta")
-            db.session.add(torneo)
-            db.session.commit()
     app.run(debug=True)

@@ -65,17 +65,12 @@ document.getElementById('num_categorias').addEventListener('change', function() 
                 </div>
                 
                 <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="tiene_liga_${i}" name="tiene_liga_${i}" checked>
-                    <label class="form-check-label" for="tiene_liga_${i}" style="color: white;">Incluir Liga</label>
+                    <input type="checkbox" class="form-check-input" id="tiene_grupos_${i}" name="tiene_grupos_${i}">
+                    <label class="form-check-label" for="tiene_grupos_${i}" style="color: white;">Dividir en grupos</label>
                 </div>
                 
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="tiene_copa_${i}" name="tiene_copa_${i}">
-                    <label class="form-check-label" for="tiene_copa_${i}" style="color: white;">Incluir Copa</label>
-                </div>
-                
-                <div class="mb-3" id="grupos_copa_${i}_container" style="display: none;">
-                    <label for="num_grupos_categoria_${i}" class="form-label" style="color: white;">Número de Grupos para la Copa (2-4)</label>
+                <div class="mb-3" id="num_grupos_${i}_container" style="display: none;">
+                    <label for="num_grupos_categoria_${i}" class="form-label" style="color: white;">Número de Grupos (2-4)</label>
                     <input type="number" class="form-control" id="num_grupos_categoria_${i}" name="num_grupos_categoria_${i}" min="2" max="4" value="2">
                 </div>
                 
@@ -84,9 +79,9 @@ document.getElementById('num_categorias').addEventListener('change', function() 
         `;
         container.appendChild(categoriaDiv);
         
-        // Mostrar/ocultar configuración de copa
-        document.getElementById(`tiene_copa_${i}`).addEventListener('change', function() {
-            document.getElementById(`grupos_copa_${i}_container`).style.display = 
+        // Mostrar/ocultar configuración de grupos
+        document.getElementById(`tiene_grupos_${i}`).addEventListener('change', function() {
+            document.getElementById(`num_grupos_${i}_container`).style.display = 
                 this.checked ? 'block' : 'none';
         });
         
