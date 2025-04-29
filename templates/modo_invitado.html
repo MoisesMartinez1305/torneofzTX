@@ -164,8 +164,6 @@
                                 0 jornadas | 
                             {% endif %}
                             <i class="fas fa-futbol me-1"></i> 
-                            {% set partidos_jugados = datos.partidos|selectattr('jugado')|list|length if datos.partidos else 0 %}
-                            {{ partidos_jugados }}/{{ datos.partidos|length if datos.partidos else 0 }} partidos
                             {% if datos.tiene_descanso %}
                                 | <i class="fas fa-moon me-1"></i> Con descansos
                             {% endif %}
@@ -460,7 +458,7 @@
                                                             <th class="text-center">POS</th>
                                                             <th>EQUIPO</th>
                                                             <th class="text-center">PJ</th>
-                                                            <th class="text-center" style="color: rgb(3, 162, 235);">G</th>
+                                                            <th class="text-center" style="color: rgb(115, 192, 228);">G</th>
                                                             <th class="text-center">E</th>
                                                             <th class="text-center" style="color: red;">P</th>
                                                             <th class="text-center" style="color: green;">GF</th>
@@ -524,7 +522,7 @@
                                                     <th class="text-center">POS</th>
                                                     <th>EQUIPO</th>
                                                     <th class="text-center">PJ</th>
-                                                    <th class="text-center" style="color: rgb(3, 84, 235);">G</th>
+                                                    <th class="text-center" style="color: rgb(15, 149, 238);">G</th>
                                                     <th class="text-center">E</th>
                                                     <th class="text-center" style="color: red;">P</th>
                                                     <th class="text-center" style="color: green;">GF</th>
@@ -541,7 +539,7 @@
                                                     </td>
                                                     <td class="fw-bold">{{ equipo.nombre }}</td>
                                                     <td class="text-center">{{ equipo.partidos_jugados }}</td>
-                                                    <td class="text-center" style="color: rgb(3, 84, 235);">
+                                                    <td class="text-center" style="color: rgb(77, 174, 238);">
                                                         {% set stats = calcular_estadisticas_equipo(equipo) %}
                                                         {{ stats['ganados'] }}
                                                     </td>
@@ -588,10 +586,10 @@
                                                 <th class="text-center">POS</th>
                                                 <th>EQUIPO</th>
                                                 <th class="text-center">PJ</th>
-                                                <th class="text-center" style="color: rgb(3, 84, 235);">G</th>
+                                                <th class="text-center" style="color: rgb(3, 162, 235);">G</th>
                                                 <th class="text-center">E</th>
                                                 <th class="text-center" style="color: red;">P</th>
-                                                <th class="text-center" style="color: green;">GF</th>
+                                                <th class="text-center" style="color: rgb(4, 253, 4);">GF</th>
                                                 <th class="text-center" style="color: red;">GC</th>
                                                 <th class="text-center">DG</th>
                                                 <th class="text-center fw-bold">PTS</th>

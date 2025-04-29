@@ -112,19 +112,19 @@
                                  aria-valuemax="{{ liga.total_partidos }}">
                             </div>
                         </div>
-                        <p class="text-center text-muted small">
+                        <p class="text-center text-white small">
                             Progreso: {{ liga.partidos_jugados }} / {{ liga.total_partidos }} partidos jugados
                         </p>
                     </div>
 
                     <!-- Botón para mostrar/ocultar la tabla de clasificación -->
                     <button class="btn btn-outline-primary mb-3 toggle-table" data-target="#tablaClasificacion{{ liga.categoria.id }}">
-                        <i class="fas fa-table me-1"></i>Mostrar/Ocultar Tabla de Clasificación
+                        <i class="fas fa-table me-1"></i>Mostrar/Ocultar Tabla
                     </button>
 
                     <!-- Tabla de clasificación -->
                     <div id="tablaClasificacion{{ liga.categoria.id }}" class="d-none">
-                        <h6>Tabla de Clasificación</h6>
+                        <h6 style="color: wheat;">Tabla de Clasificación</h6>
                         <div class="table-responsive">
                             <table class="table table-standings">
                                 <thead>
