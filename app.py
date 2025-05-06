@@ -52,8 +52,8 @@ class Equipo(db.Model):
 class Partido(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     jornada = db.Column(db.Integer, nullable=False)
-    fecha = db.Column(db.DateTime)
-    hora = db.Column(db.String(10))
+    fecha = db.Column(db.DateTime, nullable=True)
+    hora = db.Column(db.String(10), nullable=True)
     categoria_id = db.Column(db.Integer, db.ForeignKey('categoria.id'), nullable=False)
     grupo_id = db.Column(db.Integer, db.ForeignKey('grupo.id'), nullable=True)
     equipo_local = db.Column(db.String(50), nullable=True)
@@ -130,7 +130,6 @@ def crear_calendario_liga(equipos, categoria_id, grupo_id=None, formato_liga="id
         jornadas.extend(jornadas_vuelta)
 
     # Guardar los partidos en la base de datos
-    fecha_inicio = datetime.now()
     for i, (descanso, jornada) in enumerate(jornadas, 1):
         # Registrar el equipo que descansa en esta jornada
         if descanso:
@@ -140,7 +139,7 @@ def crear_calendario_liga(equipos, categoria_id, grupo_id=None, formato_liga="id
                 grupo_id=grupo_id,
                 equipo_local=None,
                 equipo_visitante=None,
-                fecha=fecha_inicio + timedelta(days=(i - 1) * 7),
+                fecha=None,
                 es_descanso=True,
                 equipo_descansa=descanso
             )
@@ -156,7 +155,7 @@ def crear_calendario_liga(equipos, categoria_id, grupo_id=None, formato_liga="id
                 grupo_id=grupo_id,
                 equipo_local=local,
                 equipo_visitante=visitante,
-                fecha=fecha_inicio + timedelta(days=(i - 1) * 7),
+                fecha=None,
                 es_descanso=False
             )
             db.session.add(partido)

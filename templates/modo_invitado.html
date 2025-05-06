@@ -444,26 +444,27 @@
                                                             <tr class="{% if partido.fecha and partido.fecha.date() == today %}table-info{% endif %}">
                                                                 <td class="text-center">
                                                                     <div class="d-flex flex-column align-items-center">
-                                                                        {% if partido.fecha %}
-                                                                            <small class="text-nowrap">
-                                                                                <i class="far fa-calendar-alt me-1 text-primary"></i>
+                                                                        <small class="text-nowrap {% if not partido.fecha %}text-muted{% else %}text-primary{% endif %}">
+                                                                            <i class="far fa-calendar-alt me-1"></i>
+                                                                            {% if partido.fecha %}
                                                                                 {{ partido.fecha.strftime('%d/%m/%Y') }}
-                                                                            </small>
-                                                                            {% if partido.hora %}
-                                                                                <small class="text-nowrap">
-                                                                                    <i class="far fa-clock me-1 text-primary"></i>
-                                                                                    {{ partido.hora }}
-                                                                                </small>
                                                                             {% else %}
-                                                                                <small class="text-muted text-nowrap">
-                                                                                    <i class="far fa-clock me-1"></i> No asignado aún
-                                                                                </small>
+                                                                                No asignada
                                                                             {% endif %}
-                                                                        {% else %}
-                                                                            <small class="text-muted text-nowrap">
-                                                                                <i class="far fa-calendar-alt me-1"></i> Pendiente de asignación
-                                                                            </small>
-                                                                        {% endif %}
+                                                                        </small>
+                                                                        <small class="text-nowrap {% if not partido.hora %}text-muted{% else %}text-primary{% endif %}">
+                                                                            <i class="far fa-clock me-1"></i>
+                                                                            {% if partido.hora %}
+                                                                            {% set hora_24h = partido.hora.split(':') %}
+                                                                            {{ "%d:%02d %s"|format(
+                                                                                (hora_24h[0]|int % 12 or 12),
+                                                                                hora_24h[1]|int,
+                                                                                "AM" if hora_24h[0]|int < 12 else "PM"
+                                                                            ) }}
+                                                                            {% else %}
+                                                                                No asignada
+                                                                            {% endif %}
+                                                                        </small>
                                                                     </div>
                                                                 </td>
 
