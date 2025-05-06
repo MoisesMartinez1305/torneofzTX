@@ -64,6 +64,7 @@ class Partido(db.Model):
     es_descanso = db.Column(db.Boolean, default=False)
     equipo_descansa = db.Column(db.String(50))
 
+
 # Usuario administrador
 ADMIN_USER = {
     "username": "Moy",
@@ -320,90 +321,128 @@ def index():
     return redirect(url_for('modo_invitado'))
 
 # Corrección en la organización de los enfrentamientos para que se muestren correctamente
-
 @app.route('/modo-invitado')
 def modo_invitado():
     torneo = Torneo.query.first()
+    today = datetime.now().date()
+
     if not torneo:
-        flash('No hay torneos creados aún', 'info')
-        return render_template('modo_invitado.html', datos_ligas=[])
+        return render_template('modo_invitado.html', datos_ligas=[], today=today)
 
     categorias = Categoria.query.filter_by(torneo_id=torneo.id).all()
     datos_ligas = []
 
     for categoria in categorias:
+        categoria_data = {
+            'categoria': categoria,
+            'tiene_grupos': categoria.tiene_grupos,
+            'tiene_descanso': False
+        }
+
         if categoria.tiene_grupos:
+            grupos_data = []
             grupos = Grupo.query.filter_by(categoria_id=categoria.id).all()
-            datos_grupos = []
 
             for grupo in grupos:
                 equipos = Equipo.query.filter_by(grupo_id=grupo.id).order_by(
                     Equipo.puntos.desc(),
                     Equipo.diferencia_goles.desc(),
                     Equipo.goles_favor.desc()).all()
-                partidos = Partido.query.filter_by(grupo_id=grupo.id).order_by(Partido.jornada, Partido.hora).all()
 
-                jornadas = defaultdict(list)
-                descansos = defaultdict(list)
+                partidos = Partido.query.filter_by(grupo_id=grupo.id).order_by(Partido.jornada, Partido.fecha, Partido.hora).all()
+
+                jornadas_dict = defaultdict(list)
+                descansos_dict = defaultdict(list)
+
                 for partido in partidos:
+                    partido_dict = {
+                        'id': partido.id,
+                        'jornada': partido.jornada,
+                        'fecha': partido.fecha,
+                        'hora': partido.hora if isinstance(partido.hora, str) else partido.hora.strftime('%H:%M') if partido.hora else None,
+                        'equipo_local': partido.equipo_local,
+                        'equipo_visitante': partido.equipo_visitante,
+                        'goles_local': partido.goles_local,
+                        'goles_visitante': partido.goles_visitante,
+                        'jugado': partido.jugado,
+                        'es_descanso': partido.es_descanso,
+                        'equipo_descansa': partido.equipo_descansa
+                    }
+
                     if partido.es_descanso:
-                        descansos[partido.jornada].append(partido.equipo_descansa)
+                        descansos_dict[partido.jornada].append(partido.equipo_descansa)
                     else:
-                        jornadas[partido.jornada].append(partido)
-                jornadas_ordenadas = sorted(jornadas.items())
+                        jornadas_dict[partido.jornada].append(partido_dict)
 
-                stats_equipos = calcular_stats_para_tabla(equipos)
+                jornadas_ordenadas = sorted(jornadas_dict.items(), key=lambda x: x[0])
 
-                datos_grupos.append({
+                grupo_data = {
                     'grupo': grupo,
                     'tabla': equipos,
                     'jornadas': jornadas_ordenadas,
-                    'descansos': descansos,
+                    'descansos': dict(descansos_dict),
                     'total_partidos': len([p for p in partidos if not p.es_descanso]),
-                    'partidos_jugados': sum(1 for p in partidos if p.jugado and not p.es_descanso),
+                    'partidos_jugados': len([p for p in partidos if p.jugado and not p.es_descanso]),
                     'total_equipos': len(equipos),
-                    'stats_equipos': stats_equipos,
+                    'stats_equipos': calcular_stats_para_tabla(equipos),
                     'tiene_descanso': len(equipos) % 2 != 0
-                })
+                }
 
-            datos_ligas.append({
-                'categoria': categoria,
-                'tiene_grupos': True,
-                'grupos': datos_grupos
-            })
+                grupos_data.append(grupo_data)
+                categoria_data['tiene_descanso'] = categoria_data['tiene_descanso'] or grupo_data['tiene_descanso']
+
+            categoria_data['grupos'] = grupos_data
         else:
             equipos = Equipo.query.filter_by(categoria_id=categoria.id).order_by(
                 Equipo.puntos.desc(),
                 Equipo.diferencia_goles.desc(),
                 Equipo.goles_favor.desc()).all()
-            partidos = Partido.query.filter_by(categoria_id=categoria.id).order_by(Partido.jornada, Partido.hora).all()
 
-            jornadas = defaultdict(list)
-            descansos = defaultdict(list)
+            partidos = Partido.query.filter_by(categoria_id=categoria.id).order_by(Partido.jornada, Partido.fecha, Partido.hora).all()
+
+            jornadas_dict = defaultdict(list)
+            descansos_dict = defaultdict(list)
+
             for partido in partidos:
+                partido_dict = {
+                    'id': partido.id,
+                    'jornada': partido.jornada,
+                    'fecha': partido.fecha,
+                    'hora': partido.hora if isinstance(partido.hora, str) else partido.hora.strftime('%H:%M') if partido.hora else None,
+                    'equipo_local': partido.equipo_local,
+                    'equipo_visitante': partido.equipo_visitante,
+                    'goles_local': partido.goles_local,
+                    'goles_visitante': partido.goles_visitante,
+                    'jugado': partido.jugado,
+                    'es_descanso': partido.es_descanso,
+                    'equipo_descansa': partido.equipo_descansa
+                }
+
                 if partido.es_descanso:
-                    descansos[partido.jornada].append(partido.equipo_descansa)
+                    descansos_dict[partido.jornada].append(partido.equipo_descansa)
                 else:
-                    jornadas[partido.jornada].append(partido)
-            jornadas_ordenadas = sorted(jornadas.items())
+                    jornadas_dict[partido.jornada].append(partido_dict)
 
-            stats_equipos = calcular_stats_para_tabla(equipos)
+            jornadas_ordenadas = sorted(jornadas_dict.items(), key=lambda x: x[0])
 
-            datos_ligas.append({
-                'categoria': categoria,
-                'tiene_grupos': False,
+            categoria_data.update({
                 'tabla': equipos,
                 'jornadas': jornadas_ordenadas,
-                'descansos': descansos,
+                'descansos': dict(descansos_dict),
                 'total_partidos': len([p for p in partidos if not p.es_descanso]),
-                'partidos_jugados': sum(1 for p in partidos if p.jugado and not p.es_descanso),
+                'partidos_jugados': len([p for p in partidos if p.jugado and not p.es_descanso]),
                 'total_equipos': len(equipos),
-                'stats_equipos': stats_equipos,
+                'stats_equipos': calcular_stats_para_tabla(equipos),
                 'tiene_descanso': len(equipos) % 2 != 0
             })
 
-    return render_template('modo_invitado.html', torneo=torneo, datos_ligas=datos_ligas)
+        datos_ligas.append(categoria_data)
+        
 
+    return render_template('modo_invitado.html',
+                         torneo=torneo,
+                         datos_ligas=datos_ligas,
+                         today=today)
 # Rutas de administración
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
@@ -429,23 +468,25 @@ def admin_dashboard():
         return redirect(url_for('crear_torneo_admin'))
 
     datos_ligas = []
-
     categorias = Categoria.query.filter_by(torneo_id=torneo.id).all()
+
     for categoria in categorias:
         if categoria.tiene_grupos:
             grupos = Grupo.query.filter_by(categoria_id=categoria.id).all()
-
             datos_grupos = []
+
             for grupo in grupos:
                 equipos = Equipo.query.filter_by(grupo_id=grupo.id).order_by(
                     Equipo.puntos.desc(),
                     Equipo.diferencia_goles.desc(),
                     Equipo.goles_favor.desc()).all()
-                partidos = Partido.query.filter_by(grupo_id=grupo.id).order_by(Partido.jornada).all()
-
+                
+                partidos = Partido.query.filter_by(grupo_id=grupo.id).order_by(Partido.jornada, Partido.fecha, Partido.hora).all()
+                
                 # Calcular progreso
                 partidos_jugados, total_partidos = calcular_progreso(partidos)
 
+                # Organizar jornadas como lista de tuplas (jornada_num, partidos)
                 jornadas = defaultdict(list)
                 for partido in partidos:
                     if not partido.es_descanso:
@@ -455,15 +496,18 @@ def admin_dashboard():
                             'goles_local': partido.goles_local,
                             'goles_visitante': partido.goles_visitante,
                             'jugado': partido.jugado,
-                            'id': partido.id
+                            'id': partido.id,
+                            'fecha': partido.fecha,
+                            'hora': partido.hora
                         })
 
-                jornadas_ordenadas = sorted(jornadas.items())
+                # Convertir a lista de tuplas ordenadas por jornada
+                jornadas_ordenadas = sorted(jornadas.items(), key=lambda x: x[0])
 
                 datos_grupos.append({
                     'grupo': grupo,
-                    'tabla': equipos,  # Tabla de clasificación
-                    'jornadas': jornadas_ordenadas,
+                    'tabla': equipos,
+                    'jornadas': jornadas_ordenadas,  # Lista de (jornada_num, partidos)
                     'total_partidos': total_partidos,
                     'partidos_jugados': partidos_jugados,
                     'total_equipos': len(equipos)
@@ -479,11 +523,13 @@ def admin_dashboard():
                 Equipo.puntos.desc(),
                 Equipo.diferencia_goles.desc(),
                 Equipo.goles_favor.desc()).all()
-            partidos = Partido.query.filter_by(categoria_id=categoria.id).order_by(Partido.jornada).all()
-
+            
+            partidos = Partido.query.filter_by(categoria_id=categoria.id).order_by(Partido.jornada, Partido.fecha, Partido.hora).all()
+            
             # Calcular progreso
             partidos_jugados, total_partidos = calcular_progreso(partidos)
 
+            # Misma estructura que para grupos: lista de tuplas
             jornadas = defaultdict(list)
             for partido in partidos:
                 if not partido.es_descanso:
@@ -493,25 +539,27 @@ def admin_dashboard():
                         'goles_local': partido.goles_local,
                         'goles_visitante': partido.goles_visitante,
                         'jugado': partido.jugado,
-                        'id': partido.id
+                        'id': partido.id,
+                        'fecha': partido.fecha,
+                        'hora': partido.hora
                     })
 
-            jornadas_ordenadas = sorted(jornadas.items())
+            # Convertir a lista de tuplas ordenadas
+            jornadas_ordenadas = sorted(jornadas.items(), key=lambda x: x[0])
 
             datos_ligas.append({
                 'categoria': categoria,
                 'tiene_grupos': False,
-                'tabla': equipos,  # Tabla de clasificación
-                'jornadas': jornadas_ordenadas,
+                'tabla': equipos,
+                'jornadas': jornadas_ordenadas,  # Misma estructura que en grupos
                 'total_partidos': total_partidos,
                 'partidos_jugados': partidos_jugados,
                 'total_equipos': len(equipos)
             })
 
     return render_template('admin_dashboard.html',
-                           torneo=torneo,
-                           datos_ligas=datos_ligas)
-
+                         torneo=torneo,
+                         datos_ligas=datos_ligas)
 @app.route('/admin/crear-torneo', methods=['GET', 'POST'])
 @admin_required
 def crear_torneo_admin():
@@ -689,28 +737,32 @@ def reiniciar_torneo():
     
     return redirect(url_for('crear_torneo_admin'))
 
-@app.route('/admin/editar-hora/<int:partido_id>', methods=['POST'])
+@app.route('/admin/editar-hora/<int:partido_id>', methods=['GET', 'POST'])
 @admin_required
 def editar_hora(partido_id):
     partido = Partido.query.get_or_404(partido_id)
     
-    try:
-        nueva_hora = request.form.get('hora')
-        nueva_fecha = request.form.get('fecha')
+    if request.method == 'POST':
+        try:
+            nueva_hora = request.form.get('hora')
+            nueva_fecha = request.form.get('fecha')
+            
+            if nueva_hora:
+                partido.hora = nueva_hora
+            
+            if nueva_fecha:
+                partido.fecha = datetime.strptime(nueva_fecha, '%Y-%m-%d')
+            
+            db.session.commit()
+            flash('Fecha y hora actualizadas correctamente', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar: {str(e)}', 'danger')
+            partidos = Partido.query.filter_by(grupo_id=grupo.id).order_by(Partido.fecha, Partido.hora).all()
         
-        if nueva_hora:
-            partido.hora = nueva_hora
-        
-        if nueva_fecha:
-            partido.fecha = datetime.strptime(nueva_fecha, '%Y-%m-%d')
-        
-        db.session.commit()
-        flash('Fecha y hora actualizadas correctamente', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error al actualizar: {str(e)}', 'danger')
+        return redirect(url_for('admin_dashboard'))
     
-    return redirect(url_for('admin_dashboard'))
+    return render_template('editar_hora.html', partido=partido)
 
 @app.route('/logout')
 def logout():

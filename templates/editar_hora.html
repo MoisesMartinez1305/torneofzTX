@@ -1,0 +1,21 @@
+{% extends "base_admin.html" %}
+
+{% block admin_title %}Editar Fecha y Hora{% endblock %}
+
+{% block admin_content %}
+<div class="container mt-4">
+    <h2 class="mb-4" style="color: black;">Editar Fecha y Hora del Partido</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="fecha" class="form-label" style="color: black;">Fecha</label>
+            <input type="date" class="form-control" id="fecha" name="fecha" value="{{ partido.fecha.strftime('%Y-%m-%d') if partido.fecha else '' }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="hora" class="form-label" style="color: black;">Hora</label>
+            <input type="time" class="form-control" id="hora" name="hora" value="{{ partido.hora }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Volver</a>
+    </form>
+</div>
+{% endblock %}

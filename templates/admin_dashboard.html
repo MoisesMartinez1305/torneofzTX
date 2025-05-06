@@ -225,6 +225,7 @@
                                         <table class="table table-striped table-hover align-middle">
                                             <thead class="table-dark">
                                                 <tr>
+                                                    <th>Fecha/Hora</th>  <!-- Nueva columna -->
                                                     <th>Local</th>
                                                     <th class="text-center">Resultado</th>
                                                     <th>Visitante</th>
@@ -235,6 +236,24 @@
                                             <tbody>
                                                 {% for partido in partidos_jornada %}
                                                 <tr>
+                                                    <!-- Nueva celda para fecha y hora -->
+                                                    <td>
+                                                        {% if partido.fecha %}
+                                                            <small class="d-block">
+                                                                <i class="far fa-calendar-alt me-1"></i>
+                                                                {{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Sin fecha' }}
+                                                            </small>
+                                                            {% if partido.hora %}
+                                                                <small class="d-block">
+                                                                    <i class="far fa-clock me-1"></i>
+                                                                    {{ partido.hora }}
+                                                                </small>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <span class="text-muted">No programado</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    
                                                     <td class="fw-bold">
                                                         {% if partido.equipo_local == "Descanso" %}
                                                             <i class="fas fa-moon text-muted"></i> Descanso
@@ -242,6 +261,7 @@
                                                             {{ partido.equipo_local }}
                                                         {% endif %}
                                                     </td>
+                                                    
                                                     <td class="text-center">
                                                         {% if partido.jugado and not partido.es_descanso %}
                                                             <span class="badge bg-primary rounded-pill px-3 py-1">
@@ -253,6 +273,7 @@
                                                             <span class="text-muted">VS</span>
                                                         {% endif %}
                                                     </td>
+                                                    
                                                     <td class="fw-bold">
                                                         {% if partido.equipo_visitante == "Descanso" %}
                                                             <i class="fas fa-moon text-muted"></i> Descanso
@@ -260,6 +281,7 @@
                                                             {{ partido.equipo_visitante }}
                                                         {% endif %}
                                                     </td>
+                                                    
                                                     <td class="text-center">
                                                         {% if partido.jugado and not partido.es_descanso %}
                                                             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-2 py-1 rounded">
@@ -275,11 +297,21 @@
                                                             </span>
                                                         {% endif %}
                                                     </td>
+                                                    
                                                     <td class="text-center">
                                                         {% if not partido.es_descanso %}
-                                                            <a href="{{ url_for('actualizar_resultado', partido_id=partido.id) }}" class="btn btn-sm btn-outline-primary">
-                                                                <i class="fas fa-edit"></i> Editar
-                                                            </a>
+                                                            <div class="btn-group btn-group-sm">
+                                                                <a href="{{ url_for('actualizar_resultado', partido_id=partido.id) }}" 
+                                                                   class="btn btn-outline-primary" 
+                                                                   title="Editar resultado">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </a>
+                                                                <a href="{{ url_for('editar_hora', partido_id=partido.id) }}" 
+                                                                   class="btn btn-outline-secondary" 
+                                                                   title="Cambiar fecha/hora">
+                                                                    <i class="fas fa-calendar-alt"></i>
+                                                                </a>
+                                                            </div>
                                                         {% endif %}
                                                     </td>
                                                 </tr>
