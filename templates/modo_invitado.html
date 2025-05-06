@@ -105,6 +105,21 @@
         transform: translateY(-5px);
         box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
+    
+    /* Estilos para logos */
+    .team-logo {
+        height: 30px;
+        width: auto;
+        max-width: 40px;
+        margin-right: 8px;
+        object-fit: contain;
+        vertical-align: middle;
+    }
+    
+    .team-with-logo {
+        display: flex;
+        align-items: center;
+    }
 </style>
 
 <div class="container mt-4 mt-md-5" style="background-color: #0d3b66; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
@@ -321,7 +336,13 @@
                                                                                     {% if partido.es_descanso or partido.equipo_local == "Descanso" %}
                                                                                         <i class="fas fa-moon text-muted"></i> Descanso
                                                                                     {% else %}
-                                                                                        {{ partido.equipo_local }}
+                                                                                        <div class="team-with-logo">
+                                                                                            {% set equipo_local = grupo_data.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
+                                                                                            {% if equipo_local %}
+                                                                                                <img src="{{ get_logo_path(equipo_local) }}" alt="{{ partido.equipo_local }}" class="team-logo">
+                                                                                            {% endif %}
+                                                                                            {{ partido.equipo_local }}
+                                                                                        </div>
                                                                                     {% endif %}
                                                                                 </td>
                                                                                 
@@ -341,7 +362,13 @@
                                                                                     {% if partido.es_descanso or partido.equipo_visitante == "Descanso" %}
                                                                                         <i class="fas fa-moon text-muted"></i> Descanso
                                                                                     {% else %}
-                                                                                        {{ partido.equipo_visitante }}
+                                                                                        <div class="team-with-logo">
+                                                                                            {% set equipo_visitante = grupo_data.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
+                                                                                            {% if equipo_visitante %}
+                                                                                                <img src="{{ get_logo_path(equipo_visitante) }}" alt="{{ partido.equipo_visitante }}" class="team-logo">
+                                                                                            {% endif %}
+                                                                                            {{ partido.equipo_visitante }}
+                                                                                        </div>
                                                                                     {% endif %}
                                                                                 </td>
                                                                                 
@@ -472,7 +499,13 @@
                                                                     {% if partido.es_descanso or partido.equipo_local == "Descanso" %}
                                                                         <i class="fas fa-moon text-muted"></i> Descanso
                                                                     {% else %}
-                                                                        {{ partido.equipo_local }}
+                                                                        <div class="team-with-logo">
+                                                                            {% set equipo_local = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
+                                                                            {% if equipo_local %}
+                                                                                <img src="{{ get_logo_path(equipo_local) }}" alt="{{ partido.equipo_local }}" class="team-logo">
+                                                                            {% endif %}
+                                                                            {{ partido.equipo_local }}
+                                                                        </div>
                                                                     {% endif %}
                                                                 </td>
 
@@ -492,7 +525,13 @@
                                                                     {% if partido.es_descanso or partido.equipo_visitante == "Descanso" %}
                                                                         <i class="fas fa-moon text-muted"></i> Descanso
                                                                     {% else %}
-                                                                        {{ partido.equipo_visitante }}
+                                                                        <div class="team-with-logo">
+                                                                            {% set equipo_visitante = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
+                                                                            {% if equipo_visitante %}
+                                                                                <img src="{{ get_logo_path(equipo_visitante) }}" alt="{{ partido.equipo_visitante }}" class="team-logo">
+                                                                            {% endif %}
+                                                                            {{ partido.equipo_visitante }}
+                                                                        </div>
                                                                     {% endif %}
                                                                 </td>
 
@@ -559,7 +598,12 @@
                                                             <td class="text-center fw-bold" style="background-color: #007bff; color: white; border-radius: 5px;">
                                                                 {{ loop.index }}
                                                             </td>
-                                                            <td class="fw-bold" style="background-color: #0d3b66; color: white;">{{ equipo.nombre }}</td>
+                                                            <td class="fw-bold" style="background-color: #0d3b66; color: white;">
+                                                                <div class="team-with-logo">
+                                                                    <img src="{{ get_logo_path(equipo) }}" alt="{{ equipo.nombre }}" class="team-logo">
+                                                                    {{ equipo.nombre }}
+                                                                </div>
+                                                            </td>
                                                             <td class="text-center">{{ equipo.partidos_jugados }}</td>
                                                             <td class="text-center" style="color: rgb(3, 84, 235);">
                                                                 {% set stats = calcular_estadisticas_equipo(equipo) %}
@@ -623,7 +667,12 @@
                                                     <td class="text-center fw-bold" style="background-color: #007bff; color: white; border-radius: 5px;">
                                                         {{ loop.index }}
                                                     </td>
-                                                    <td class="fw-bold" style="background-color: #0056b3; color: #f8f9fa; border-radius: 10px;">{{ equipo.nombre }}</td>
+                                                    <td class="fw-bold" style="background-color: #0056b3; color: #f8f9fa; border-radius: 10px;">
+                                                        <div class="team-with-logo">
+                                                            <img src="{{ get_logo_path(equipo) }}" alt="{{ equipo.nombre }}" class="team-logo">
+                                                            {{ equipo.nombre }}
+                                                        </div>
+                                                    </td>
                                                     <td class="text-center">{{ equipo.partidos_jugados }}</td>
                                                     <td class="text-center" style="color: rgb(77, 174, 238);">
                                                         {% set stats = calcular_estadisticas_equipo(equipo) %}
@@ -687,7 +736,12 @@
                                                 <td class="text-center fw-bold" style="background-color: #007bff; color: white; border-radius: 5px;">
                                                     {{ loop.index }}
                                                 </td>
-                                                <td class="fw-bold" style="background-color: #0d3b66; color: white; border-radius: 5px;">{{ equipo.nombre }}</td>
+                                                <td class="fw-bold" style="background-color: #0d3b66; color: white; border-radius: 5px;">
+                                                    <div class="team-with-logo">
+                                                        <img src="{{ get_logo_path(equipo) }}" alt="{{ equipo.nombre }}" class="team-logo">
+                                                        {{ equipo.nombre }}
+                                                    </div>
+                                                </td>
                                                 <td class="text-center">{{ equipo.partidos_jugados }}</td>
                                                 <td class="text-center" style="color: rgb(3, 84, 235);">
                                                     {% set stats = calcular_estadisticas_equipo(equipo) %}

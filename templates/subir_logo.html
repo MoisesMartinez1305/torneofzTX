@@ -1,0 +1,14 @@
+{% extends 'base_admin.html' %}
+
+{% block content %}
+<h2>Subir logo para {{ equipo.nombre }}</h2>
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="logo">Selecciona un logo:</label>
+        <input type="file" class="form-control-file" id="logo" name="logo" required>
+        <small class="form-text text-muted">Formatos permitidos: PNG, JPG, JPEG, GIF</small>
+    </div>
+    <button type="submit" class="btn btn-primary">Subir Logo</button>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

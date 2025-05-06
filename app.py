@@ -7,12 +7,18 @@ from itertools import combinations
 import random
 from collections import defaultdict
 from datetime import datetime, timedelta
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24).hex()
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = 'static/logos'
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 db = SQLAlchemy(app)
+
+# Asegurar que la carpeta de logos existe
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Modelos de la base de datos
 class Torneo(db.Model):
@@ -48,6 +54,7 @@ class Equipo(db.Model):
     goles_contra = db.Column(db.Integer, default=0)
     diferencia_goles = db.Column(db.Integer, default=0)
     partidos_jugados = db.Column(db.Integer, default=0)
+    logo = db.Column(db.String(100), nullable=True)  # Nuevo campo para el logo
 
 class Partido(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -64,6 +71,16 @@ class Partido(db.Model):
     es_descanso = db.Column(db.Boolean, default=False)
     equipo_descansa = db.Column(db.String(50))
 
+# Función para verificar extensiones permitidas
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+# Función para obtener la ruta del logo de un equipo
+def get_logo_path(equipo):
+    if equipo.logo and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], equipo.logo)):
+        return url_for('static', filename=f'logos/{equipo.logo}')
+    return url_for('static', filename='logos/default.png')
 
 # Usuario administrador
 ADMIN_USER = {
@@ -86,7 +103,6 @@ def calcular_progreso(partidos):
     partidos_jugados = sum(1 for p in partidos if p.jugado and not p.es_descanso)
     total_partidos = sum(1 for p in partidos if not p.es_descanso)
     return partidos_jugados, total_partidos
-
 
 # Función para crear el calendario de una liga
 def crear_calendario_liga(equipos, categoria_id, grupo_id=None, formato_liga="ida_vuelta"):
@@ -289,7 +305,8 @@ def calcular_estadisticas_equipo(equipo):
 
 @app.context_processor
 def utility_processor():
-    return dict(calcular_estadisticas_equipo=calcular_estadisticas_equipo)
+    return dict(calcular_estadisticas_equipo=calcular_estadisticas_equipo,
+               get_logo_path=get_logo_path)
 
 def calcular_stats_para_tabla(tabla):
     return {equipo.nombre: calcular_estadisticas_equipo(equipo) for equipo in tabla}
@@ -442,6 +459,7 @@ def modo_invitado():
                          torneo=torneo,
                          datos_ligas=datos_ligas,
                          today=today)
+
 # Rutas de administración
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
@@ -559,6 +577,7 @@ def admin_dashboard():
     return render_template('admin_dashboard.html',
                          torneo=torneo,
                          datos_ligas=datos_ligas)
+
 @app.route('/admin/crear-torneo', methods=['GET', 'POST'])
 @admin_required
 def crear_torneo_admin():
@@ -762,6 +781,48 @@ def editar_hora(partido_id):
         return redirect(url_for('admin_dashboard'))
     
     return render_template('editar_hora.html', partido=partido)
+
+# Nueva ruta para subir logos
+@app.route('/admin/subir-logo/<int:equipo_id>', methods=['GET', 'POST'])
+@admin_required
+def subir_logo(equipo_id):
+    equipo = Equipo.query.get_or_404(equipo_id)
+    
+    if request.method == 'POST':
+        # Verificar si se envió un archivo
+        if 'logo' not in request.files:
+            flash('No se seleccionó ningún archivo', 'danger')
+            return redirect(request.url)
+        
+        file = request.files['logo']
+        
+        # Si el usuario no selecciona un archivo
+        if file.filename == '':
+            flash('No se seleccionó ningún archivo', 'danger')
+            return redirect(request.url)
+        
+        if file and allowed_file(file.filename):
+            # Eliminar el logo anterior si existe
+            if equipo.logo and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], equipo.logo)):
+                try:
+                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], equipo.logo))
+                except Exception as e:
+                    flash(f'Error al eliminar el logo anterior: {str(e)}', 'warning')
+            
+            # Guardar el nuevo logo
+            filename = secure_filename(f"equipo_{equipo.id}.{file.filename.rsplit('.', 1)[1].lower()}")
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+            # Actualizar la base de datos
+            equipo.logo = filename
+            db.session.commit()
+            
+            flash('Logo subido correctamente', 'success')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Tipo de archivo no permitido. Use PNG, JPG o JPEG', 'danger')
+    
+    return render_template('subir_logo.html', equipo=equipo)
 
 @app.route('/logout')
 def logout():
