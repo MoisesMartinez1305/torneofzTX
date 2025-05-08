@@ -7,78 +7,6 @@
 </head>
 
 <style>
-    /* Estilos para móviles */
-    @media (max-width: 768px) {
-        .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            display: block;
-            width: 100%;
-        }
-        
-        /* Tablas ajustadas al contenido */
-        .table {
-            width: auto !important;
-            min-width: 0;
-        }
-        
-        .table th, .table td {
-            white-space: nowrap;
-            padding: 0.5rem;
-        }
-        
-        /* Tabla de posiciones con columnas fijas */
-        .table-standings-container {
-            position: relative;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .table-standings {
-            width: auto;
-            min-width: 100%;
-        }
-        
-        .table-standings th, .table-standings td {
-            white-space: nowrap;
-        }
-        
-        /* Columnas fijas para posición y equipo */
-        .table-standings th:first-child,
-        .table-standings td:first-child {
-            position: sticky;
-            left: 0;
-            z-index: 1;
-            background-color: #007bff;
-            color: white;
-        }
-        
-        .table-standings th:nth-child(2),
-        .table-standings td:nth-child(2) {
-            position: sticky;
-            left: 50px; /* Ajustar según el ancho de la columna posición */
-            z-index: 1;
-            
-        }
-        
-        .accordion-body {
-            padding: 0;
-        }
-        
-        .btn {
-            white-space: nowrap;
-        }
-        
-        .liga-card {
-            margin-bottom: 15px;
-        }
-        
-        .nav-tabs-modern .nav-link {
-            padding: 0.5rem;
-            font-size: 0.9rem;
-        }
-    }
-    
     /* Estilos generales */
     .overflow-auto {
         overflow-x: auto !important;
@@ -120,6 +48,180 @@
         display: flex;
         align-items: center;
     }
+
+    /* Tamaño de letra reducido para tablas */
+    .table th, .table td {
+        font-size: 0.7rem;
+    }
+
+    /* Estilos para móviles */
+    @media (max-width: 768px) {
+        /* Contenedor principal al 100% */
+        .container {
+            width: 100%;
+            padding: 0px;
+        }
+
+        /* Tarjetas al 100% en móviles */
+        .col-12.col-md-6.col-lg-4 {
+            width: 100%;
+            padding-left: 0%;
+            padding-right: 0;
+        }
+
+        .liga-card {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        /* Tablas responsivas */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            display: block;
+            width: 100%;
+        }
+        
+        /* Tablas ajustadas al contenido */
+        .table {
+            width: 100% !important;
+            min-width: 100%;
+        }
+        
+        .table th, .table td {
+            white-space: nowrap;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        /* Tabla de posiciones con columnas fijas */
+        .table-standings-container {
+            position: relative;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+        }
+        
+        .table-standings {
+            width: 100%;
+            min-width: 100%;
+        }
+        
+        .table-standings th, .table-standings td {
+            white-space: nowrap;
+            font-size: 0.8rem;
+        }
+        
+        /* Columnas fijas para posición y equipo */
+        .table-standings th:first-child,
+        .table-standings td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            background-color: #007bff;
+            color: white;
+        }
+        /*coluuummmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm*/
+         /* Ajustar tarjetas al ancho del contenedor */
+         .liga-card {
+            width: 90% !important;
+           
+            margin: 0 auto; /* Centrar la tarjeta */
+        }
+
+        .liga-card .card-body {
+            padding: 0px; /* Ajustar el padding si es necesario */
+        }
+
+        /* Ajustar tablas al ancho del contenedor */
+        .table-standings-container {
+            width: 100% !important;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table-standings {
+            width: 100% !important; /* Asegurar que la tabla ocupe todo el ancho */
+            min-width: 100% !important;
+        }
+
+        .table-standings th, .table-standings td {
+            white-space: nowrap;
+        }
+
+        /* Ajustar jornadas al ancho del contenedor */
+        .accordion-body {
+            width: 100% !important;
+        }
+
+        /* Ajustar el contenedor principal */
+        .container {
+            padding: 0 !important; /* Eliminar padding del contenedor */
+            margin: 0 auto; /* Centrar el contenedor */
+        }
+        
+        
+        .accordion-body {
+            padding: 0;
+        }
+        
+        .btn {
+            white-space: nowrap;
+        }
+        
+        .nav-tabs-modern .nav-link {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* Ajustes para jornadas */
+        .accordion-item {
+            width: 100%;
+        }
+
+        /* Ajustes para pestañas */
+        .tab-content {
+            width: 100%;
+        }
+
+        /* Reducción adicional de tamaño en móviles */
+        .team-logo {
+            height: 20px;
+            max-width: 30px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+        }
+    }
+
+    /* Ajustar jornadas y tablas al ancho del contenedor */
+.accordion-body,
+.table-standings-container {
+    width: 100% !important; /* Asegurar que ocupen todo el ancho del contenedor */
+    margin: 0 !important; /* Eliminar márgenes */
+    padding: 0 !important; /* Eliminar padding */
+    overflow-x: auto; /* Permitir desplazamiento horizontal si es necesario */
+    -webkit-overflow-scrolling: touch; /* Mejora en dispositivos táctiles */
+}
+
+.table-standings {
+    width: 100% !important; /* Asegurar que la tabla ocupe todo el ancho */
+    min-width: 100%; /* Evitar que las columnas se corten */
+}
+
+.table {
+    width: 100% !important; /* Asegurar que la tabla ocupe todo el ancho */
+    min-width: 100%; /* Evitar que las columnas se corten */
+    margin: 0 !important; /* Eliminar márgenes */
+    padding: 0 !important; /* Eliminar padding */
+}
+
+.table th, .table td {
+    white-space: nowrap; /* Evitar que el contenido se ajuste en varias líneas */
+    padding: 0.5rem; /* Ajustar el espacio interno */
+    font-size: 0.8rem; /* Tamaño de letra ajustado para móviles */
+}
 </style>
 
 <div class="container mt-4 mt-md-5" style="background-color: #0d3b66; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
@@ -459,17 +561,17 @@
                                                     <table class="table table-striped table-hover align-middle">
                                                         <thead class="table-dark">
                                                             <tr>
-                                                                <th class="text-center" style="font-size: 0.8rem;">Fecha/Hora</th>
-                                                                <th class="text-center" style="font-size: 0.8rem;">Local</th>
-                                                                <th class="text-center" style="font-size: 0.8rem;">Resultado</th>
-                                                                <th class="text-center" style="font-size: 0.8rem;">Visitante</th>
-                                                                <th class="text-center" style="font-size: 0.8rem;">Estado</th>
+                                                                <th class="text-center">Fecha/Hora</th>
+                                                                <th class="text-center">Local</th>
+                                                                <th class="text-center">Resultado</th>
+                                                                <th class="text-center">Visitante</th>
+                                                                <th class="text-center">Estado</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             {% for partido in partidos_jornada %}
                                                             <tr class="{% if partido.fecha and partido.fecha.date() == today %}table-info{% endif %}">
-                                                                <td class="text-center" style="font-size: 0.8rem;"> <!-- Tamaño de letra reducido -->
+                                                                <td class="text-center">
                                                                     <div class="d-flex flex-column align-items-center">
                                                                         <small class="text-nowrap {% if not partido.fecha %}text-muted{% else %}text-primary{% endif %}">
                                                                             <i class="far fa-calendar-alt me-1"></i>
@@ -502,22 +604,22 @@
                                                                         <div class="team-with-logo">
                                                                             {% set equipo_local = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
                                                                             {% if equipo_local %}
-                                                                                <img src="{{ get_logo_path(equipo_local) }}" alt="{{ partido.equipo_local }}" class="team-logo" style="height: 20px; max-width: 30px;"> <!-- Tamaño del logo reducido -->
+                                                                                <img src="{{ get_logo_path(equipo_local) }}" alt="{{ partido.equipo_local }}" class="team-logo">
                                                                             {% endif %}
-                                                                            <span style="font-size: 0.8rem;">{{ partido.equipo_local }}</span> <!-- Tamaño de letra reducido -->
+                                                                            {{ partido.equipo_local }}
                                                                         </div>
                                                                     {% endif %}
                                                                 </td>
                                                             
                                                                 <td class="text-center">
                                                                     {% if partido.jugado and not partido.es_descanso %}
-                                                                        <span class="badge bg-primary rounded-pill px-3 py-1" style="font-size: 0.8rem;"> <!-- Tamaño de letra reducido -->
+                                                                        <span class="badge bg-primary rounded-pill px-3 py-1">
                                                                             {{ partido.goles_local }} - {{ partido.goles_visitante }}
                                                                         </span>
                                                                     {% elif partido.es_descanso %}
-                                                                        <span class="text-muted" style="font-size: 0.8rem;">-</span> <!-- Tamaño de letra reducido -->
+                                                                        <span class="text-muted">-</span>
                                                                     {% else %}
-                                                                        <span class="text-muted" style="font-size: 0.8rem;">VS</span> <!-- Tamaño de letra reducido -->
+                                                                        <span class="text-muted">VS</span>
                                                                     {% endif %}
                                                                 </td>
                                                             
@@ -528,24 +630,24 @@
                                                                         <div class="team-with-logo">
                                                                             {% set equipo_visitante = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
                                                                             {% if equipo_visitante %}
-                                                                                <img src="{{ get_logo_path(equipo_visitante) }}" alt="{{ partido.equipo_visitante }}" class="team-logo" style="height: 20px; max-width: 30px;"> <!-- Tamaño del logo reducido -->
+                                                                                <img src="{{ get_logo_path(equipo_visitante) }}" alt="{{ partido.equipo_visitante }}" class="team-logo">
                                                                             {% endif %}
-                                                                            <span style="font-size: 0.8rem;">{{ partido.equipo_visitante }}</span> <!-- Tamaño de letra reducido -->
+                                                                            {{ partido.equipo_visitante }}
                                                                         </div>
                                                                     {% endif %}
                                                                 </td>
                                                             
                                                                 <td class="text-center">
                                                                     {% if partido.jugado and not partido.es_descanso %}
-                                                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-2 py-1 rounded" style="font-size: 0.8rem;"> <!-- Tamaño de letra reducido -->
+                                                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-2 py-1 rounded">
                                                                             <i class="fas fa-check-circle me-1"></i> Jugado
                                                                         </span>
                                                                     {% elif partido.es_descanso %}
-                                                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 px-2 py-1 rounded" style="font-size: 0.8rem;"> <!-- Tamaño de letra reducido -->
+                                                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 px-2 py-1 rounded">
                                                                             <i class="fas fa-moon me-1"></i> Descanso
                                                                         </span>
                                                                     {% else %}
-                                                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 px-2 py-1 rounded" style="font-size: 0.8rem;"> <!-- Tamaño de letra reducido -->
+                                                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 px-2 py-1 rounded">
                                                                             <i class="fas fa-clock me-1"></i> Pendiente
                                                                         </span>
                                                                     {% endif %}
@@ -733,12 +835,12 @@
                                         <tbody>
                                             {% for equipo in datos.tabla %}
                                             <tr>
-                                                <td class="text-center fw-bold" style="background-color: #007bff; color: white; border-radius: 5px; font-size: 0.8rem;">
+                                                <td class="text-center fw-bold" style="background-color: #007bff; color: white; border-radius: 5px;">
                                                     {{ loop.index }}
                                                 </td>
-                                                <td class="fw-bold" style="background-color: #0d3b66; color: white; border-radius: 5px; font-size: 0.7rem;">
+                                                <td class="fw-bold" style="background-color: #0d3b66; color: white; border-radius: 5px;">
                                                     <div class="team-with-logo">
-                                                        <img src="{{ get_logo_path(equipo) }}" alt="{{ equipo.nombre }}" class="team-logo" style="height: 20px; max-width: 30px;">
+                                                        <img src="{{ get_logo_path(equipo) }}" alt="{{ equipo.nombre }}" class="team-logo">
                                                         {{ equipo.nombre }}
                                                     </div>
                                                 </td>
