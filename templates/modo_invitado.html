@@ -7,6 +7,52 @@
 </head>
 
 <style>
+    /* Estilos para las pestañas */
+.nav-tabs-modern {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-tabs-modern .nav-link {
+    color: #0d3b66;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 0;
+    padding: 12px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    margin-right: 5px;
+}
+
+.nav-tabs-modern .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.nav-tabs-modern .nav-link.active {
+    color: #fff;
+    background-color: #0d3b66;
+    border: none;
+    font-weight: 600;
+}
+
+.nav-tabs-modern .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #28a745;
+}
+
+/* Estilo para el hover en móviles */
+@media (max-width: 768px) {
+    .nav-tabs-modern .nav-link {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
     /* Estilos generales */
     .overflow-auto {
         overflow-x: auto !important;
@@ -49,6 +95,71 @@
         align-items: center;
     }
 
+    /* Estilos para la sección de goleadores */
+    .goleadores-section {
+        margin-top: 2rem;
+        background-color: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 20px;
+    }
+    
+    .goleador-card {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        margin-bottom: 15px;
+    }
+    
+    .goleador-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        background: rgba(255,255,255,0.2);
+    }
+    
+    .goleador-position {
+        background-color: #007bff;
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    .goles-badge {
+        background-color: #28a745;
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    .jornada-goles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .jornada-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .jornada-badge {
+        background-color: #0d3b66;
+        color: white;
+        border-radius: 5px;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+    }
+
     /* Tamaño de letra reducido para tablas */
     .table th, .table td {
         font-size: 0.7rem;
@@ -59,7 +170,8 @@
         /* Contenedor principal al 100% */
         .container {
             width: 100%;
-            padding: 0px;
+            padding: 0 !important; /* Eliminar padding del contenedor, que se vea completo el contenido de la liga */
+            margin: 0 auto !important; /* Centrar el contenedor */
         }
 
         /* Tarjetas al 100% en móviles */
@@ -70,8 +182,8 @@
         }
 
         .liga-card {
-            margin-bottom: 10px;
-            width: 100%;
+            margin: 0 auto; /* Centrar la tarjeta */
+            width: 90%;
         }
 
         /* Tablas responsivas */
@@ -121,45 +233,6 @@
             background-color: #007bff;
             color: white;
         }
-        /*coluuummmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm*/
-         /* Ajustar tarjetas al ancho del contenedor */
-         .liga-card {
-            width: 90% !important;
-           
-            margin: 0 auto; /* Centrar la tarjeta */
-        }
-
-        .liga-card .card-body {
-            padding: 0px; /* Ajustar el padding si es necesario */
-        }
-
-        /* Ajustar tablas al ancho del contenedor */
-        .table-standings-container {
-            width: 100% !important;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .table-standings {
-            width: 100% !important; /* Asegurar que la tabla ocupe todo el ancho */
-            min-width: 100% !important;
-        }
-
-        .table-standings th, .table-standings td {
-            white-space: nowrap;
-        }
-
-        /* Ajustar jornadas al ancho del contenedor */
-        .accordion-body {
-            width: 100% !important;
-        }
-
-        /* Ajustar el contenedor principal */
-        .container {
-            padding: 0 !important; /* Eliminar padding del contenedor */
-            margin: 0 auto; /* Centrar el contenedor */
-        }
-        
         
         .accordion-body {
             padding: 0;
@@ -193,6 +266,26 @@
         .badge {
             font-size: 0.75rem;
         }
+        
+        /* Ajustes para goleadores en móviles */
+        .goleador-card {
+            padding: 10px;
+        }
+        
+        .goleador-position, .goles-badge {
+            width: 25px;
+            height: 25px;
+            font-size: 0.8rem;
+        }
+        
+        .jornada-goles {
+            gap: 5px;
+        }
+        
+        .jornada-badge {
+            font-size: 0.7rem;
+            padding: 1px 5px;
+        }
     }
 
     /* Ajustar jornadas y tablas al ancho del contenedor */
@@ -221,6 +314,117 @@
     white-space: nowrap; /* Evitar que el contenido se ajuste en varias líneas */
     padding: 0.5rem; /* Ajustar el espacio interno */
     font-size: 0.8rem; /* Tamaño de letra ajustado para móviles */
+}
+
+/* Estilos para la tabla de goleadores */
+.table-scorers {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table-scorers thead th {
+    background-color: #0d3b66;
+    color: white;
+    padding: 12px 15px;
+    text-align: center;
+    font-weight: 600;
+    border: none;
+}
+
+.table-scorers tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table-scorers tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.table-scorers tbody td {
+    padding: 12px 15px;
+    vertical-align: middle;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.table-scorers tbody tr:first-child td {
+    border-top: none;
+}
+
+.table-scorers .position-cell {
+    font-weight: bold;
+    color: white;
+    background-color: #007bff;
+    border-radius: 5px 0 0 5px;
+}
+
+.table-scorers .player-cell {
+    text-align: left;
+    font-weight: 500;
+}
+
+.table-scorers .team-cell {
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+
+.table-scorers .goals-cell {
+    font-weight: bold;
+    color: #28a745;
+    background-color: rgba(40, 167, 69, 0.1);
+    border-radius: 0 5px 5px 0;
+}
+
+.table-scorers .jornada-badge {
+    background-color: #0d3b66;
+    color: white;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    margin-right: 3px;
+    margin-bottom: 3px;
+    display: inline-block;
+}
+
+.jornadas-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+/* Estilos para el top goleador */
+.top-scorer {
+    background-color: rgba(255, 215, 0, 0.2) !important;
+    border-left: 3px solid gold;
+}
+
+.top-scorer .position-cell {
+    background-color: gold;
+    color: #0d3b66;
+}
+
+/* Estilos para móviles en tabla de goleadores */
+@media (max-width: 768px) {
+    .table-scorers thead th,
+    .table-scorers tbody td {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+    
+    .table-scorers .jornada-badge {
+        font-size: 0.6rem;
+        padding: 1px 4px;
+    }
+    
+    .jornadas-container {
+        gap: 3px;
+    }
 }
 </style>
 
@@ -338,12 +542,17 @@
                 <ul class="nav nav-tabs-modern" id="liga{{ datos.categoria.id }}Tab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active toggle-tab" id="jornadas{{ datos.categoria.id }}-tab" data-bs-toggle="tab" data-bs-target="#jornadas{{ datos.categoria.id }}" type="button" role="tab" aria-controls="jornadas{{ datos.categoria.id }}" aria-selected="true">
-                            <i class="fas fa-calendar-alt me-2"></i>Mostrar Jornadas
+                            <i class="fas fa-calendar-alt me-2"></i><span class="tab-text">Mostrar Jornadas</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link toggle-tab" id="tabla{{ datos.categoria.id }}-tab" data-bs-toggle="tab" data-bs-target="#tabla{{ datos.categoria.id }}" type="button" role="tab" aria-controls="tabla{{ datos.categoria.id }}" aria-selected="false">
-                            <i class="fas fa-trophy me-2"></i>Mostrar Clasificación
+                            <i class="fas fa-trophy me-2"></i><span class="tab-text">Mostrar Clasificación</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link toggle-tab" id="goleadores{{ datos.categoria.id }}-tab" data-bs-toggle="tab" data-bs-target="#goleadores{{ datos.categoria.id }}" type="button" role="tab" aria-controls="goleadores{{ datos.categoria.id }}" aria-selected="false">
+                            <i class="fas fa-futbol me-2"></i><span class="tab-text">Mostrar Goleadores</span>
                         </button>
                     </li>
                 </ul>
@@ -875,6 +1084,60 @@
                             {% endif %}
                         {% endif %}
                     </div>
+
+                    <!-- Pestaña de Goleadores (MODIFICADA) -->
+                    <div class="tab-pane fade" id="goleadores{{ datos.categoria.id }}" role="tabpanel" aria-labelledby="goleadores{{ datos.categoria.id }}-tab">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                {% if datos.goleadores %}
+                                    <div class="table-responsive">
+                                        <table class="table table-scorers">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center">POS</th>
+                                                    <th>JUGADOR</th>
+                                                    <th>EQUIPO</th>
+                                                    <th class="text-center">GOLES</th>
+                                                    
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for goleador in datos.goleadores[:20] %} <!-- Solo primeros 20 goleadores -->
+                                                <tr class="{% if loop.index == 1 %}top-scorer{% endif %}">
+                                                    <td class="position-cell text-center">{{ loop.index }}</td>
+                                                    <td class="player-cell">{{ goleador.nombre }}</td>
+                                                    <td class="team-cell">
+                                                        {% for equipo in datos.equipos_con_logo %}
+                                                            {% if equipo.nombre == goleador.equipo %}
+                                                                <img src="{{ equipo.logo }}" alt="{{ equipo.nombre }}" class="team-logo">
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        <span>{{ goleador.equipo }}</span>
+                                                    </td>
+                                                    <td class="goals-cell text-center" style="color: #02fc3c;">{{ goleador.total_goles }}</td>
+                                                   
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    {% if datos.goleadores|length > 20 %}
+                                        <div class="alert alert-info text-center mt-3 mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Mostrando solo los 20 máximos goleadores. Hay {{ datos.goleadores|length - 20 }} jugadores más en la lista completa.
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="alert alert-info text-center py-4 m-3">
+                                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                        <h5>No hay goleadores registrados</h5>
+                                        <p class="mb-0">Los goleadores aparecerán cuando se registren los primeros goles</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -884,21 +1147,30 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Función para manejar el cambio de texto en los botones de pestaña
-        function handleTabButtonText(tabId, isActive) {
-            const button = document.getElementById(tabId + '-tab');
-            if (button) {
-                if (isActive) {
-                    if (tabId.includes('jornadas')) {
-                        button.innerHTML = '<i class="fas fa-calendar-alt me-2"></i>Ocultar Jornadas';
-                    } else if (tabId.includes('tabla')) {
-                        button.innerHTML = '<i class="fas fa-trophy me-2"></i>Ocultar Clasificación';
-                    }
-                } else {
-                    if (tabId.includes('jornadas')) {
-                        button.innerHTML = '<i class="fas fa-calendar-alt me-2"></i>Mostrar Jornadas';
-                    } else if (tabId.includes('tabla')) {
-                        button.innerHTML = '<i class="fas fa-trophy me-2"></i>Mostrar Clasificación';
+        // Función para actualizar los textos de las pestañas
+        function updateTabTexts(activeTabId) {
+            // Primero resetear todos los textos a "Mostrar"
+            document.querySelectorAll('.toggle-tab .tab-text').forEach(textElement => {
+                const tabId = textElement.closest('.toggle-tab').getAttribute('data-bs-target').replace('#', '');
+                if (tabId.includes('jornadas')) {
+                    textElement.textContent = 'Mostrar Jornadas';
+                } else if (tabId.includes('tabla')) {
+                    textElement.textContent = 'Mostrar Clasificación';
+                } else if (tabId.includes('goleadores')) {
+                    textElement.textContent = 'Mostrar Goleadores';
+                }
+            });
+
+            // Luego establecer "Ocultar" solo para la pestaña activa
+            if (activeTabId) {
+                const activeButton = document.querySelector(`[data-bs-target="#${activeTabId}"] .tab-text`);
+                if (activeButton) {
+                    if (activeTabId.includes('jornadas')) {
+                        activeButton.textContent = 'JORNADAS';
+                    } else if (activeTabId.includes('tabla')) {
+                        activeButton.textContent = 'CLASIFICACIÓN';
+                    } else if (activeTabId.includes('goleadores')) {
+                        activeButton.textContent = 'GOLEADORES-TOP20';
                     }
                 }
             }
@@ -908,32 +1180,24 @@
         document.querySelectorAll('.toggle-tab').forEach(button => {
             button.addEventListener('click', function() {
                 const targetId = this.getAttribute('data-bs-target').replace('#', '');
-                const tabContent = document.getElementById(targetId);
-                const isActive = tabContent.classList.contains('show');
-
-                // Cambiar el texto del botón
-                handleTabButtonText(targetId, !isActive);
-
-                // Ocultar o mostrar el contenido de la pestaña
-                if (isActive) {
-                    tabContent.classList.remove('show', 'active');
-                } else {
-                    tabContent.classList.add('show', 'active');
-                }
-
-                // Cambiar el texto del botón opuesto
-                const oppositeTabId = targetId.includes('jornadas') ? 
-                    targetId.replace('jornadas', 'tabla') : 
-                    targetId.replace('tabla', 'jornadas');
-                
-                const oppositeButton = document.getElementById(oppositeTabId + '-tab');
-                if (oppositeButton) {
-                    oppositeButton.innerHTML = oppositeTabId.includes('jornadas') ? 
-                    '<i class="fas fa-calendar-alt me-2"></i>Mostrar Jornadas' : 
-                    '<i class="fas fa-trophy me-2"></i>Mostrar Clasificación';
-                }
+                updateTabTexts(targetId);
             });
         });
+
+        // Manejar el evento de cambio de pestaña de Bootstrap
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function(event) {
+                const targetId = event.target.getAttribute('data-bs-target').replace('#', '');
+                updateTabTexts(targetId);
+            });
+        });
+
+        // Inicializar con la primera pestaña activa
+        const activeTab = document.querySelector('.nav-link.active');
+        if (activeTab) {
+            const activeTabId = activeTab.getAttribute('data-bs-target').replace('#', '');
+            updateTabTexts(activeTabId);
+        }
 
         // Mostrar automáticamente la primera liga
         if (document.querySelector('.collapse')) {

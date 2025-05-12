@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .goleadores-section {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .goleador-header {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .goleador-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        margin-bottom: 15px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .goleador-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .goleador-position {
+        background-color: #007bff;
+        color: white;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .goles-total {
+        background-color: #28a745;
+        color: white;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    .jornada-goles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .jornada-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .jornada-badge {
+        background-color: #0d3b66;
+        color: white;
+        border-radius: 5px;
+        padding: 3px 10px;
+        font-size: 0.85rem;
+    }
+
+    .team-with-logo {
+        display: flex;
+        align-items: center;
+    }
+    
+    .team-logo {
+        height: 25px;
+        width: auto;
+        max-width: 30px;
+        margin-right: 8px;
+        object-fit: contain;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="goleadores-section">
+        <div class="goleador-header text-center">
+            <h2 class="text-white mb-3">
+                <i class="fas fa-futbol me-2"></i>Tabla de Goleadores
+            </h2>
+            <p class="text-white-50">Top 20 de los máximos anotadores del torneo</p>
+        </div>
+        
+        {% if goleadores %}
+            <div class="row">
+                {% for goleador in goleadores %}
+                <div class="col-md-6 mb-4">
+                    <div class="goleador-card p-3 d-flex align-items-center">
+                        <div class="goleador-position me-3">
+                            {{ loop.index }}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="text-white mb-1">{{ goleador.nombre }}</h5>
+                            <div class="mb-2 text-white d-flex align-items-center">
+                                <div class="team-with-logo me-2">
+                                    {% for categoria in categorias if categoria.id == goleador.categoria_id %}
+                                        {% for equipo in categoria.equipos if equipo.nombre == goleador.equipo %}
+                                            <img src="{{ get_logo_path(equipo) }}" alt="{{ equipo.nombre }}" class="team-logo">
+                                            {{ equipo.nombre }}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                                <span class="mx-2">|</span>
+                                <i class="fas fa-tag me-1"></i>
+                                {% for categoria in categorias if categoria.id == goleador.categoria_id %}
+                                    {{ categoria.nombre }}
+                                {% endfor %}
+                            </div>
+                            <div class="jornada-goles">
+                                {% for jornada, goles in (goleador.goles_por_jornada or {}).items() if goles > 0 %}
+                                    <div class="jornada-item">
+                                        <small class="text-white">J{{ jornada }}</small>
+                                        <span class="jornada-badge">{{ goles }}</span>
+                                    </div>
+                                {% else %}
+                                    <small class="text-white">Sin goles registrados</small>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="goles-total ms-3">
+                            {{ goleador.total_goles }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-light text-center py-5">
+                <i class="fas fa-info-circle fa-3x mb-3 text-primary"></i>
+                <h4 class="text-dark">No hay goleadores registrados</h4>
+                <p class="text-muted">Los goleadores aparecerán cuando se registren los primeros goles</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -58,6 +58,39 @@
         display: flex;
         align-items: center;
     }
+    
+    /* Estilos para la sección de goleadores */
+    .goleadores-section {
+        margin-top: 2rem;
+    }
+    
+    .goleador-row {
+        transition: all 0.3s ease;
+    }
+    
+    .goleador-row:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+    
+    .goleador-position {
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        padding: 2px 8px;
+        font-weight: bold;
+    }
+    
+    .goles-badge {
+        background-color: #28a745;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+    }
 </style>
 <div class="container-fluid mt-4">
     {% if not torneo or not datos_ligas %}
@@ -95,6 +128,9 @@
                                 <i class="fas fa-sync-alt me-1"></i>Actualizar Tablas
                             </button>
                         </form>
+                        <a href="{{ url_for('administrar_goleadores') }}" class="btn btn-light">
+                            <i class="fas fa-futbol me-1"></i>Goleadores
+                        </a>
                     </div>
                 </div>
             </div>
@@ -366,6 +402,72 @@
                 </div>
             </div>
         {% endfor %}
+
+        <!-- Sección de Goleadores -->
+        <div class="card mb-4 border-0 shadow goleadores-section">
+            <div class="card-header bg-dark text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-futbol me-2"></i>Tabla de Goleadores
+                    </h5>
+                    <a href="{{ url_for('administrar_goleadores') }}" class="btn btn-sm btn-light">
+                        <i class="fas fa-cog me-1"></i>Administrar
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if goleadores %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th>Jugador</th>
+                                    <th>Equipo</th>
+                                    <th class="text-center">Goles</th>
+                                    <th class="text-center">Goles por Jornada</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for goleador in goleadores %}
+                                <tr class="goleador-row">
+                                    <td class="text-center">
+                                        <span class="goleador-position">{{ loop.index }}</span>
+                                    </td>
+                                    <td class="fw-bold">{{ goleador.nombre }}</td>
+                                    <td>{{ goleador.equipo }}</td>
+                                    <td class="text-center fw-bold">
+                                        <span class="goles-badge">{{ goleador.total_goles }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                            {% for jornada, goles in (goleador.goles_por_jornada or {}).items() %}
+                                                {% if goles > 0 %}
+                                                    <div class="d-flex flex-column align-items-center">
+                                                        <small class="text-muted">J{{ jornada }}</small>
+                                                        <span class="badge bg-primary rounded-pill px-2">{{ goles }}</span>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info text-center py-4">
+                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                        <h5>No hay goleadores registrados</h5>
+                        <p class="mb-0">Añade goleadores desde el panel de administración</p>
+                        <a href="{{ url_for('administrar_goleadores') }}" class="btn btn-primary mt-3">
+                            <i class="fas fa-plus-circle me-1"></i>Añadir Goleadores
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     {% endif %}
 </div>
 
