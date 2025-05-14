@@ -4,29 +4,7 @@
 
 {% block admin_content %}
 <style>
-    /* Estilos para móviles */
-    @media (max-width: 768px) {
-        .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch; /* Desplazamiento suave en iOS */
-            display: block;
-            width: 100%;
-        }
-        
-        .table {
-            min-width: 600px; /* Ancho mínimo para que no se rompa el contenido */
-        }
-        
-        .accordion-body {
-            padding: 0;
-        }
-        
-        .btn {
-            white-space: nowrap;
-        }
-    }
-    
-    /* Estilos generales */
+    /* General Styles */
     .overflow-auto {
         overflow-x: auto !important;
     }
@@ -40,11 +18,33 @@
         background-color: #28a745;
     }
     
-    .table-standings th, .table-standings td {
-        white-space: nowrap;
+    /* Table Styles */
+    .table-responsive-force {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        display: block;
     }
     
-    /* Estilos para logos */
+    .table-responsive-force table {
+        min-width: 100%;
+        width: auto;
+        margin-bottom: 0;
+    }
+    
+    /* Font sizes matching guest mode */
+    .table th, .table td {
+        font-size: 0.7rem;
+    }
+    
+    @media (max-width: 768px) {
+        .table th, .table td {
+            font-size: 0.8rem;
+            padding: 0.5rem;
+        }
+    }
+    
+    /* Team logo styles */
     .team-logo {
         height: 30px;
         width: auto;
@@ -54,45 +54,82 @@
         vertical-align: middle;
     }
     
+    @media (max-width: 768px) {
+        .team-logo {
+            height: 20px;
+            max-width: 30px;
+        }
+    }
+    
     .team-with-logo {
         display: flex;
         align-items: center;
     }
-    
-    /* Estilos para la sección de goleadores */
-    .goleadores-section {
-        margin-top: 2rem;
+
+    /* Scorers Table - Fixed scrolling solution */
+    .scorers-container {
+        width: 100%;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        display: block;
     }
     
-    .goleador-row {
-        transition: all 0.3s ease;
+    .scorers-table {
+        min-width: 600px; /* Ajusta el ancho mínimo para dispositivos más pequeños */
+        width: 100%;
+        margin-bottom: 0;
     }
     
-    .goleador-row:hover {
-        background-color: rgba(0, 123, 255, 0.1);
+    .scorers-table th, .scorers-table td {
+        white-space: nowrap;
+        padding: 8px 12px;
     }
     
-    .goleador-position {
+    .scorers-table thead th {
+        background-color: #0d3b66;
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .scorers-table .position-cell {
         background-color: #007bff;
         color: white;
-        border-radius: 5px;
-        padding: 2px 8px;
         font-weight: bold;
+        text-align: center;
     }
     
-    .goles-badge {
-        background-color: #28a745;
-        color: white;
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
+    .scorers-table .goals-cell {
+        font-weight: bold;
+        color: #28a745;
+        text-align: center;
+    }
+    
+    .jornada-badge {
         display: inline-flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
+        margin: 2px;
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 0 !important;
+        }
+        
+        .card-body {
+            padding: 0.5rem !important;
+        }
+        
+        .scorers-table {
+            min-width: 600px;
+        }
     }
 </style>
-<div class="container-fluid mt-4">
+
+<div class="container-fluid mt-4" style="padding: 0;">
     {% if not torneo or not datos_ligas %}
         <div class="alert alert-info text-center py-5">
             <i class="fas fa-info-circle fa-3x mb-3 text-primary"></i>
@@ -103,7 +140,7 @@
             </a>
         </div>
     {% else %}
-        <!-- Panel de control superior -->
+        <!-- Control Panel -->
         <div class="card mb-4 border-0 shadow">
             <div class="card-header bg-primary text-white py-3">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
@@ -136,7 +173,7 @@
             </div>
         </div>
 
-        <!-- Botones para expandir/contraer todas las jornadas -->
+        <!-- Expand/Collapse buttons -->
         <div class="d-flex justify-content-end mb-3 flex-wrap">
             <button class="btn btn-primary me-2 mb-2" id="expandAll">
                 <i class="fas fa-plus-circle me-1"></i>Expandir Todas
@@ -146,14 +183,14 @@
             </button>
         </div>
 
-        <!-- Contenido por liga -->
+        <!-- League content -->
         {% for liga in datos_ligas %}
             <div class="card mb-4 border-0 shadow">
                 <div class="card-header bg-dark text-white">
                     <h5 class="mb-0">{{ liga.categoria.nombre }}</h5>
                 </div>
-                <div class="card-body">
-                    <!-- Barra de progreso -->
+                <div class="card-body" style="padding: 0.5rem;">
+                    <!-- Progress bar -->
                     <div class="mb-3">
                         <div class="progress mb-3">
                             <div class="progress-bar" role="progressbar" 
@@ -168,16 +205,16 @@
                         </p>
                     </div>
 
-                    <!-- Botón para mostrar/ocultar la tabla de clasificación -->
+                    <!-- Show/Hide classification table button -->
                     <button class="btn btn-outline-primary mb-3 toggle-table" data-target="#tablaClasificacion{{ liga.categoria.id }}">
                         <i class="fas fa-table me-1"></i>Mostrar/Ocultar Tabla
                     </button>
 
-                    <!-- Tabla de clasificación -->
+                    <!-- Classification table -->
                     <div id="tablaClasificacion{{ liga.categoria.id }}" class="d-none">
                         <h6 style="color: wheat;">Tabla de Clasificación</h6>
-                        <div class="table-responsive">
-                            <table class="table table-standings">
+                        <div class="table-responsive-force">
+                            <table class="table table-striped">
                                 <thead>
                                     <tr class="table-dark">
                                         <th class="text-center">POS</th>
@@ -201,7 +238,7 @@
                                         </td>
                                         <td class="fw-bold">
                                             <div class="team-with-logo">
-                                                <img src="{{ get_logo_path(equipo) }}" alt="{{ equipo.nombre }}" class="team-logo">
+                                                <img src="{{ get_logo_path(equipo) }}" class="team-logo">
                                                 {{ equipo.nombre }}
                                             </div>
                                         </td>
@@ -240,7 +277,7 @@
                         </div>
                     </div>
 
-                    <!-- Jornadas -->
+                    <!-- Matchdays -->
                     <div class="accordion" id="accordionLiga{{ liga.categoria.id }}">
                         {% for jornada_num, partidos_jornada in liga.jornadas %}
                         <div class="accordion-item border-0 mb-3 shadow-sm">
@@ -283,12 +320,11 @@
                                  aria-labelledby="headingLiga{{ liga.categoria.id }}Jornada{{ jornada_num }}" 
                                  data-bs-parent="#accordionLiga{{ liga.categoria.id }}">
                                 <div class="accordion-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover align-middle">
+                                    <div class="table-responsive-force">
+                                        <table class="table table-striped table-hover">
                                             <thead class="table-dark">
                                                 <tr>
                                                     <th>Fecha/Hora</th>
-                                            
                                                     <th>Local</th>
                                                     <th class="text-center">Resultado</th>
                                                     <th>Visitante</th>
@@ -323,13 +359,12 @@
                                                             <div class="team-with-logo">
                                                                 {% set equipo_local = liga.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
                                                                 {% if equipo_local %}
-                                                                    <img src="{{ get_logo_path(equipo_local) }}" alt="{{ partido.equipo_local }}" class="team-logo">
+                                                                    <img src="{{ get_logo_path(equipo_local) }}"  class="team-logo">
                                                                 {% endif %}
                                                                 {{ partido.equipo_local }}
                                                             </div>
                                                         {% endif %}
                                                     </td>
-                                                  
                                                     
                                                     <td class="text-center">
                                                         {% if partido.jugado and not partido.es_descanso %}
@@ -350,7 +385,7 @@
                                                             <div class="team-with-logo">
                                                                 {% set equipo_visitante = liga.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
                                                                 {% if equipo_visitante %}
-                                                                    <img src="{{ get_logo_path(equipo_visitante) }}" alt="{{ partido.equipo_visitante }}" class="team-logo">
+                                                                    <img src="{{ get_logo_path(equipo_visitante) }}" class="team-logo">
                                                                 {% endif %}
                                                                 {{ partido.equipo_visitante }}
                                                             </div>
@@ -403,8 +438,8 @@
             </div>
         {% endfor %}
 
-        <!-- Sección de Goleadores -->
-        <div class="card mb-4 border-0 shadow goleadores-section">
+        <!-- Scorers Section - Fixed solution -->
+        <div class="card mb-4 border-0 shadow">
             <div class="card-header bg-dark text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
@@ -415,49 +450,43 @@
                     </a>
                 </div>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 {% if goleadores %}
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-dark">
+                    <div class="scorers-container">
+                        <table class="table table-striped scorers-table">
+                            <thead>
                                 <tr>
-                                    <th class="text-center">#</th>
+                                    <th class="position-cell">POS</th>
                                     <th>Jugador</th>
                                     <th>Equipo</th>
-                                    <th class="text-center">Goles</th>
-                                    <th class="text-center">Goles por Jornada</th>
+                                    <th class="goals-cell">Goles</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for goleador in goleadores %}
-                                <tr class="goleador-row">
-                                    <td class="text-center">
-                                        <span class="goleador-position">{{ loop.index }}</span>
-                                    </td>
-                                    <td class="fw-bold">{{ goleador.nombre }}</td>
-                                    <td>{{ goleador.equipo }}</td>
-                                    <td class="text-center fw-bold">
-                                        <span class="goles-badge">{{ goleador.total_goles }}</span>
-                                    </td>
+                                <tr class="{% if loop.index == 1 %}top-scorer{% endif %}">
+                                    <td class="position-cell">{{ loop.index }}</td>
+                                    <td>{{ goleador.nombre }}</td>
                                     <td>
-                                        <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                            {% for jornada, goles in (goleador.goles_por_jornada or {}).items() %}
-                                                {% if goles > 0 %}
-                                                    <div class="d-flex flex-column align-items-center">
-                                                        <small class="text-muted">J{{ jornada }}</small>
-                                                        <span class="badge bg-primary rounded-pill px-2">{{ goles }}</span>
-                                                    </div>
+                                        <div class="team-with-logo">
+                                            {% for equipo in equipos_con_logo %}
+                                                {% if equipo.nombre == goleador.equipo %}
+                                                    <img src="{{ equipo.logo }}" alt="{{ equipo.nombre }}" class="team-logo">
                                                 {% endif %}
                                             {% endfor %}
+                                            {{ goleador.equipo }}
                                         </div>
                                     </td>
+                                    <td class="goals-cell">{{ goleador.total_goles }}</td>
+                                   
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 {% else %}
-                    <div class="alert alert-info text-center py-4">
+                    <div class="alert alert-info text-center py-4 m-3">
                         <i class="fas fa-info-circle fa-2x mb-3"></i>
                         <h5>No hay goleadores registrados</h5>
                         <p class="mb-0">Añade goleadores desde el panel de administración</p>
@@ -471,7 +500,7 @@
     {% endif %}
 </div>
 
-<!-- Modal para reiniciar torneo -->
+<!-- Reset Tournament Modal -->
 <div class="modal fade" id="modalReiniciar" tabindex="-1" aria-labelledby="modalReiniciarLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -500,7 +529,7 @@
 </div>
 
 <script>
-    // Mostrar/Ocultar tabla de clasificación
+    // Show/Hide classification table
     document.querySelectorAll('.toggle-table').forEach(button => {
         button.addEventListener('click', () => {
             const target = document.querySelector(button.dataset.target);
@@ -508,7 +537,7 @@
         });
     });
 
-    // Expandir todas las jornadas
+    // Expand all matchdays
     document.getElementById('expandAll').addEventListener('click', () => {
         document.querySelectorAll('.accordion-collapse').forEach(collapse => {
             if (!collapse.classList.contains('show')) {
@@ -517,7 +546,7 @@
         });
     });
 
-    // Contraer todas las jornadas
+    // Collapse all matchdays
     document.getElementById('collapseAll').addEventListener('click', () => {
         document.querySelectorAll('.accordion-collapse.show').forEach(collapse => {
             new bootstrap.Collapse(collapse, { hide: true });

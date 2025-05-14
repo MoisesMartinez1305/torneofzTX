@@ -287,6 +287,34 @@
             padding: 1px 5px;
         }
     }
+    .team-with-logo {
+    display: flex;
+    align-items: center;
+    min-width: 0; /* Permite que el texto se trunque */
+}
+
+.team-logo-container {
+    width: 30px; /* Ancho fijo para el contenedor del logo */
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Evita que se reduzca */
+}
+
+.team-logo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Mantiene la proporción */
+}
+
+.team-name {
+    flex: 1;
+    min-width: 0; /* Permite truncamiento */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
     /* Ajustar jornadas y tablas al ancho del contenedor */
 .accordion-body,
@@ -813,7 +841,7 @@
                                                                         <div class="team-with-logo">
                                                                             {% set equipo_local = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
                                                                             {% if equipo_local %}
-                                                                                <img src="{{ get_logo_path(equipo_local) }}" alt="{{ partido.equipo_local }}" class="team-logo">
+                                                                                <img src="{{ get_logo_path(equipo_local) }}" class="team-logo">
                                                                             {% endif %}
                                                                             {{ partido.equipo_local }}
                                                                         </div>
@@ -839,7 +867,7 @@
                                                                         <div class="team-with-logo">
                                                                             {% set equipo_visitante = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
                                                                             {% if equipo_visitante %}
-                                                                                <img src="{{ get_logo_path(equipo_visitante) }}" alt="{{ partido.equipo_visitante }}" class="team-logo">
+                                                                                <img src="{{ get_logo_path(equipo_visitante) }}" class="team-logo">
                                                                             {% endif %}
                                                                             {{ partido.equipo_visitante }}
                                                                         </div>
@@ -911,7 +939,7 @@
                                                             </td>
                                                             <td class="fw-bold" style="background-color: #0d3b66; color: white;">
                                                                 <div class="team-with-logo">
-                                                                    <img src="{{ get_logo_path(equipo) }}" alt="{{ equipo.nombre }}" class="team-logo">
+                                                                    <img src="{{ get_logo_path(equipo) }}" class="team-logo">
                                                                     {{ equipo.nombre }}
                                                                 </div>
                                                             </td>
@@ -980,7 +1008,7 @@
                                                     </td>
                                                     <td class="fw-bold" style="background-color: #0056b3; color: #f8f9fa; border-radius: 10px;">
                                                         <div class="team-with-logo">
-                                                            <img src="{{ get_logo_path(equipo) }}" alt="{{ equipo.nombre }}" class="team-logo">
+                                                            <img src="{{ get_logo_path(equipo) }}" class="team-logo">
                                                             {{ equipo.nombre }}
                                                         </div>
                                                     </td>
@@ -1048,9 +1076,13 @@
                                                     {{ loop.index }}
                                                 </td>
                                                 <td class="fw-bold" style="background-color: #0d3b66; color: white; border-radius: 5px;">
-                                                    <div class="team-with-logo">
-                                                        <img src="{{ get_logo_path(equipo) }}" alt="{{ equipo.nombre }}" class="team-logo">
-                                                        {{ equipo.nombre }}
+                                                    <div class="team-with-logo d-flex align-items-center">
+                                                        <div class="team-logo-container">
+                                                            <img src="{{ get_logo_path(equipo) }}" class="team-logo">
+                                                        </div>
+                                                        <div class="team-name ms-2 text-truncate">
+                                                            {{ equipo.nombre }}
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td class="text-center">{{ equipo.partidos_jugados }}</td>
@@ -1104,17 +1136,21 @@
                                             <tbody>
                                                 {% for goleador in datos.goleadores[:20] %} <!-- Solo primeros 20 goleadores -->
                                                 <tr class="{% if loop.index == 1 %}top-scorer{% endif %}">
-                                                    <td class="position-cell text-center">{{ loop.index }}</td>
-                                                    <td class="player-cell">{{ goleador.nombre }}</td>
-                                                    <td class="team-cell">
-                                                        {% for equipo in datos.equipos_con_logo %}
-                                                            {% if equipo.nombre == goleador.equipo %}
-                                                                <img src="{{ equipo.logo }}" alt="{{ equipo.nombre }}" class="team-logo">
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                        <span>{{ goleador.equipo }}</span>
+                                                    <td class="position-cell text-center" style="border-radius: 5px;">{{ loop.index }}</td>
+                                                    <td class="player-cell" style="background-color: #dde0e4; border-radius: 5px;" ><strong>{{ goleador.nombre }}</strong></td>
+                                                    <td class="team-cell" style="border-radius: 5px;">
+                                                        <div class="team-with-logo d-flex align-items-center">
+                                                            <div class="team-logo-container me-2">
+                                                                {% for equipo in datos.equipos_con_logo %}
+                                                                    {% if equipo.nombre == goleador.equipo %}
+                                                                        <img src="{{ equipo.logo }}" class="team-logo" >
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </div>
+                                                            <span class="team-name">{{ goleador.equipo }}</span>
+                                                        </div>
                                                     </td>
-                                                    <td class="goals-cell text-center" style="color: #02fc3c;">{{ goleador.total_goles }}</td>
+                                                    <td class="goals-cell text-center" style="color: #02fc3c; border-radius: 5px;">{{ goleador.total_goles }}</td>
                                                    
                                                 </tr>
                                                 {% endfor %}

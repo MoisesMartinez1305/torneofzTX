@@ -4,48 +4,68 @@
 
 {% block admin_content %}
 <style>
+    /* Estilos base */
     .goleadores-container {
         background-color: #f8f9fa;
         border-radius: 10px;
         padding: 20px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        font-size: 0.875rem;
     }
-    
-    .goleador-card {
-        transition: all 0.3s ease;
-        border-left: 4px solid #007bff;
-    }
-    
-    .goleador-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    
-    .team-with-logo {
-        display: flex;
-        align-items: center;
-    }
-    
+
+    /* Estilo para los logos de equipo - AJUSTADO */
     .team-logo {
-        height: 30px;
-        width: auto;
-        max-width: 40px;
-        margin-right: 8px;
+        height: 24px;
+        width: 24px;
         object-fit: contain;
+        margin-right: 8px;
+    }
+
+    /* Tabla responsive */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
     
-    .action-buttons .btn {
-        margin-right: 5px;
+    /* Estilos para móviles */
+    @media (max-width: 768px) {
+        .table {
+            min-width: 100%;
+            font-size: 0.8125rem;
+        }
+        .action-buttons .btn {
+            padding: 0.25rem 0.4rem;
+            font-size: 0.75rem;
+        }
+        
+        /* Ajuste adicional para logos en móviles */
+        .team-logo {
+            height: 20px;
+            width: 20px;
+            margin-right: 6px;
+        }
     }
-    
-    /* Estilos específicos para el select2 */
-    .select2-container--default .select2-selection--single {
-        height: 38px;
-        padding-top: 4px;
+
+    /* Estilos para Select2 */
+    .select2-container--default .select2-results__option {
+        color: #212529 !important;
+        padding: 8px 12px;
+        background-color: white !important;
     }
-    
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 36px;
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #0d6efd !important;
+        color: white !important;
+    }
+
+    .select2-container--open .select2-dropdown {
+        background-color: white !important;
+        border-color: #86b7fe;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .select2-container--default .select2-results > .select2-results__options {
+        background-color: white !important;
     }
 </style>
 
@@ -77,11 +97,11 @@
                             <td>{{ loop.index }}</td>
                             <td>{{ goleador.nombre }}</td>
                             <td>
-                                <div class="team-with-logo">
+                                <div class="team-with-logo d-flex align-items-center">
                                     {% for categoria in categorias if categoria.id == goleador.categoria_id %}
                                         {% for equipo in categoria.equipos if equipo.nombre == goleador.equipo %}
-                                            <img src="{{ get_logo_path(equipo) }}" alt="{{ equipo.nombre }}" class="team-logo">
-                                            {{ equipo.nombre }}
+                                            <img src="{{ get_logo_path(equipo) }}" class="team-logo">
+                                            <span>{{ equipo.nombre }}</span>
                                         {% endfor %}
                                     {% endfor %}
                                 </div>
@@ -126,73 +146,24 @@
     </div>
 </div>
 
-<!-- Modal para editar goles -->
-{% for goleador in goleadores %}
-<div class="modal fade" id="modalEditarGoles{{ goleador.id }}" tabindex="-1" 
-     aria-labelledby="modalEditarGolesLabel{{ goleador.id }}" aria-hidden="true">
+<!-- Modal para agregar goleador -->
+<div class="modal fade" id="modalAgregarGoleador" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalEditarGolesLabel{{ goleador.id }}">
-                    <i class="fas fa-edit me-2"></i>Editar Goles: {{ goleador.nombre }}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" 
-                        data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{{ url_for('administrar_goleadores') }}" method="POST">
-                <input type="hidden" name="update_goles" value="1">
-                <input type="hidden" name="goleador_id" value="{{ goleador.id }}">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Jornada</label>
-                        <select class="form-select" name="jornada" required>
-                            {% for jornada_num in jornadas_por_categoria[goleador.categoria_id] %}
-                                <option value="{{ jornada_num }}">
-                                    Jornada {{ jornada_num }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Cantidad de Goles</label>
-                        <input type="number" class="form-control" name="goles" min="0" value="0" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" 
-                            data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>Guardar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-<!-- Modal para agregar goleador - Versión corregida -->
-<div class="modal fade" id="modalAgregarGoleador" tabindex="-1" aria-labelledby="modalAgregarGoleadorLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalAgregarGoleadorLabel">
-                    <i class="fas fa-plus-circle me-2"></i>Agregar Nuevo Goleador
-                </h5>
+                <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Agregar Nuevo Goleador</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ url_for('administrar_goleadores') }}" method="POST">
                 <input type="hidden" name="add_goleador" value="1">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Nombre del Jugador</label>
+                        <label class="form-label fw-bold" style="color: black;">Nombre del Jugador</label>
                         <input type="text" class="form-control" name="nombre" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Categoría</label>
+                        <label class="form-label fw-bold" style="color: black;">Categoría</label>
                         <select class="form-select" id="selectCategoria" name="categoria_id" required>
                             <option value="">Seleccione una categoría</option>
                             {% for categoria in categorias %}
@@ -202,8 +173,8 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Equipo</label>
-                        <select class="form-select" id="selectEquipo" name="equipo" required>
+                        <label class="form-label fw-bold" style="color: black;">Equipo</label>
+                        <select class="form-select select2-equipos" id="selectEquipo" name="equipo" required>
                             <option value="">Primero seleccione una categoría</option>
                             {% for categoria in categorias %}
                                 {% for equipo in categoria.equipos %}
@@ -228,47 +199,34 @@
     </div>
 </div>
 
-<!-- jQuery primero -->
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Select2 CSS y JS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<!-- Bootstrap Bundle JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 $(document).ready(function() {
-    // Inicializar el select de equipos
-    $('#selectEquipo').select2({
+    // Inicializar Select2
+    $('#selectCategoria, #selectEquipo').select2({
         dropdownParent: $('#modalAgregarGoleador'),
-        width: '100%'
-    }).prop('disabled', true);
+        width: '100%',
+        theme: 'default'
+    }).on('select2:open', function() {
+        $('.select2-results__options').css('background-color', 'white');
+    });
 
-    // Manejar cambio de categoría para filtrar equipos
-    $('#selectCategoria').on('change', function() {
+    // Filtrar equipos al cambiar categoría
+    $('#selectCategoria').change(function() {
         const categoriaId = $(this).val();
         const $selectEquipo = $('#selectEquipo');
         
         if (categoriaId) {
-            // Ocultar todas las opciones primero
-            $selectEquipo.find('.equipo-option').hide();
-            
-            // Mostrar solo los equipos de la categoría seleccionada
-            $selectEquipo.find('.equipo-option[data-categoria="' + categoriaId + '"]').show();
-            
-            // Resetear la selección y habilitar
+            $selectEquipo.find('.equipo-option').hide().prop('disabled', true);
+            $selectEquipo.find('.equipo-option[data-categoria="'+categoriaId+'"]').show().prop('disabled', false);
             $selectEquipo.val('').trigger('change').prop('disabled', false);
         } else {
-            // Si no hay categoría seleccionada, ocultar todos y deshabilitar
-            $selectEquipo.find('.equipo-option').hide();
             $selectEquipo.val('').trigger('change').prop('disabled', true);
         }
-    });
-
-    // Inicializar modales de edición de goles
-    $('[data-bs-toggle="modal"]').on('click', function() {
-        var target = $(this).data('bs-target');
-        $(target).modal('show');
     });
 });
 </script>
