@@ -120,18 +120,64 @@
                             <td class="action-buttons">
                                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" 
                                     data-bs-target="#modalEditarGoles{{ goleador.id }}">
-                                    <i class="fas fa-edit"></i> Goles
+                                    <i class="fas fa-edit"></i> + Goles
                                 </button>
                                 <form action="{{ url_for('administrar_goleadores') }}" method="POST" style="display: inline;">
                                     <input type="hidden" name="delete_goleador" value="1">
                                     <input type="hidden" name="goleador_id" value="{{ goleador.id }}">
                                     <button type="submit" class="btn btn-sm btn-danger" 
                                         onclick="return confirm('¿Eliminar este goleador?')">
-                                        <i class="fas fa-trash"></i>
+                                        <i class="fas fa-trash"></i>Eliminar
                                     </button>
                                 </form>
                             </td>
                         </tr>
+                                                <!-- Modal para editar goles -->
+                        {% for goleador in goleadores %}
+                        <div class="modal fade" id="modalEditarGoles{{ goleador.id }}" tabindex="-1" 
+                            aria-labelledby="modalEditarGolesLabel{{ goleador.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="modalEditarGolesLabel{{ goleador.id }}">
+                                            <i class="fas fa-edit me-2"></i>Editar Goles: {{ goleador.nombre }}
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" 
+                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{{ url_for('administrar_goleadores') }}" method="POST">
+                                        <input type="hidden" name="update_goles" value="1">
+                                        <input type="hidden" name="goleador_id" value="{{ goleador.id }}">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold" style="color: black;">Jornada</label>
+                                                <select class="form-select" name="jornada" required>
+                                                    {% for jornada_num in jornadas_por_categoria[goleador.categoria_id] %}
+                                                        <option value="{{ jornada_num }}">
+                                                            Jornada {{ jornada_num }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold" style="color: black;">Cantidad de Goles</label>
+                                                <input type="number" class="form-control" name="goles" min="0" value="0" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" 
+                                                    data-bs-dismiss="modal">
+                                                <i class="fas fa-times me-1"></i>Cancelar
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-1"></i>Guardar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
                         {% endfor %}
                     </tbody>
                 </table>
