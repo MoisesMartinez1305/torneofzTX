@@ -167,9 +167,6 @@
     .bg-dark-blue {
     background-color: #0d3b66;
 }
-.simbologia-container {
-    font-size: 0.9rem;
-}
 
     /* Estilos para móviles */
     @media (max-width: 768px) {
@@ -208,7 +205,7 @@
         
         .table th, .table td {
             white-space: nowrap;
-            padding: 0.5rem;
+            padding: 0.4rem; /* Ajustar margen hacie arriba y abajo del contenido*/
             font-size: 0.8rem;
         }
         
@@ -256,6 +253,7 @@
         /* Ajustes para jornadas */
         .accordion-item {
             width: 100%;
+           
         }
 
         /* Ajustes para pestañas */
@@ -275,7 +273,7 @@
         
         /* Ajustes para goleadores en móviles */
         .goleador-card {
-            padding: 10px;
+            padding: 5px;
         }
         
         .goleador-position, .goles-badge {
@@ -346,8 +344,11 @@
 
 .table th, .table td {
     white-space: nowrap; /* Evitar que el contenido se ajuste en varias líneas */
-    padding: 1 rem !important; /* Ajustar el espacio interno */
+    padding: 0.2 rem !important; /* Ajustar el espacio interno */
+    padding-right: 0.3rem !important; /* Espacio a la derecha */
+    padding-left: 0.3rem !important; /* Espacio a la izquierda */
     font-size: 0.75rem; /* Tamaño de letra ajustado para móviles */
+    vertical-align: middle; /* Alinear verticalmente el contenido */
 }
 
 /* Estilos para la tabla de goleadores */
@@ -378,7 +379,7 @@
 }
 
 .table-scorers tbody td {
-    padding: 12px 15px;
+    padding: 1rem;
     vertical-align: middle;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
@@ -447,7 +448,7 @@
 @media (max-width: 768px) {
     .table-scorers thead th,
     .table-scorers tbody td {
-        padding: 8px 10px;
+        padding: 0.1rem;
         font-size: 0.7rem;
     }
     
