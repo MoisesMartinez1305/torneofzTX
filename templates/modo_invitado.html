@@ -162,8 +162,14 @@
 
     /* Tamaño de letra reducido para tablas */
     .table th, .table td {
-        font-size: 0.7rem;
+        font-size: 0.6rem;
     }
+    .bg-dark-blue {
+    background-color: #0d3b66;
+}
+.simbologia-container {
+    font-size: 0.9rem;
+}
 
     /* Estilos para móviles */
     @media (max-width: 768px) {
@@ -264,7 +270,7 @@
         }
 
         .badge {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
         
         /* Ajustes para goleadores en móviles */
@@ -340,8 +346,8 @@
 
 .table th, .table td {
     white-space: nowrap; /* Evitar que el contenido se ajuste en varias líneas */
-    padding: 0.5rem; /* Ajustar el espacio interno */
-    font-size: 0.8rem; /* Tamaño de letra ajustado para móviles */
+    padding: 0.5 rem; /* Ajustar el espacio interno */
+    font-size: 0.7rem; /* Tamaño de letra ajustado para móviles */
 }
 
 /* Estilos para la tabla de goleadores */
@@ -1060,9 +1066,9 @@
                                                 <th class="text-center">POS</th>
                                                 <th class="text-center">EQUIPO</th>
                                                 <th class="text-center">PJ</th>
-                                                <th class="text-center" style="color: rgb(3, 162, 235);">G</th>
-                                                <th class="text-center">E</th>
-                                                <th class="text-center" style="color: red;">P</th>
+                                                <th class="text-center" style="color: rgb(3, 162, 235);">PG</th>
+                                                <th class="text-center">PE</th>
+                                                <th class="text-center" style="color: red;">PP</th>
                                                 <th class="text-center" style="color: rgb(4, 253, 4);">GF</th>
                                                 <th class="text-center" style="color: red;">GC</th>
                                                 <th class="text-center">DG</th>
@@ -1113,6 +1119,34 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                
+                                    <div class="row">
+                                        <div class="col-6 col-md-3 mb-2">
+                                            <span style="color: rgb(7, 7, 7); font-size: 0.7rem;">■</span> <strong style="font-size: 0.7rem;">PJ:</strong> Partidos jugados
+                                        </div>
+                                        <div class="col-6 col-md-3 mb-2">
+                                            <span style="color: rgb(3, 162, 235); font-size: 0.7rem;">■</span> <strong style="font-size: 0.7rem;">PG:</strong> Partidos ganados
+                                        </div>
+                                        <div class="col-6 col-md-3 mb-2">
+                                            <span style="color: rgb(0, 0, 0); font-size: 0.7rem;">■</span> <strong style="font-size: 0.7rem;">PE:</strong> Partidos empatados
+                                        </div>
+                                        <div class="col-6 col-md-3 mb-2">
+                                            <span style="color: red; font-size: 0.7rem;">■</span> <strong style="font-size: 0.7rem;">PP:</strong> Partidos perdidos
+                                        </div>
+                                        <div class="col-6 col-md-3 mb-2">
+                                            <span style="color: green; font-size: 0.7rem;">■</span> <strong style="font-size: 0.7rem;">GF:</strong> Goles a favor
+                                        </div>
+                                        <div class="col-6 col-md-3 mb-2">
+                                            <span style="color: red; font-size: 0.7rem;">■</span> <strong style="font-size: 0.7rem;">GC:</strong> Goles en contra
+                                        </div>
+                                        <div class="col-6 col-md-3 mb-2">
+                                            <span style="color: rgb(0, 0, 0); font-size: 0.7rem;">■</span> <strong style="font-size: 0.7rem;">DG:</strong> Diferencia de goles
+                                        </div>
+                                        <div class="col-6 col-md-3 mb-2">
+                                            <span style="color: rgb(0, 0, 0); font-size: 0.7rem;">■</span> <strong style="font-size: 0.7rem;">PTS:</strong> Puntos
+                                        </div>
+                                    </div>
+                                
                             {% endif %}
                         {% endif %}
                     </div>
