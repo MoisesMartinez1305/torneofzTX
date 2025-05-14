@@ -167,6 +167,9 @@
     .bg-dark-blue {
     background-color: #0d3b66;
 }
+.simbologia-container {
+    font-size: 0.9rem;
+}
 
     /* Estilos para móviles */
     @media (max-width: 768px) {
@@ -188,6 +191,7 @@
             margin: 0 auto; /* Centrar la tarjeta */
             width: 90%;
         }
+
         /* Tablas responsivas */
         .table-responsive {
             overflow-x: auto;
@@ -198,15 +202,14 @@
         
         /* Tablas ajustadas al contenido */
         .table {
-            width: auto; /* Ajustar el ancho de la tabla al contenido */
+            width: 100% !important;
             min-width: 100%;
         }
         
         .table th, .table td {
             white-space: nowrap;
-            padding: 0.4rem; /* Ajustar margen hacia arriba y abajo del contenido */
+            padding: 0.5rem;
             font-size: 0.8rem;
-            width: auto; /* Ajustar el ancho de la columna al contenido */
         }
         
         /* Tabla de posiciones con columnas fijas */
@@ -216,16 +219,25 @@
             -webkit-overflow-scrolling: touch;
             width: 100%;
         }
+        /* Columna local y visita */
+        td:nth-child(2), td:nth-child(4) {
+            min-width: 190px !important; /* Reduce el mínimo para móviles */
+            font-size: 0.85rem !important;
+            min-width: auto !important;
+        }
+        .team-logo {
+            width: 18px !important;
+            height: 18px !important;
+        }
         
         .table-standings {
-            width: auto; /* Ajustar el ancho de la tabla al contenido */
+            width: 100%;
             min-width: 100%;
         }
         
         .table-standings th, .table-standings td {
             white-space: nowrap;
             font-size: 0.8rem;
-            width: auto; /* Ajustar el ancho de la columna al contenido */
         }
         
         /* Columnas fijas para posición y equipo */
@@ -270,9 +282,10 @@
         .badge {
             font-size: 0.7rem;
         }
+        
         /* Ajustes para goleadores en móviles */
         .goleador-card {
-            padding: 5px;
+            padding: 10px;
         }
         
         .goleador-position, .goles-badge {
@@ -343,12 +356,8 @@
 
 .table th, .table td {
     white-space: nowrap; /* Evitar que el contenido se ajuste en varias líneas */
-    padding: 0.2rem !important; /* Ajustar el espacio interno */
-    padding-right: 0.3rem !important; /* Espacio a la derecha */
-    padding-left: 0.3rem !important; /* Espacio a la izquierda */
-    font-size: 0.75rem; /* Tamaño de letra ajustado para móviles */
-    vertical-align: middle; /* Alinear verticalmente el contenido */
-    width: auto; /* Ajustar el ancho de la columna al contenido */
+    padding: 0.5 rem; /* Ajustar el espacio interno */
+    font-size: 0.6rem; /* Tamaño de letra ajustado para móviles */
 }
 
 /* Estilos para la tabla de goleadores */
@@ -379,7 +388,7 @@
 }
 
 .table-scorers tbody td {
-    padding: 1rem;
+    padding: 12px 15px;
     vertical-align: middle;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
@@ -448,8 +457,8 @@
 @media (max-width: 768px) {
     .table-scorers thead th,
     .table-scorers tbody td {
-        padding: 0.1rem;
-        font-size: 0.7rem;
+        padding: 8px 10px;
+        font-size: 0.8rem;
     }
     
     .table-scorers .jornada-badge {
@@ -691,9 +700,7 @@
                                                                                         </div>
                                                                                     {% endif %}
                                                                                 </td>
-                                                                                <div>   
-
-                                                                                </div>
+                                                                                
                                                                                 <td class="text-center">
                                                                                     {% if partido.jugado and not partido.es_descanso %}
                                                                                         <span class="badge bg-primary rounded-pill px-3 py-1">
@@ -705,9 +712,7 @@
                                                                                         <span class="text-muted">VS</span>
                                                                                     {% endif %}
                                                                                 </td>
-                                                                                <div>
-
-                                                                                </div>
+                                                                                
                                                                                 <td class="fw-bold text-center">
                                                                                     {% if partido.es_descanso or partido.equipo_visitante == "Descanso" %}
                                                                                         <i class="fas fa-moon text-muted"></i> Descanso
