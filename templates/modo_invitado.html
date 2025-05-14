@@ -346,8 +346,8 @@
 
 .table th, .table td {
     white-space: nowrap; /* Evitar que el contenido se ajuste en varias líneas */
-    padding: 0.5 rem; /* Ajustar el espacio interno */
-    font-size: 0.6rem; /* Tamaño de letra ajustado para móviles */
+    padding: 1 rem !important; /* Ajustar el espacio interno */
+    font-size: 0.75rem; /* Tamaño de letra ajustado para móviles */
 }
 
 /* Estilos para la tabla de goleadores */
@@ -448,7 +448,7 @@
     .table-scorers thead th,
     .table-scorers tbody td {
         padding: 8px 10px;
-        font-size: 0.8rem;
+        font-size: 0.7rem;
     }
     
     .table-scorers .jornada-badge {
@@ -690,7 +690,9 @@
                                                                                         </div>
                                                                                     {% endif %}
                                                                                 </td>
-                                                                                
+                                                                                <div>   
+
+                                                                                </div>
                                                                                 <td class="text-center">
                                                                                     {% if partido.jugado and not partido.es_descanso %}
                                                                                         <span class="badge bg-primary rounded-pill px-3 py-1">
@@ -702,7 +704,9 @@
                                                                                         <span class="text-muted">VS</span>
                                                                                     {% endif %}
                                                                                 </td>
-                                                                                
+                                                                                <div>
+
+                                                                                </div>
                                                                                 <td class="fw-bold text-center">
                                                                                     {% if partido.es_descanso or partido.equipo_visitante == "Descanso" %}
                                                                                         <i class="fas fa-moon text-muted"></i> Descanso
