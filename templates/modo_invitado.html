@@ -188,7 +188,6 @@
             margin: 0 auto; /* Centrar la tarjeta */
             width: 90%;
         }
-
         /* Tablas responsivas */
         .table-responsive {
             overflow-x: auto;
@@ -199,13 +198,13 @@
         
         /* Tablas ajustadas al contenido */
         .table {
-            width: 100% !important;
+            width: auto; /* Ajustar el ancho de la tabla al contenido */
             min-width: 100%;
         }
         
         .table th, .table td {
             white-space: nowrap;
-            padding: 0.4rem; /* Ajustar margen hacie arriba y abajo del contenido*/
+            padding: 0.4rem; /* Ajustar margen hacia arriba y abajo del contenido */
             font-size: 0.8rem;
             width: auto; /* Ajustar el ancho de la columna al contenido */
         }
@@ -219,13 +218,14 @@
         }
         
         .table-standings {
-            width: 100%;
+            width: auto; /* Ajustar el ancho de la tabla al contenido */
             min-width: 100%;
         }
         
         .table-standings th, .table-standings td {
             white-space: nowrap;
             font-size: 0.8rem;
+            width: auto; /* Ajustar el ancho de la columna al contenido */
         }
         
         /* Columnas fijas para posición y equipo */
@@ -254,7 +254,6 @@
         /* Ajustes para jornadas */
         .accordion-item {
             width: 100%;
-           
         }
 
         /* Ajustes para pestañas */
@@ -271,7 +270,6 @@
         .badge {
             font-size: 0.7rem;
         }
-        
         /* Ajustes para goleadores en móviles */
         .goleador-card {
             padding: 5px;
