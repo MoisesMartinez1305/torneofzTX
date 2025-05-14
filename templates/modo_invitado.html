@@ -342,6 +342,11 @@
     padding: 0 !important; /* Eliminar padding */
 }
 
+.table {
+    table-layout: fixed; /* Ajustar el ancho de las columnas automáticamente */
+    width: 100%; /* Asegurar que la tabla ocupe todo el ancho disponible */
+}
+
 .table th, .table td {
     white-space: nowrap; /* Evitar que el contenido se ajuste en varias líneas */
     padding: 0.2rem !important; /* Ajustar el espacio interno */
@@ -349,8 +354,6 @@
     padding-left: 0.3rem !important; /* Espacio a la izquierda */
     font-size: 0.75rem; /* Tamaño de letra ajustado para móviles */
     vertical-align: middle; /* Alinear verticalmente el contenido */
-    width: auto; /* Ajustar el ancho de la columna al contenido */
-    max-width: calc(5ch + 20px); /* Limitar el ancho máximo de las columnas a 5 palabras aproximadamente */
     overflow: hidden; /* Ocultar contenido que exceda el ancho */
     text-overflow: ellipsis; /* Mostrar puntos suspensivos si el texto es demasiado largo */
 }
