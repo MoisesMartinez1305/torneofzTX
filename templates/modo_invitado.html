@@ -1102,28 +1102,28 @@
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td class="text-center">{{ equipo.partidos_jugados }}</td>
+                                                <td class="text-center"><strong>{{ equipo.partidos_jugados }}</strong></td>
                                                 <td class="text-center" style="color: rgb(3, 84, 235);">
                                                     {% set stats = calcular_estadisticas_equipo(equipo) %}
-                                                    {{ stats['ganados'] }}
+                                                    <strong>{{ stats['ganados'] }}</strong>
                                                 </td>
                                                 <td class="text-center">
-                                                    {{ stats['empatados'] }}
+                                                    <strong>{{ stats['empatados'] }}</strong>
                                                 </td>
                                                 <td class="text-center" style="color: red;">
-                                                    {{ stats['perdidos'] }}
+                                                    <strong>{{ stats['perdidos'] }}</strong>
                                                 </td>
                                                 <td class="text-center" style="color: green;">
-                                                    {{ equipo.goles_favor }}
+                                                    <strong>{{ equipo.goles_favor }}</strong>
                                                 </td>
                                                 <td class="text-center" style="color: red;">
-                                                    {{ equipo.goles_contra }}
+                                                    <strong>{{ equipo.goles_contra }}</strong>
                                                 </td>
                                                 <td class="text-center">
-                                                    {{ equipo.diferencia_goles }}
+                                                    <strong>{{ equipo.diferencia_goles }}</strong>
                                                 </td>
                                                 <td class="text-center fw-bold">
-                                                    {{ equipo.puntos }}
+                                                    <strong>{{ equipo.puntos }}</strong>
                                                 </td>
                                             </tr>
                                             {% endfor %}
