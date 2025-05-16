@@ -31,9 +31,10 @@
 
 .nav-tabs-modern .nav-link.active {
     color: #fff;
-    background-color: #0d3b66;
+    background-color: #031194;
     border: none;
     font-weight: 600;
+    text-shadow: 0 0 1px #00FFFF, 0 0 2px #00FFFF, 0 0 3px #00FFFF, 0 0 4px #00FFFF, 0 0 5px #00FFFF, 0 0 6px #00FFFF, 0 0 7px #00FFFF;
 }
 
 .nav-tabs-modern .nav-link.active::after {
@@ -247,8 +248,8 @@
             position: sticky;
             left: 0;
             z-index: 1;
-            background-color: #007bff;
-            color: white;
+            padding: 0.2rem !important;
+        
         }
         
         .accordion-body {
@@ -372,12 +373,13 @@
 }
 
 .table-scorers thead th {
-    background-color: #0d3b66;
+    background-color: #031194;
     color: white;
     padding: 12px 15px;
     text-align: center;
     font-weight: 600;
     border: none;
+    text-shadow: 0 0 5px #00FFFF, 0 0 10px #00FFFF, 0 0 20px #00FFFF;
 }
 
 .table-scorers tbody tr {
@@ -402,26 +404,34 @@
 .table-scorers .position-cell {
     font-weight: bold;
     color: white;
-    background-color: #007bff;
+    background-color: #031194;
     border-radius: 5px 0 0 5px;
+    text-shadow: 0 0 5px #00FFFF, 0 0 10px #00FFFF, 0 0 20px #00FFFF;
 }
 
 .table-scorers .player-cell {
     text-align: left;
     font-weight: 500;
+    background-color: #031194 !important;
+    color: white;
+    padding-left: 1rem;
 }
 
 .table-scorers .team-cell {
     text-align: left;
     display: flex;
     align-items: center;
+    background-color: #031194 !important;
+    color: white;
+    padding-left: 1rem;
 }
 
 .table-scorers .goals-cell {
     font-weight: bold;
-    color: #28a745;
-    background-color: rgba(40, 167, 69, 0.1);
+    color: white !important;
+    background-color: #031194;
     border-radius: 0 5px 5px 0;
+    text-shadow: 0 0 5px #00FFFF, 0 0 10px #00FFFF, 0 0 20px #00FFFF;
 }
 
 .table-scorers .jornada-badge {
@@ -450,8 +460,8 @@
 }
 
 .top-scorer .position-cell {
-    background-color: gold;
-    color: #0d3b66;
+    background-color: #060f5f;
+    color: white;
 }
 
 /* Estilos para móviles en tabla de goleadores */
@@ -473,7 +483,7 @@
 }
 </style>
 
-<div class="container mt-4 mt-md-5" style="background-color: #0d3b66; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+<div class="container mt-4 mt-md-5" style="background-color: #031194; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
     <!-- Encabezado principal mejorado -->
     <div class="text-center mb-5">
         <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="Logo del torneo" class="img-fluid mb-3" style="max-width: 120px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
@@ -497,7 +507,7 @@
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card liga-card h-100 border-0 overflow-hidden shadow" 
                      onclick="document.getElementById('ligaCollapse{{ datos.categoria.id }}').classList.toggle('show')"
-                     style="cursor: pointer; background: linear-gradient(135deg, #00baf3 0%, #0b669e 100%);">
+                     style="cursor: pointer; background: linear-gradient(to bottom, #0068f0 20%, #0f6ce7 80%);">
                     <div class="card-body p-4 d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
@@ -1089,10 +1099,10 @@
                                         <tbody>
                                             {% for equipo in datos.tabla %}
                                             <tr>
-                                                <td class="text-center fw-bold" style="background-color: #031194; color: white; border-radius: 5px; text-shadow: 0 0 5px #00FFFF, 0 0 10px #00FFFF, 0 0 20px #00FFFF; ">
+                                                <td class="text-center fw-bold" style="background-color: #031194; color: white; text-shadow: 0 0 5px #00FFFF, 0 0 10px #00FFFF, 0 0 20px #00FFFF; ">
                                                     {{ loop.index }}
                                                 </td>
-                                                <td class="fw-bold" style="background-color: #031194; color: white; border-radius: 5px;">
+                                                <td class="fw-bold" style="background-color: #031194; color: white;">
                                                     <div class="team-with-logo d-flex align-items-center">
                                                         <div class="team-logo-container">
                                                             <img src="{{ get_logo_path(equipo) }}" class="team-logo">
@@ -1124,7 +1134,7 @@
                                                 <td class="text-center" style="background-color: #031194; color: white; ">
                                                     <strong>{{ equipo.diferencia_goles }}</strong>
                                                 </td>
-                                                <td class="text-center fw-bold" style="background-color: #031194; color: white; text-shadow: 0 0 5px #00FFFF, 0 0 10px #00FFFF, 0 0 20px #00FFFF; border-radius: 5px;">
+                                                <td class="text-center fw-bold" style="background-color: #031194; color: white; text-shadow: 0 0 5px #00FFFF, 0 0 10px #00FFFF, 0 0 20px #00FFFF;">
                                                     <strong>{{ equipo.puntos }}</strong>
                                                 </td>
                                             </tr>
