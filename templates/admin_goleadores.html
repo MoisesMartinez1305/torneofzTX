@@ -67,6 +67,25 @@
     .select2-container--default .select2-results > .select2-results__options {
         background-color: white !important;
     }
+
+    /* Estilos para el buscador */
+    .search-container {
+        margin-bottom: 20px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .search-input {
+        border-radius: 20px;
+        padding-left: 40px;
+    }
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 10px;
+        color: #6c757d;
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -78,9 +97,34 @@
             </button>
         </div>
         
+        <!-- Buscador de Goleadores -->
+        <div class="search-container mb-4">
+            <div class="row">
+                <div class="col-md-6 position-relative">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" class="form-control search-input" placeholder="Buscar por nombre o equipo...">
+                </div>
+                <div class="col-md-3">
+                    <select id="filterTeam" class="form-select">
+                        <option value="">Todos los equipos</option>
+                        {% for categoria in categorias %}
+                            {% for equipo in categoria.equipos %}
+                                <option value="{{ equipo.nombre }}">{{ equipo.nombre }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button id="resetSearch" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-undo me-1"></i>Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+        
         {% if goleadores %}
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover" id="goleadoresTable">
                     <thead class="table-primary">
                         <tr>
                             <th>#</th>
@@ -93,15 +137,15 @@
                     </thead>
                     <tbody>
                         {% for goleador in goleadores %}
-                        <tr>
+                        <tr class="goleador-row" data-nombre="{{ goleador.nombre|lower }}" data-equipo="{{ goleador.equipo|lower }}">
                             <td>{{ loop.index }}</td>
-                            <td>{{ goleador.nombre }}</td>
+                            <td class="goleador-nombre">{{ goleador.nombre }}</td>
                             <td>
                                 <div class="team-with-logo d-flex align-items-center">
                                     {% for categoria in categorias if categoria.id == goleador.categoria_id %}
                                         {% for equipo in categoria.equipos if equipo.nombre == goleador.equipo %}
                                             <img src="{{ get_logo_path(equipo) }}" class="team-logo">
-                                            <span>{{ equipo.nombre }}</span>
+                                            <span class="goleador-equipo">{{ equipo.nombre }}</span>
                                         {% endfor %}
                                     {% endfor %}
                                 </div>
@@ -132,52 +176,6 @@
                                 </form>
                             </td>
                         </tr>
-                                                <!-- Modal para editar goles -->
-                        {% for goleador in goleadores %}
-                        <div class="modal fade" id="modalEditarGoles{{ goleador.id }}" tabindex="-1" 
-                            aria-labelledby="modalEditarGolesLabel{{ goleador.id }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header bg-primary text-white">
-                                        <h5 class="modal-title" id="modalEditarGolesLabel{{ goleador.id }}">
-                                            <i class="fas fa-edit me-2"></i>Editar Goles: {{ goleador.nombre }}
-                                        </h5>
-                                        <button type="button" class="btn-close btn-close-white" 
-                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ url_for('administrar_goleadores') }}" method="POST">
-                                        <input type="hidden" name="update_goles" value="1">
-                                        <input type="hidden" name="goleador_id" value="{{ goleador.id }}">
-                                        <div class="modal-body">
-                                            <div class="mb-3">
-                                                <label class="form-label fw-bold" style="color: black;">Jornada</label>
-                                                <select class="form-select" name="jornada" required>
-                                                    {% for jornada_num in jornadas_por_categoria[goleador.categoria_id] %}
-                                                        <option value="{{ jornada_num }}">
-                                                            Jornada {{ jornada_num }}
-                                                        </option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label fw-bold" style="color: black;">Cantidad de Goles</label>
-                                                <input type="number" class="form-control" name="goles" min="0" value="0" required>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" 
-                                                    data-bs-dismiss="modal">
-                                                <i class="fas fa-times me-1"></i>Cancelar
-                                            </button>
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-save me-1"></i>Guardar
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
                         {% endfor %}
                     </tbody>
                 </table>
@@ -245,6 +243,51 @@
     </div>
 </div>
 
+<!-- Modales para editar goles (uno por cada goleador) -->
+{% for goleador in goleadores %}
+<div class="modal fade" id="modalEditarGoles{{ goleador.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Editar Goles: {{ goleador.nombre }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form class="goles-form" action="{{ url_for('administrar_goleadores') }}" method="POST">
+                <input type="hidden" name="update_goles" value="1">
+                <input type="hidden" name="goleador_id" value="{{ goleador.id }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Jornada</label>
+                        <select class="form-select jornada-select" name="jornada" required>
+                            {% for jornada_num in jornadas_por_categoria[goleador.categoria_id] %}
+                                {% set jornada_str = jornada_num|string %}
+                                <option value="{{ jornada_str }}" data-goles="{{ goleador.goles_por_jornada.get(jornada_str, 0) }}"
+                                        data-goles="{{ goleador.goles_por_jornada.get(jornada_str, 0)|int }}">
+                                    Jornada {{ jornada_num }}
+                                    {% if goleador.goles_por_jornada.get(jornada_str, 0) > 0 %}
+                                        ({{ goleador.goles_por_jornada.get(jornada_str, 0) }} goles)
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cantidad de Goles</label>
+                        {% set primera_jornada = jornadas_por_categoria[goleador.categoria_id][0]|string %}
+                        <input type="number" class="form-control goles-input" name="goles" 
+                               value="{{ goleador.goles_por_jornada.get(primera_jornada, 0)|int }}" min="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
@@ -252,7 +295,7 @@
 
 <script>
 $(document).ready(function() {
-    // Inicializar Select2
+    // 1. Inicializar Select2
     $('#selectCategoria, #selectEquipo').select2({
         dropdownParent: $('#modalAgregarGoleador'),
         width: '100%',
@@ -261,7 +304,7 @@ $(document).ready(function() {
         $('.select2-results__options').css('background-color', 'white');
     });
 
-    // Filtrar equipos al cambiar categoría
+    // 2. Filtrar equipos al cambiar categoría
     $('#selectCategoria').change(function() {
         const categoriaId = $(this).val();
         const $selectEquipo = $('#selectEquipo');
@@ -274,6 +317,64 @@ $(document).ready(function() {
             $selectEquipo.val('').trigger('change').prop('disabled', true);
         }
     });
+
+    // 3. Manejar goles por jornada
+    $(document).on('shown.bs.modal', '.modal', function() {
+        const $modal = $(this);
+        const $form = $modal.find('.goles-form');
+        
+        if ($form.length) {
+            const $jornadaSelect = $form.find('.jornada-select');
+            const $golesInput = $form.find('.goles-input');
+            
+            function actualizarGoles() {
+                const selectedOption = $jornadaSelect.find('option:selected');
+                const goles = selectedOption.data('goles') || 0;
+                $golesInput.val(goles);
+            }
+            
+            $jornadaSelect.off('change.goles').on('change.goles', actualizarGoles);
+            actualizarGoles();
+        }
+    });
+
+    // 4. Implementación del buscador
+    function filtrarGoleadores() {
+        const searchText = $('#searchInput').val().toLowerCase();
+        const filterTeam = $('#filterTeam').val().toLowerCase();
+        
+        $('.goleador-row').each(function() {
+            const $row = $(this);
+            const nombre = $row.data('nombre');
+            const equipo = $row.data('equipo');
+            
+            const matchNombre = nombre.includes(searchText) || searchText === '';
+            const matchEquipo = equipo.includes(filterTeam) || filterTeam === '';
+            
+            if (matchNombre && matchEquipo) {
+                $row.show();
+            } else {
+                $row.hide();
+            }
+        });
+        
+        // Reordenar números de fila visibles
+        $('#goleadoresTable tbody tr:visible').each(function(index) {
+            $(this).find('td:first').text(index + 1);
+        });
+    }
+    
+    $('#searchInput').on('input', filtrarGoleadores);
+    $('#filterTeam').on('change', filtrarGoleadores);
+    
+    $('#resetSearch').click(function() {
+        $('#searchInput').val('');
+        $('#filterTeam').val('').trigger('change');
+        filtrarGoleadores();
+    });
+
+    // Inicializar filtro al cargar la página
+    filtrarGoleadores();
 });
 </script>
 {% endblock %}

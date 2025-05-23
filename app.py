@@ -78,7 +78,7 @@ class Goleador(db.Model):
     categoria_id = db.Column(db.Integer, db.ForeignKey('categoria.id'), nullable=False)
     categoria = db.relationship('Categoria', backref='goleadores')
     total_goles = db.Column(db.Integer, default=0)
-    goles_por_jornada = db.Column(db.JSON, default={})
+    goles_por_jornada = db.Column(db.JSON, default=lambda: {})
 
 # Funciones auxiliares
 def allowed_file(filename):
@@ -595,24 +595,25 @@ def administrar_goleadores():
             
             elif 'update_goles' in request.form:
                 goleador_id = int(request.form['goleador_id'])
-                jornada = request.form['jornada']  # Mantenemos como string para consistencia con JSON
+                jornada = request.form['jornada']  # Mantener como string
                 goles = int(request.form['goles'])
                 
                 goleador = Goleador.query.get(goleador_id)
                 if goleador:
-                    # Inicializar goles_por_jornada si es None
+                    # Asegurar que goles_por_jornada es un diccionario
                     if goleador.goles_por_jornada is None:
                         goleador.goles_por_jornada = {}
                     
-                    # Convertir a string para consistencia con el almacenamiento JSON
-                    jornada_str = str(jornada)
+                    # Convertir claves a strings por si acaso
+                    goles_por_jornada = {str(k): v for k, v in goleador.goles_por_jornada.items()}
                     
-                    # Calcular diferencia para el total
-                    goles_anteriores = goleador.goles_por_jornada.get(jornada_str, 0)
+                    # Calcular diferencia
+                    goles_anteriores = goles_por_jornada.get(jornada, 0)
                     diferencia = goles - goles_anteriores
                     
-                    # Actualizar los goles
-                    goleador.goles_por_jornada[jornada_str] = goles
+                    # Actualizar
+                    goles_por_jornada[jornada] = goles
+                    goleador.goles_por_jornada = goles_por_jornada
                     goleador.total_goles += diferencia
                     
                     db.session.commit()
@@ -831,10 +832,10 @@ def actualizar_tabla():
 @admin_required
 def reiniciar_torneo():
     try:
+        db.session.query(Goleador).delete()
         db.session.query(Partido).delete()
         db.session.query(Equipo).delete()
         db.session.query(Grupo).delete()
-        db.session.query(Goleador).delete()
         db.session.query(Categoria).delete()
         torneo = Torneo.query.first()
         if torneo:
