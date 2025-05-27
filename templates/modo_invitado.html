@@ -254,13 +254,15 @@
         
         /* Tablas responsivas */
         .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            touch-action: pan-x;
-            display: block;
+            overflow-x: auto !important;              /* Mostrar scroll solo cuando es necesario */
+            overflow-y: auto !important;              /* Permite scroll vertical si es necesario */
+            -webkit-overflow-scrolling: touch;        /* Mejora el scroll en iOS */
+            touch-action: auto !important;            /* Permite gestos normales: scroll y zoom */
+            display: block !important;                /* Asegura el comportamiento esperado del scroll */
             width: 100%;
             padding-bottom: 10px;
         }
+
         
         .table th, .table td {
             padding: 0.3rem;
@@ -274,14 +276,16 @@
         text-align: left !important;
     }
         
-        /* Tabla de posiciones en móvil */
-        .table-standings-container {
-            -webkit-overflow-scrolling: touch;
-            touch-action: pan-x;
-            overflow-x: scroll;
-            padding-bottom: 15px;
+       /* Tabla de posiciones en móvil */
+    .table-standings-container {
+        -webkit-overflow-scrolling: touch;
+        touch-action: auto;               /* <-- Permite gestos normales: scroll y zoom */
+        overflow-x: auto !important;      /* <-- auto en vez de scroll es más natural */
+        overflow-y: auto !important;      /* <-- Por si hay desborde vertical en algunos casos */
+        display: block !important;        /* <-- Forzar bloque para scroll horizontal correcto */
+        padding-bottom: 15px;
+    }
 
-        }
         
         .table-standings {
             width: auto;
@@ -292,21 +296,31 @@
             z-index: 3;
         }
         
-        /* Tabla de goleadores en móvil */
-        .table-scorers thead th{
+      /* Tabla de goleadores en móvil */
+        .table-scorers thead th {
             padding: 0.5rem !important;
             font-size: 0.75rem !important;
-            border: 0.01px solid #ffffff !important; /* Borde neón cian */
-            box-shadow: 0 0 3px #00ffff, 0 0 6px #00ffff; /* Efecto neón */
+            border: 0.01px solid #ffffff !important;          /* Borde neón cian */
+            box-shadow: 0 0 3px #00ffff, 0 0 6px #00ffff;     /* Efecto neón */
             width: auto !important;
+            overflow: hidden;                                /* Asegura control de contenido */
+            white-space: nowrap;                             /* Evita salto de línea */
+            text-overflow: ellipsis;
+            touch-action: auto !important;                   /* Permite scroll y zoom */
         }
+
         .table-scorers tbody td {
-            padding: 0.001rem !important;
+            padding: 0.25rem !important;                     /* Más razonable que 0.001rem */
             font-size: 0.7rem !important;
-            border: 0px solid #ffffff !important; /* Borde neón cian */
-            box-shadow: 0 0 1px #00ffff, 0 0 3px #00ffff; /* Efecto neón */
+            border: none !important;                         /* Limpieza del borde */
+            box-shadow: 0 0 1px #00ffff, 0 0 3px #00ffff;     /* Efecto neón */
             width: auto !important;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            touch-action: auto !important;                   /* Permite scroll y zoom */
         }
+
         
         .table-scorers .goals-cell {
             text-align: center !important;
@@ -341,6 +355,7 @@
         .table {
             width: auto !important;
             min-width: 100%;
+            
         }
     }
 </style>
