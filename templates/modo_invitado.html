@@ -47,9 +47,12 @@
     }
     
     .team-logo {
+        width: 30px;
+        height: 30px;
         max-width: 100%;
         max-height: 100%;
         object-fit: contain;
+        display: inline-block;
     }
     
     .team-name {
@@ -187,7 +190,7 @@
         color: white;
         background-color: #031194;
         border-radius: 5px 0 0 5px;
-        text-shadow: 0 0 5px #00FFFF;
+        text-shadow: 0 0 1px #00FFFF, 0 0 5px #00FFFF, 0 0 10px #00FFFF !important;
     }
     
     .table-scorers .player-cell{
@@ -196,14 +199,14 @@
         background-color: #031194 !important;
         color: white;
         padding-left: 1rem !important;
-        text-shadow: 0 0 2px #00FFFF;
+        text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
     }
     .table-scorers .team-cell {
         text-align: left;
         font-weight: 500;
         background-color: #031194 !important;
         color: white;
-        padding-left: 1rem !important;
+        padding-left: 0.5rem !important;
     }
     
     .table-scorers .team-cell {
@@ -216,7 +219,7 @@
         color: white !important;
         background-color: #031194;
         border-radius: 0 5px 5px 0;
-        text-shadow: 0 0 5px #00FFFF;
+        text-shadow: 0 0 1px #00FFFF, 0 0 5px #00FFFF, 0 0 10px #00FFFF;
         text-align: center !important;
     }
     
@@ -264,17 +267,73 @@
         }
 
         
-        .table th, .table td {
+        .table th {
             padding: 0.3rem;
             font-size: 0.7rem !important;
+            border: 0.01px solid #ffffff !important;          /* Borde neón cian */
+            box-shadow: 0 0 3px #00ffff, 0 0 6px #00ffff; 
+
+        }
+         .table td {
+            padding: 0.3rem;
+            font-size: 0.7rem !important;
+            border: none !important;                         /* Limpieza del borde */
+            box-shadow: 0 0 1px #00ffff, 0 0 3px #00ffff !important;  
+            border-radius: 3px !important; /* Bordes redondeados */
         }
 
          /* Padding específico para columnas Local y Visitante */
-        table.table-striped tbody tr td:nth-child(2), /* Local */
-        table.table-striped tbody tr td:nth-child(4) { /* Visitante */
-        padding-right: 1rem !important;
-        text-align: left !important;
-    }
+        /* Local */
+        table.table-striped thead th:nth-child(2) {
+            background: #031194 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+        }
+        table.table-striped tbody tr td:nth-child(2) {
+            padding-right: 1.3rem !important;
+            text-align: left !important;
+            
+        }
+
+        /* Visitante */
+        table.table-striped thead th:nth-child(4) {
+            background: #031194 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+        }
+        table.table-striped tbody tr td:nth-child(4) {
+            padding-right: 1.3rem !important;
+            text-align: left !important;
+            
+        }
+
+        /* Fecha/Hora */
+        table.table-striped thead th:nth-child(1) {
+            background: #031194 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+        }
+        table.table-striped tbody tr td:nth-child(1) {
+            background: #fff !important;
+            
+        }
+
+        /* Resultado */
+        table.table-striped thead th:nth-child(3) {
+            background: #031194 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+        }
+        table.table-striped tbody tr td:nth-child(3) {
+            background: #fff !important;
+            
+        }
+
+        /* Estado */
+        table.table-striped thead th:nth-child(5) {
+            background: #031194 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+        }
+        table.table-striped tbody tr td:nth-child(5) {
+            background: #fff !important;
+            
+        }
         
        /* Tabla de posiciones en móvil */
     .table-standings-container {
@@ -284,6 +343,7 @@
         overflow-y: auto !important;      /* <-- Por si hay desborde vertical en algunos casos */
         display: block !important;        /* <-- Forzar bloque para scroll horizontal correcto */
         padding-bottom: 15px;
+        
     }
 
         
@@ -301,7 +361,7 @@
             padding: 0.5rem !important;
             font-size: 0.75rem !important;
             border: 0.01px solid #ffffff !important;          /* Borde neón cian */
-            box-shadow: 0 0 3px #00ffff, 0 0 6px #00ffff;     /* Efecto neón */
+           text-shadow: 0 0 1px #00FFFF, 0 0 5px #00FFFF, 0 0 10px #00FFFF;     /* Efecto neón */
             width: auto !important;
             overflow: hidden;                                /* Asegura control de contenido */
             white-space: nowrap;                             /* Evita salto de línea */
@@ -310,7 +370,7 @@
         }
 
         .table-scorers tbody td {
-            padding: 0.25rem !important;                     /* Más razonable que 0.001rem */
+            padding: 0.001rem !important;                     /* Más razonable que 0.001rem */
             font-size: 0.7rem !important;
             border: none !important;                         /* Limpieza del borde */
             box-shadow: 0 0 1px #00ffff, 0 0 3px #00ffff;     /* Efecto neón */
@@ -327,6 +387,7 @@
             display: table-cell !important;
             padding-left: 0 !important;
             padding-right: 0 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 5px #00FFFF, 0 0 10px #00FFFF;
         }
         
         .table-scorers .jornada-badge {
