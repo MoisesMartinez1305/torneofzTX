@@ -9,7 +9,7 @@
         background-color: #f8f9fa;
         border-radius: 10px;
         padding: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 10px rgb(3, 6, 182);
         font-size: 0.875rem;
     }
 
@@ -44,6 +44,15 @@
             width: 20px;
             margin-right: 6px;
         }
+        .goleadores-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 0;
+            font-size: 0.875rem;
+            margin: 0 !important; /* Elimina el margen para alinear al container */
+            box-shadow: none !important; /* Elimina la sombra en móviles para mayor alineación */
+            
+        }
     }
 
     /* Estilos para Select2 */
@@ -61,7 +70,7 @@
     .select2-container--open .select2-dropdown {
         background-color: white !important;
         border-color: #86b7fe;
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        box-shadow: 0 0.5rem 1rem rgba(255, 0, 0, 0.15);
     }
 
     .select2-container--default .select2-results > .select2-results__options {
@@ -74,17 +83,29 @@
         background: #fff;
         padding: 15px;
         border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgb(2, 10, 128);
     }
     .search-input {
         border-radius: 20px;
         padding-left: 40px;
+        text-align: center !important;
+        color: white !important;
+        background-color: #08034d52;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        
+    }
+    .search-input:focus {
+        background-color: #0d6efd;
+        color: #fff;
+        border-color: #0d6efd;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(2, 10, 88, 0.973);
     }
     .search-icon {
         position: absolute;
-        left: 15px;
+        left: 55px;
         top: 10px;
-        color: #6c757d;
+        color: #ffffff;
     }
 </style>
 
@@ -102,7 +123,7 @@
             <div class="row">
                 <div class="col-md-6 position-relative">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" class="form-control search-input" placeholder="Buscar por nombre o equipo...">
+                    <input type="text" id="searchInput" class="form-control search-input" placeholder="Buscar jugador">
                 </div>
                 <div class="col-md-3">
                     <select id="filterTeam" class="form-select">
@@ -127,7 +148,7 @@
                 <table class="table table-hover" id="goleadoresTable">
                     <thead class="table-primary">
                         <tr>
-                            <th>#</th>
+                            <th>POS</th>
                             <th>Jugador</th>
                             <th>Equipo</th>
                             <th>Categoría</th>
@@ -257,7 +278,7 @@
                 <input type="hidden" name="goleador_id" value="{{ goleador.id }}">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Jornada</label>
+                        <label class="form-label fw-bold" style="color: black;">Jornada</label>
                         <select class="form-select jornada-select" name="jornada" required>
                             {% for jornada_num in jornadas_por_categoria[goleador.categoria_id] %}
                                 {% set jornada_str = jornada_num|string %}
@@ -272,7 +293,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Cantidad de Goles</label>
+                        <label class="form-label fw-bold" style="color: black;">Cantidad de Goles</label>
                         {% set primera_jornada = jornadas_por_categoria[goleador.categoria_id][0]|string %}
                         <input type="number" class="form-control goles-input" name="goles" 
                                value="{{ goleador.goles_por_jornada.get(primera_jornada, 0)|int }}" min="0" required>
