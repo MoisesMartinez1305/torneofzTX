@@ -5,6 +5,68 @@
 {% block admin_content %}
 <style>
     /* General Styles */
+
+/* Estilos para el acordeón de eliminatorias */
+.eliminatoria-accordion .accordion-button:not(.collapsed) {
+    background-color: #f8f9fa;
+    color: #0d6efd;
+}
+
+.eliminatoria-accordion .accordion-item {
+    margin-bottom: 10px;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: 5px;
+}
+
+/* Estilos para los partidos */
+.eliminatoria-match {
+    transition: all 0.3s ease;
+    border-left: 3px solid #0d6efd;
+}
+
+.eliminatoria-match:hover {
+    background-color: #f8f9fa;
+}
+
+.eliminatoria-match.played {
+    border-left-color: #28a745;
+}
+
+.eliminatoria-match.pending {
+    border-left-color: #ffc107;
+}    
+    /* Eliminatorias admin */
+.eliminatorias-admin {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.fase-eliminatoria {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.partido-admin {
+    border-left: 4px solid #007bff;
+    transition: all 0.3s ease;
+}
+
+.partido-admin:hover {
+    border-left-color: #28a745;
+    transform: translateX(5px);
+}
+
+.team-logo-small {
+    height: 20px;
+    width: auto;
+    max-width: 25px;
+    vertical-align: middle;
+}
+
     .overflow-auto {
         overflow-x: auto !important;
     }
@@ -168,6 +230,19 @@
                         <a href="{{ url_for('administrar_goleadores') }}" class="btn btn-light">
                             <i class="fas fa-futbol me-1"></i>Goleadores
                         </a>
+                        <!-- Añade este nuevo botón -->
+                        <a href="{{ url_for('configurar_eliminatorias') }}" class="btn btn-light">
+                            <i class="fas fa-trophy me-1"></i>Eliminatorias
+                        </a>
+                        <!-- Nuevo botón para configurar emparejamientos - SOLO si hay eliminatorias habilitadas -->
+                            {% if torneo.tiene_eliminatorias %}
+                                {% for categoria in categorias %}
+                                    <a href="{{ url_for('actualizar_eliminatorias', categoria_id=categoria.id) }}" 
+                                    class="btn btn-outline-primary ms-2">
+                                        <i class="fas fa-cog me-1"></i>Configurar {{ categoria.nombre }}
+                                    </a>
+                                {% endfor %}
+                            {% endif %}
                     </div>
                 </div>
             </div>
@@ -194,7 +269,6 @@
                 <div class="mb-3">
                     <div class="progress mb-3">
                         <div class="progress-bar" role="progressbar" 
-                            style="width: {% if liga.total_partidos > 0 %}{{ (liga.partidos_jugados / liga.total_partidos * 100) }}{% else %}0{% endif %}%" 
                             aria-valuenow="{{ liga.partidos_jugados }}" 
                             aria-valuemin="0" 
                             aria-valuemax="{{ liga.total_partidos }}">
@@ -784,6 +858,7 @@
                                                     {% endfor %}
                                                 </tbody>
                                             </table>
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -794,6 +869,94 @@
                 </div>
             </div>
         {% endfor %}
+        {% if torneo.tiene_eliminatorias %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Fase de Eliminatorias</h5>
+                    <a href="{{ url_for('configurar_eliminatorias') }}" class="btn btn-sm btn-light">
+                        <i class="fas fa-cog me-1"></i> Configurar
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for liga in datos_ligas if liga.eliminatorias %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-dark text-white">
+                                <h6 class="mb-0">{{ liga.categoria.nombre }}</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="accordion-{{ liga.categoria.id }}">
+                                    {% for eliminatoria in liga.eliminatorias %}
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="heading-{{ loop.index }}">
+                                            <button class="accordion-button collapsed" type="button" 
+                                                    data-bs-toggle="collapse" 
+                                                    data-bs-target="#collapse-{{ liga.categoria.id }}-{{ loop.index }}" 
+                                                    aria-expanded="false" 
+                                                    aria-controls="collapse-{{ liga.categoria.id }}-{{ loop.index }}">
+                                                {{ eliminatoria.fase|replace('_', ' ')|title }}
+                                            </button>
+                                        </h2>
+                                        <div id="collapse-{{ liga.categoria.id }}-{{ loop.index }}" 
+                                             class="accordion-collapse collapse" 
+                                             aria-labelledby="heading-{{ loop.index }}" 
+                                             data-bs-parent="#accordion-{{ liga.categoria.id }}">
+                                            <div class="accordion-body p-0">
+                                                <ul class="list-group list-group-flush">
+                                                    {% for partido in eliminatoria.partidos %}
+                                                    <li class="list-group-item">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>Partido {{ partido.numero_partido }}</strong><br>
+                                                                {{ partido.equipo_local|default("Por definir", true) }} vs 
+                                                                {{ partido.equipo_visitante|default("Por definir", true) }}
+                                                                {% if partido.fecha %}
+                                                                <div class="text-muted small mt-1">
+                                                                    <i class="far fa-calendar-alt"></i> 
+                                                                    {{ partido.fecha.strftime('%d/%m/%Y') }}
+                                                                    {% if partido.hora %}
+                                                                    - {{ partido.hora }}
+                                                                    {% endif %}
+                                                                </div>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="text-end">
+                                                                {% if partido.jugado %}
+                                                                <span class="badge bg-success">
+                                                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                                                </span>
+                                                                {% else %}
+                                                                <span class="badge bg-secondary">Pendiente</span>
+                                                                {% endif %}
+                                                                <a href="{{ url_for('resultado_eliminatoria', partido_id=partido.id) }}" 
+                                                                   class="btn btn-sm btn-outline-primary mt-2">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
         <!-- Scorers Section -->
         <div class="card mb-4 border-0 shadow">

@@ -1,0 +1,59 @@
+{% extends 'base_admin.html' %}
+
+{% block content %}
+<h2>Editar Formatos de Eliminatorias - {{ categoria.nombre }}</h2>
+
+<form method="POST">
+    {% for eliminatoria in categoria.eliminatorias|sort(attribute='fase') %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5>{{ eliminatoria.fase|replace('_', ' ')|title }}</h5>
+            <small class="text-muted">Formato actual: 
+                {% if eliminatoria.formato == 'single' %}Partido único
+                {% elif eliminatoria.formato == 'ida' %}Solo ida
+                {% else %}Ida y vuelta
+                {% endif %}
+            </small>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label>Formato:</label>
+                <select name="formato_{{ eliminatoria.id }}" class="form-control" onchange="mostrarCampos(this, {{ eliminatoria.id }})">
+                    <option value="single" {% if eliminatoria.formato == 'single' %}selected{% endif %}>Partido único</option>
+                    <option value="ida" {% if eliminatoria.formato == 'ida' %}selected{% endif %}>Solo ida</option>
+                    <option value="ida_vuelta" {% if eliminatoria.formato == 'ida_vuelta' %}selected{% endif %}>Ida y vuelta</option>
+                </select>
+            </div>
+            
+            <!-- Ejemplo de cómo mostrar campos condicionales -->
+            <div id="campos-{{ eliminatoria.id }}">
+                {% if eliminatoria.formato == 'ida_vuelta' %}
+                <div class="alert alert-info mt-2">
+                    <i class="fas fa-info-circle"></i> Esta eliminatoria usa formato de ida y vuelta
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    <a href="{{ url_for('configurar_eliminatorias') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+
+<script>
+function mostrarCampos(selectElement, eliminatoriaId) {
+    const formato = selectElement.value;
+    const camposDiv = document.getElementById(`campos-${eliminatoriaId}`);
+    
+    if (formato === 'ida_vuelta') {
+        camposDiv.innerHTML = `
+            <div class="alert alert-info mt-2">
+                <i class="fas fa-info-circle"></i> Se mostrarán campos para partido de ida y vuelta
+            </div>`;
+    } else {
+        camposDiv.innerHTML = '';
+    }
+}
+</script>
+{% endblock %}

@@ -4,10 +4,673 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <head>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <style>
     /* ===== ESTILOS GENERALES ===== */
+/* Estilo para el contenedor principal del bracket - Versión Premium Optimizada */
+.bracket-container {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #050a1f 0%, #121633 100%);
+    border-radius: 12px;
+    box-shadow: 
+        0 0 25px rgba(0, 150, 255, 0.4),
+        inset 0 0 15px rgba(0, 191, 255, 0.2);
+    position: relative;
+    margin: 30px 0;
+    min-height: 400px;
+    /* Scroll suave en horizontal */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Efecto de borde neón mejorado - Más eficiente */
+.bracket-container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, 
+        #00fff0 0%, 
+        #0080ff 25%, 
+        #00bfff 50%,
+        #0080ff 75%, 
+        #00fff0 100%);
+    z-index: -1;
+    animation: neonBorder 4s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+@keyframes neonBorder {
+    0%, 100% { 
+        opacity: 0.6; 
+        filter: blur(1px);
+    }
+    50% { 
+        opacity: 1; 
+        filter: blur(0px);
+    }
+}
+
+/* Estilo para cada fase de la eliminatoria - Más flexible */
+.bracket-phase {
+    min-width: 280px;
+    max-width: 350px;
+    flex: 0 0 auto;
+    margin: 0 30px;
+    padding: 20px 15px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* Adaptable al número de partidos */
+    gap: 20px;
+}
+
+/* Ajuste automático para diferentes números de partidos */
+.bracket-phase[data-matches="1"] { justify-content: center; }
+.bracket-phase[data-matches="2"] { justify-content: space-around; }
+.bracket-phase[data-matches="4"] { justify-content: space-between; }
+.bracket-phase[data-matches="8"] { gap: 15px; }
+
+/* Líneas conectivas más elegantes */
+.bracket-phase:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -30px;
+    width: 30px;
+    height: 3px;
+    background: linear-gradient(90deg, 
+        rgba(0, 255, 240, 0.9) 0%, 
+        rgba(0, 191, 255, 0.7) 50%,
+        rgba(0, 128, 255, 0.9) 100%);
+    z-index: 2;
+    box-shadow: 
+        0 0 10px rgba(0, 255, 240, 0.5),
+        0 0 20px rgba(0, 191, 255, 0.3);
+    transform: translateY(-1.5px);
+    border-radius: 2px;
+}
+
+/* Línea vertical conectiva premium */
+.bracket-phase:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    bottom: 20%;
+    left: -30px;
+    width: 3px;
+    background: linear-gradient(to bottom, 
+        transparent 5%, 
+        rgba(0, 255, 240, 0.9) 15%, 
+        rgba(0, 191, 255, 0.8) 50%,
+        rgba(0, 128, 255, 0.9) 85%, 
+        transparent 95%);
+    z-index: 2;
+    box-shadow: 
+        0 0 12px rgba(0, 255, 240, 0.4),
+        0 0 25px rgba(0, 128, 255, 0.3);
+    border-radius: 2px;
+}
+
+/* Estilo para cada partido - Ultra Premium */
+.bracket-match {
+    background: linear-gradient(135deg, 
+        rgba(5, 10, 30, 0.95) 0%, 
+        rgba(8, 15, 35, 0.9) 50%,
+        rgba(5, 10, 30, 0.95) 100%);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 0;
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(0, 191, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 191, 255, 0.1);
+    border: 1px solid rgba(0, 191, 255, 0.25);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.bracket-match::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(0, 191, 255, 0.03) 0%, 
+        transparent 50%,
+        rgba(0, 255, 240, 0.02) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.bracket-match:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(0, 191, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 191, 255, 0.2);
+    border-color: rgba(0, 255, 240, 0.5);
+}
+
+.bracket-match:hover::before {
+    opacity: 1;
+}
+
+/* Efecto de brillo más sutil */
+.bracket-match::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, 
+        rgba(0, 255, 240, 0.1) 0%, 
+        transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.bracket-match:hover::after {
+    opacity: 1;
+}
+
+/* Contenedor de equipos más organizado */
+.teams-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* Estilo para los equipos - UX Premium */
+.team {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #e8e8ff;
+    font-weight: 500;
+    font-family: 'Segoe UI', 'Inter', sans-serif;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    min-height: 44px;
+    overflow: hidden;
+}
+
+.team::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: transparent;
+    transition: all 0.3s ease;
+}
+
+.team:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(2px) translateY(-1px);
+    color: #ffffff;
+    border-color: rgba(0, 191, 255, 0.3);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.2),
+        0 0 15px rgba(0, 191, 255, 0.1);
+}
+
+.team:hover::before {
+    background: linear-gradient(to bottom, #00fff0, #0080ff);
+    box-shadow: 0 0 8px rgba(0, 191, 255, 0.4);
+}
+
+/* Contenedor del contenido del equipo */
+.team-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 10px;
+}
+
+/* Nombre del equipo con ellipsis mejorado */
+.team-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.95em;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* Estilo para el equipo ganador - Diseño premium */
+.team.winner {
+    background: linear-gradient(135deg, 
+        rgba(0, 191, 255, 0.12) 0%, 
+        rgba(0, 128, 255, 0.08) 50%,
+        rgba(0, 255, 240, 0.06) 100%);
+    font-weight: 600;
+    color: #00f9ff;
+    border-color: rgba(0, 249, 255, 0.4);
+    text-shadow: 0 0 8px rgba(0, 249, 255, 0.3);
+    position: relative;
+    animation: winnerGlow 3s ease-in-out infinite alternate;
+}
+
+.team.winner::before {
+    background: linear-gradient(to bottom, 
+        #00fff0 0%, 
+        #00bfff 50%, 
+        #0080ff 100%);
+    box-shadow: 
+        0 0 10px rgba(0, 249, 255, 0.5),
+        inset 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+/* Trofeo posicionado estéticamente */
+.trophy-icon {
+    font-size: 1.1em;
+    color: #ffd700;
+    text-shadow: 
+        0 0 8px rgba(255, 215, 0, 0.6),
+        0 0 15px rgba(255, 215, 0, 0.3);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    animation: trophyShine 2s ease-in-out infinite alternate;
+    flex-shrink: 0;
+}
+
+@keyframes trophyShine {
+    0% { 
+        text-shadow: 
+            0 0 8px rgba(255, 215, 0, 0.6),
+            0 0 15px rgba(255, 215, 0, 0.3);
+    }
+    100% { 
+        text-shadow: 
+            0 0 12px rgba(255, 215, 0, 0.8),
+            0 0 20px rgba(255, 215, 0, 0.5),
+            0 0 25px rgba(255, 215, 0, 0.2);
+    }
+}
+
+@keyframes winnerGlow {
+    0% { 
+        box-shadow: 
+            0 4px 12px rgba(0, 0, 0, 0.2),
+            0 0 15px rgba(0, 249, 255, 0.2);
+    }
+    100% { 
+        box-shadow: 
+            0 6px 18px rgba(0, 0, 0, 0.3),
+            0 0 25px rgba(0, 249, 255, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Estilo para los equipos no ganadores */
+.team:not(.winner) {
+    color: #bbb8ff;
+    opacity: 0.85;
+}
+
+.team:not(.winner):hover {
+    opacity: 1;
+}
+
+/* Estilo para los marcadores - Diseño premium */
+.score {
+    font-weight: 700;
+    color: #00f9ff;
+    text-shadow: 
+        0 0 8px rgba(0, 249, 255, 0.6),
+        0 0 15px rgba(0, 249, 255, 0.3);
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 1.05em;
+    letter-spacing: 0.5px;
+    min-width: 50px;
+    text-align: center;
+    background: linear-gradient(135deg, 
+        rgba(0, 249, 255, 0.15) 0%, 
+        rgba(0, 191, 255, 0.1) 100%);
+    border-radius: 6px;
+    padding: 4px 10px;
+    border: 1px solid rgba(0, 249, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.score::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.1), 
+        transparent);
+    transition: left 0.5s ease;
+}
+
+.team:hover .score::before {
+    left: 100%;
+}
+
+/* Marcador del equipo ganador */
+.team.winner .score {
+    background: linear-gradient(135deg, 
+        rgba(0, 249, 255, 0.25) 0%, 
+        rgba(0, 191, 255, 0.2) 50%,
+        rgba(0, 255, 240, 0.15) 100%);
+    border-color: rgba(0, 249, 255, 0.6);
+    box-shadow: 
+        0 0 12px rgba(0, 249, 255, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-weight: 800;
+}
+
+/* Estilo para la información del partido */
+.match-info {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 191, 255, 0.3);
+    font-size: 0.85em;
+    color: #a8b8ff;
+    font-family: 'Segoe UI', sans-serif;
+    line-height: 1.4;
+}
+
+.match-info div {
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.match-info .info-icon {
+    color: #00bfff;
+    font-size: 1em;
+    min-width: 16px;
+}
+
+/* Resultado global más compacto */
+.global-result {
+    margin-top: 8px;
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(90deg, 
+        rgba(0, 191, 255, 0.25) 0%, 
+        rgba(0, 128, 255, 0.25) 100%);
+    padding: 6px 12px;
+    border-radius: 5px;
+    display: inline-block;
+    font-size: 0.9em;
+    border: 1px solid rgba(0, 191, 255, 0.4);
+    box-shadow: 0 0 8px rgba(0, 191, 255, 0.15);
+    font-family: 'Consolas', monospace;
+}
+
+/* Títulos de fase más elegantes */
+.bracket-phase h4 {
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 191, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 1.1em;
+    position: relative;
+    font-family: 'Segoe UI', sans-serif;
+    text-shadow: 0 0 8px rgba(0, 191, 255, 0.4);
+    font-weight: 600;
+}
+
+.bracket-phase h4::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 25%;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        #00fff0 20%, 
+        #0080ff 50%,
+        #00fff0 80%, 
+        transparent);
+    box-shadow: 0 0 12px rgba(0, 191, 255, 0.4);
+}
+
+/* Estados especiales para partidos */
+.bracket-match.upcoming {
+    opacity: 0.7;
+    border-style: dashed;
+}
+
+.bracket-match.live {
+    animation: livePulse 2s infinite ease-in-out;
+    border-color: #ff4444;
+}
+
+@keyframes livePulse {
+    0%, 100% { 
+        box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+    }
+    50% { 
+        box-shadow: 0 0 25px rgba(255, 68, 68, 0.6);
+    }
+}
+
+.bracket-match.finished {
+    opacity: 0.9;
+}
+
+/* Responsive mejorado */
+@media (max-width: 1024px) {
+    .bracket-phase {
+        min-width: 260px;
+        margin: 0 20px;
+    }
+}
+
+/* Responsive premium */
+@media (max-width: 768px) {
+    .bracket-container {
+        flex-direction: column;
+        padding: 20px 15px;
+        overflow-x: visible;
+        overflow-y: auto;
+        min-height: auto;
+    }
+    
+    .bracket-phase {
+        min-width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 20px 10px;
+        gap: 18px;
+    }
+    
+    .bracket-phase:not(:last-child)::after,
+    .bracket-phase:not(:first-child)::before {
+        display: none;
+    }
+    
+    .bracket-phase h4 {
+        font-size: 1em;
+        margin-bottom: 18px;
+    }
+    
+    .bracket-match {
+        padding: 16px;
+        min-height: 110px;
+    }
+    
+    .team {
+        padding: 10px 14px;
+        min-height: 42px;
+    }
+    
+    .team-name {
+        font-size: 0.9em;
+    }
+    
+    .score {
+        font-size: 0.95em;
+        min-width: 45px;
+        padding: 3px 8px;
+    }
+    
+    .trophy-icon {
+        font-size: 1em;
+    }
+    
+    /* Separador visual premium entre fases */
+    .bracket-phase:not(:last-child) {
+        border-bottom: 3px solid transparent;
+        border-image: linear-gradient(90deg, 
+            transparent 10%,
+            rgba(0, 191, 255, 0.4) 30%,
+            rgba(0, 255, 240, 0.6) 50%,
+            rgba(0, 191, 255, 0.4) 70%,
+            transparent 90%) 1;
+        padding-bottom: 25px;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .bracket-phase:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        bottom: -3px;
+        left: 30%;
+        width: 40%;
+        height: 3px;
+        background: linear-gradient(90deg, 
+            transparent,
+            rgba(0, 255, 240, 0.8),
+            transparent);
+        box-shadow: 0 0 15px rgba(0, 255, 240, 0.4);
+        display: block;
+        right: auto;
+        top: auto;
+        transform: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .bracket-container {
+        padding: 15px 10px;
+        margin: 15px 0;
+        border-radius: 8px;
+    }
+    
+    .bracket-phase {
+        padding: 15px 5px;
+    }
+    
+    .bracket-match {
+        padding: 12px;
+    }
+    
+    .team {
+        padding: 6px 10px;
+        min-height: 32px;
+    }
+    
+    .team-name {
+        font-size: 0.85em;
+    }
+    
+    .score {
+        font-size: 0.9em;
+        min-width: 30px;
+    }
+    
+    .match-info {
+        font-size: 0.8em;
+    }
+}
+
+/* Animación del contenedor principal más suave */
+@keyframes subtleGlow {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(0, 191, 255, 0.25);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(0, 191, 255, 0.4);
+    }
+}
+
+.bracket-container {
+    animation: subtleGlow 8s infinite ease-in-out;
+}
+
+/* Utilidades para diferentes tamaños de bracket */
+.bracket-container.compact .bracket-phase {
+    min-width: 240px;
+    gap: 15px;
+}
+
+.bracket-container.large .bracket-phase {
+    min-width: 320px;
+    gap: 25px;
+}
+
+/* Estados de carga */
+.bracket-match.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.bracket-match.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(0, 191, 255, 0.2), 
+        transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
     .overflow-auto {
         overflow-x: auto !important;
     }
@@ -302,6 +965,7 @@ td.goals-jornada .btn {
     border-left: none;
     border-right: none;
 }
+
     /* ===== MEDIA QUERIES PARA MÓVILES ===== */
     @media (max-width: 768px) {
         /* Contenedor principal */
@@ -649,7 +1313,7 @@ td.goals-jornada .btn {
                     {% endif %}
                 </div>
                 
-                <!-- Pestañas mejoradas -->
+                <!-- Pestañas premium mejoradas -->
                 <ul class="nav nav-tabs-modern" id="liga{{ datos.categoria.id }}Tab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active toggle-tab" id="jornadas{{ datos.categoria.id }}-tab" data-bs-toggle="tab" data-bs-target="#jornadas{{ datos.categoria.id }}" type="button" role="tab" aria-controls="jornadas{{ datos.categoria.id }}" aria-selected="true">
@@ -666,10 +1330,18 @@ td.goals-jornada .btn {
                             <i class="fas fa-futbol me-2"></i><span class="tab-text">Mostrar Goleadores</span>
                         </button>
                     </li>
+                    {% if eliminatorias_data %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link toggle-tab" id="eliminatorias{{ datos.categoria.id }}-tab" data-bs-toggle="tab" data-bs-target="#eliminatorias{{ datos.categoria.id }}" type="button" role="tab" aria-controls="eliminatorias{{ datos.categoria.id }}" aria-selected="false">
+                            <i class="fas fa-chess-board me-2"></i><span class="tab-text">Mostrar Eliminatorias</span>
+                        </button>
+                    </li>
+                    {% endif %}
                 </ul>
 
                 <!-- Contenido de pestañas -->
                 <div class="tab-content" id="liga{{ datos.categoria.id }}TabContent">
+                    
                     <!-- Pestaña de Jornadas -->
                     <div class="tab-pane fade show active" id="jornadas{{ datos.categoria.id }}" role="tabpanel" aria-labelledby="jornadas{{ datos.categoria.id }}-tab">
                         {% if datos.tiene_grupos %}
@@ -881,6 +1553,7 @@ td.goals-jornada .btn {
                             {% endfor %}
                         </div>
                     {% else %}
+                     
    
                             <!-- Mostrar jornadas directas si no hay grupos -->
                             {% if not datos.jornadas %}
@@ -1068,6 +1741,7 @@ td.goals-jornada .btn {
                                 </div>
                             {% endif %}
                         {% endif %}
+                        
                     </div>
                     
                     <!-- Pestaña de Tabla de Posiciones -->
@@ -1351,6 +2025,93 @@ td.goals-jornada .btn {
                         {% endif %}
                     </div>
 
+                <!-- Pestaña de Eliminatorias -->
+                <div class="tab-pane fade" id="eliminatorias{{ datos.categoria.id }}" role="tabpanel" aria-labelledby="eliminatorias{{ datos.categoria.id }}-tab">
+                    {% if eliminatorias_data %}
+                        {% set categoria_eliminatorias = eliminatorias_data | selectattr('categoria.id', 'equalto', datos.categoria.id) | list %}
+                        {% if categoria_eliminatorias %}
+                            <div class="container mt-4">
+                                
+                                {% for categoria_data in categoria_eliminatorias %}
+                                    <div class="card mb-4">
+                                        
+                                        <div class="card-body">
+                                            <div class="bracket-container">
+                                                {% for eliminatoria in categoria_data.eliminatorias %}
+                                                    <div class="bracket-phase">
+                                                        <h4>{{ eliminatoria.fase|replace('_', ' ')|title }}</h4>
+                                                        {% for partido in eliminatoria.partidos %}
+                                                            <div class="bracket-match">
+                                                                {% set goles_local_total = (partido.goles_local or 0) + (partido.goles_visitante_vuelta or 0) %}
+                                                                {% set goles_visitante_total = (partido.goles_visitante or 0) + (partido.goles_local_vuelta or 0) %}
+                                                                <div class="team {% if partido.jugado and (torneo.formato_eliminatorias != 'ida_vuelta' or partido.jugado_vuelta) %}
+                                                                    {% if torneo.formato_eliminatorias == 'ida_vuelta' and goles_local_total > goles_visitante_total %}winner
+                                                                    {% elif torneo.formato_eliminatorias != 'ida_vuelta' and (partido.goles_local or 0) > (partido.goles_visitante or 0) %}winner{% endif %}
+                                                                {% endif %}">
+                                                                    {{ partido.equipo_local|default("Por definir") }}
+                                                                    <span class="score">
+                                                                        {% if partido.jugado %}
+                                                                            {{ partido.goles_local|default('-') }}
+                                                                            {% if torneo.formato_eliminatorias == 'ida_vuelta' and partido.jugado_vuelta %}
+                                                                                ({{ partido.goles_visitante_vuelta|default('-') }})
+                                                                            {% endif %}
+                                                                        {% else %}
+                                                                            -
+                                                                        {% endif %}
+                                                                    </span>
+                                                                </div>
+                                                                <div class="team {% if partido.jugado and (torneo.formato_eliminatorias != 'ida_vuelta' or partido.jugado_vuelta) %}
+                                                                    {% if torneo.formato_eliminatorias == 'ida_vuelta' and goles_visitante_total > goles_local_total %}winner
+                                                                    {% elif torneo.formato_eliminatorias != 'ida_vuelta' and (partido.goles_visitante or 0) > (partido.goles_local or 0) %}winner{% endif %}
+                                                                {% endif %}">
+                                                                    {{ partido.equipo_visitante|default("Por definir") }}
+                                                                    <span class="score">
+                                                                        {% if partido.jugado %}
+                                                                            {{ partido.goles_visitante|default('-') }}
+                                                                            {% if torneo.formato_eliminatorias == 'ida_vuelta' and partido.jugado_vuelta %}
+                                                                                ({{ partido.goles_local_vuelta|default('-') }})
+                                                                            {% endif %}
+                                                                        {% else %}
+                                                                            -
+                                                                        {% endif %}
+                                                                    </span>
+                                                                </div>
+                                                                {% if partido.fecha or (torneo.formato_eliminatorias == 'ida_vuelta' and partido.fecha_vuelta) %}
+                                                                    <div class="match-info">
+                                                                        {% if torneo.formato_eliminatorias == 'ida_vuelta' %}
+                                                                            <div>Ida: {{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Por definir' }} {{ partido.hora if partido.hora else '' }}</div>
+                                                                            <div>Vuelta: {{ partido.fecha_vuelta.strftime('%d/%m/%Y') if partido.fecha_vuelta else 'Por definir' }} {{ partido.hora_vuelta if partido.hora_vuelta else '' }}</div>
+                                                                        {% else %}
+                                                                            <div>{{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Por definir' }} {{ partido.hora if partido.hora else '' }}</div>
+                                                                        {% endif %}
+                                                                        {% if partido.jugado and (torneo.formato_eliminatorias != 'ida_vuelta' or partido.jugado_vuelta) %}
+                                                                            <div class="global-result">
+                                                                                {% if torneo.formato_eliminatorias == 'ida_vuelta' %}
+                                                                                    Global: {{ goles_local_total }} - {{ goles_visitante_total }}
+                                                                                {% else %}
+                                                                                    Resultado: {{ partido.goles_local or 0 }} - {{ partido.goles_visitante or 0 }}
+                                                                                {% endif %}
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                {% endif %}
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info text-center my-4">
+                                No hay datos de eliminatorias para esta categoría.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
                     <!-- Pestaña de Goleadores (MODIFICADA) -->
                     <div class="tab-pane fade" id="goleadores{{ datos.categoria.id }}" role="tabpanel" aria-labelledby="goleadores{{ datos.categoria.id }}-tab">
                         <div class="card border-0 shadow-sm">
@@ -1471,14 +2232,21 @@ td.goals-jornada .btn {
                                         <p class="mb-0">Los goleadores aparecerán cuando se registren los primeros goles</p>
                                     </div>
                                 {% endif %}
+                                
                             </div>
+                            
                         </div>
+                        
                     </div>
+                    
                 </div>
             </div>
+            
         </div>
+        
         {% endfor %}
     {% endif %}
+    
 </div>
 
 <script>
@@ -1494,10 +2262,12 @@ td.goals-jornada .btn {
                     textElement.textContent = 'Mostrar Clasificación';
                 } else if (tabId.includes('goleadores')) {
                     textElement.textContent = 'Mostrar Goleadores';
+                } else if (tabId.includes('eliminatorias')) {
+                    textElement.textContent = 'Mostrar Eliminatorias';
                 }
             });
 
-            // Luego establecer "Ocultar" solo para la pestaña activa
+            // Luego establecer texto en mayúsculas solo para la pestaña activa
             if (activeTabId) {
                 const activeButton = document.querySelector(`[data-bs-target="#${activeTabId}"] .tab-text`);
                 if (activeButton) {
@@ -1507,6 +2277,8 @@ td.goals-jornada .btn {
                         activeButton.textContent = 'CLASIFICACIÓN';
                     } else if (activeTabId.includes('goleadores')) {
                         activeButton.textContent = 'GOLEADORES TOP 20';
+                    } else if (activeTabId.includes('eliminatorias')) {
+                        activeButton.textContent = 'ELIMINATORIAS';
                     }
                 }
             }
@@ -1517,6 +2289,9 @@ td.goals-jornada .btn {
             button.addEventListener('click', function() {
                 const targetId = this.getAttribute('data-bs-target').replace('#', '');
                 updateTabTexts(targetId);
+                
+                // Guardar la pestaña activa en localStorage
+                localStorage.setItem('activeTab', targetId);
             });
         });
 
@@ -1525,14 +2300,25 @@ td.goals-jornada .btn {
             tab.addEventListener('shown.bs.tab', function(event) {
                 const targetId = event.target.getAttribute('data-bs-target').replace('#', '');
                 updateTabTexts(targetId);
+                
+                // Guardar la pestaña activa en localStorage
+                localStorage.setItem('activeTab', targetId);
             });
         });
 
-        // Inicializar con la primera pestaña activa
-        const activeTab = document.querySelector('.nav-link.active');
-        if (activeTab) {
-            const activeTabId = activeTab.getAttribute('data-bs-target').replace('#', '');
-            updateTabTexts(activeTabId);
+        // Intentar recuperar la pestaña activa del localStorage
+        const savedTab = localStorage.getItem('activeTab');
+        if (savedTab && document.querySelector(`[data-bs-target="#${savedTab}"]`)) {
+            const tab = new bootstrap.Tab(document.querySelector(`[data-bs-target="#${savedTab}"]`));
+            tab.show();
+            updateTabTexts(savedTab);
+        } else {
+            // Inicializar con la primera pestaña activa por defecto
+            const activeTab = document.querySelector('.nav-link.active');
+            if (activeTab) {
+                const activeTabId = activeTab.getAttribute('data-bs-target').replace('#', '');
+                updateTabTexts(activeTabId);
+            }
         }
 
         // Mostrar automáticamente la primera liga

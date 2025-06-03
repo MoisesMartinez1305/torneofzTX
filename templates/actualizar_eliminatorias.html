@@ -1,0 +1,130 @@
+{% extends 'base_admin.html' %}
+
+{% block content %}
+<h2>Emparejar Eliminatorias - {{ categoria.nombre }}</h2>
+<p>Selecciona los equipos para cada fase de eliminatorias</p>
+
+<form method="POST">
+    {% if torneo.equipos_eliminatorias >= 16 %}
+    <h3>Octavos de Final</h3>
+    {% for partido in eliminatorias[0].partidos %}
+    <div class="form-row">
+        <div class="col">
+            <select name="octavos_{{ partido.numero_partido }}_local" class="form-control">
+                <option value="">Seleccione equipo local</option>
+                {% for equipo in equipos %}
+                <option value="{{ equipo.nombre }}" {% if partido.equipo_local == equipo.nombre %}selected{% endif %}>{{ equipo.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">vs</div>
+        <div class="col">
+            <select name="octavos_{{ partido.numero_partido }}_visitante" class="form-control">
+                <option value="">Seleccione equipo visitante</option>
+                {% for equipo in equipos %}
+                <option value="{{ equipo.nombre }}" {% if partido.equipo_visitante == equipo.nombre %}selected{% endif %}>{{ equipo.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    
+    {% if torneo.equipos_eliminatorias >= 8 or torneo.equipos_eliminatorias == 6 %}
+    <h3>Cuartos de Final</h3>
+    {% for partido in eliminatorias[1 if torneo.equipos_eliminatorias >=16 else 0].partidos %}
+    <div class="form-row">
+        <div class="col">
+            <select name="cuartos_{{ partido.numero_partido }}_local" class="form-control">
+                <option value="">Seleccione equipo local</option>
+                {% for equipo in equipos %}
+                <option value="{{ equipo.nombre }}" {% if partido.equipo_local == equipo.nombre %}selected{% endif %}>{{ equipo.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">vs</div>
+        <div class="col">
+            <select name="cuartos_{{ partido.numero_partido }}_visitante" class="form-control">
+                <option value="">Seleccione equipo visitante</option>
+                {% for equipo in equipos %}
+                <option value="{{ equipo.nombre }}" {% if partido.equipo_visitante == equipo.nombre %}selected{% endif %}>{{ equipo.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    
+    <h3>Semifinales</h3>
+    {% for partido in eliminatorias[-3].partidos %}
+    <div class="form-row">
+        <div class="col">
+            <select name="semifinales_{{ partido.numero_partido }}_local" class="form-control">
+                <option value="">Seleccione equipo local</option>
+                {% for equipo in equipos %}
+                <option value="{{ equipo.nombre }}" {% if partido.equipo_local == equipo.nombre %}selected{% endif %}>{{ equipo.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">vs</div>
+        <div class="col">
+            <select name="semifinales_{{ partido.numero_partido }}_visitante" class="form-control">
+                <option value="">Seleccione equipo visitante</option>
+                {% for equipo in equipos %}
+                <option value="{{ equipo.nombre }}" {% if partido.equipo_visitante == equipo.nombre %}selected{% endif %}>{{ equipo.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endfor %}
+    
+    <h3>Final</h3>
+    {% for partido in eliminatorias[-2].partidos %}
+    <div class="form-row">
+        <div class="col">
+            <select name="final_{{ partido.numero_partido }}_local" class="form-control">
+                <option value="">Seleccione equipo local</option>
+                {% for equipo in equipos %}
+                <option value="{{ equipo.nombre }}" {% if partido.equipo_local == equipo.nombre %}selected{% endif %}>{{ equipo.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">vs</div>
+        <div class="col">
+            <select name="final_{{ partido.numero_partido }}_visitante" class="form-control">
+                <option value="">Seleccione equipo visitante</option>
+                {% for equipo in equipos %}
+                <option value="{{ equipo.nombre }}" {% if partido.equipo_visitante == equipo.nombre %}selected{% endif %}>{{ equipo.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endfor %}
+    
+    <h3>Tercer Lugar</h3>
+    {% for partido in eliminatorias[-1].partidos %}
+    <div class="form-row">
+        <div class="col">
+            <select name="tercer_lugar_{{ partido.numero_partido }}_local" class="form-control">
+                <option value="">Seleccione equipo local</option>
+                {% for equipo in equipos %}
+                <option value="{{ equipo.nombre }}" {% if partido.equipo_local == equipo.nombre %}selected{% endif %}>{{ equipo.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">vs</div>
+        <div class="col">
+            <select name="tercer_lugar_{{ partido.numero_partido }}_visitante" class="form-control">
+                <option value="">Seleccione equipo visitante</option>
+                {% for equipo in equipos %}
+                <option value="{{ equipo.nombre }}" {% if partido.equipo_visitante == equipo.nombre %}selected{% endif %}>{{ equipo.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endfor %}
+    
+    <button type="submit" class="btn btn-primary mt-3">Guardar Emparejamientos</button>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Cancelar</a>
+</form>
+{% endblock %}

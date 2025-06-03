@@ -1,0 +1,225 @@
+{% extends "base_admin.html" %}
+
+{% block admin_content %}
+<div class="container">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+                <i class="fas fa-futbol me-2"></i>
+                Resultado de Eliminatoria - {{ eliminatoria.fase|replace('_', ' ')|title }}
+            </h3>
+            <small class="opacity-75">{{ categoria.nombre }} (Formato: {{ eliminatoria.formato|replace('_', ' ')|title }})</small>
+        </div>
+        
+        <div class="card-body">
+            <form method="POST">
+                <!-- Sección Partido de Ida/Único -->
+                <div class="row mb-4">
+                    <div class="col-md-5">
+                        <div class="text-center mb-3">
+                            <h5>Equipo Local</h5>
+                            <div class="d-flex justify-content-center align-items-center mb-2">
+                                <img src="{{ get_logo_path(partido.equipo_local_obj) if partido.equipo_local_obj else url_for('static', filename='images/default_logo.png') }}" 
+                                     class="team-logo-medium me-3"
+                                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                <h4>{{ partido.equipo_local or "Por definir" }}</h4>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="goles_local" class="form-label">Goles</label>
+                                <input type="number" min="0" class="form-control text-center" 
+                                       id="goles_local" name="goles_local" 
+                                       value="{{ partido.goles_local if partido.goles_local is not none else '' }}"
+                                       {% if partido.jugado %}disabled{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                        <h2 class="text-muted">VS</h2>
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <div class="text-center mb-3">
+                            <h5>Equipo Visitante</h5>
+                            <div class="d-flex justify-content-center align-items-center mb-2">
+                                <img src="{{ get_logo_path(partido.equipo_visitante_obj) if partido.equipo_visitante_obj else url_for('static', filename='images/default_logo.png') }}" 
+                                     class="team-logo-medium me-3"
+                                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                <h4>{{ partido.equipo_visitante or "Por definir" }}</h4>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="goles_visitante" class="form-label">Goles</label>
+                                <input type="number" min="0" class="form-control text-center" 
+                                       id="goles_visitante" name="goles_visitante" 
+                                       value="{{ partido.goles_visitante if partido.goles_visitante is not none else '' }}"
+                                       {% if partido.jugado %}disabled{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sección Partido de Vuelta (solo si formato es ida_vuelta) -->
+                {% if eliminatoria.formato == 'ida_vuelta' %}
+                <hr>
+                <h4 class="text-center mb-4">Partido de Vuelta</h4>
+                
+                <div class="row mb-4">
+                    <div class="col-md-5">
+                        <div class="text-center">
+                            <div class="form-group">
+                                <label for="goles_local_vuelta" class="form-label">Goles Local</label>
+                                <input type="number" min="0" class="form-control text-center" 
+                                       id="goles_local_vuelta" name="goles_local_vuelta" 
+                                       value="{{ partido.goles_local_vuelta if partido.goles_local_vuelta is not none else '' }}"
+                                       {% if partido.jugado_vuelta %}disabled{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                        <h2 class="text-muted">VS</h2>
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <div class="text-center">
+                            <div class="form-group">
+                                <label for="goles_visitante_vuelta" class="form-label">Goles Visitante</label>
+                                <input type="number" min="0" class="form-control text-center" 
+                                       id="goles_visitante_vuelta" name="goles_visitante_vuelta" 
+                                       value="{{ partido.goles_visitante_vuelta if partido.goles_visitante_vuelta is not none else '' }}"
+                                       {% if partido.jugado_vuelta %}disabled{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <hr>
+                
+                <!-- Sección Fechas y Horas -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="fecha" class="form-label">Fecha del Partido</label>
+                            <input type="date" class="form-control" id="fecha" name="fecha" 
+                                   value="{{ partido.fecha.strftime('%Y-%m-%d') if partido.fecha else '' }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="hora" class="form-label">Hora del Partido</label>
+                            <input type="time" class="form-control" id="hora" name="hora" 
+                                   value="{{ partido.hora if partido.hora else '' }}">
+                        </div>
+                    </div>
+                    
+                    {% if eliminatoria.formato == 'ida_vuelta' %}
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="fecha_vuelta" class="form-label">Fecha de Vuelta</label>
+                            <input type="date" class="form-control" id="fecha_vuelta" name="fecha_vuelta" 
+                                   value="{{ partido.fecha_vuelta.strftime('%Y-%m-%d') if partido.fecha_vuelta else '' }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="hora_vuelta" class="form-label">Hora de Vuelta</label>
+                            <input type="time" class="form-control" id="hora_vuelta" name="hora_vuelta" 
+                                   value="{{ partido.hora_vuelta if partido.hora_vuelta else '' }}">
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Mostrar resultado global si el partido está jugado -->
+                {% if partido.jugado and (eliminatoria.formato != 'ida_vuelta' or partido.jugado_vuelta) %}
+                <div class="alert alert-info">
+                    <strong>Resultado Global:</strong>
+                    {% if eliminatoria.formato == 'ida_vuelta' %}
+                        {{ (partido.goles_local or 0) + (partido.goles_visitante_vuelta or 0) }} - 
+                        {{ (partido.goles_visitante or 0) + (partido.goles_local_vuelta or 0) }}
+                        <br>
+                        <small>(Ida: {{ partido.goles_local or 0 }}-{{ partido.goles_visitante or 0 }} | 
+                        Vuelta: {{ partido.goles_visitante_vuelta or 0 }}-{{ partido.goles_local_vuelta or 0 }})</small>
+                    {% else %}
+                        {{ partido.goles_local or 0 }} - {{ partido.goles_visitante or 0 }}
+                    {% endif %}
+                    
+                    {% if eliminatoria.formato == 'ida_vuelta' %}
+                        <div class="mt-2">
+                            <strong>Goles como visitante:</strong>
+                            Local: {{ (partido.goles_visitante_vuelta or 0) }} | 
+                            Visitante: {{ (partido.goles_visitante or 0) }}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-arrow-left me-1"></i> Volver
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Guardar Resultado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .team-logo-medium {
+        height: 50px;
+        width: 50px;
+        object-fit: contain;
+        border: 1px solid #ddd;
+        border-radius: 50%;
+        background-color: white;
+        padding: 2px;
+    }
+    
+    .form-control:disabled {
+        background-color: #f8f9fa;
+        opacity: 1;
+    }
+    
+    .alert-info {
+        background-color: #e7f5fe;
+        border-color: #b8e2fb;
+        color: #0c5460;
+    }
+    
+    .card-header small {
+        font-size: 0.85rem;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación antes de enviar el formulario
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const formato = "{{ eliminatoria.formato }}";
+        const jugado = {{ partido.jugado|tojson }};
+        const jugadoVuelta = {{ partido.jugado_vuelta|tojson }};
+        
+        // Validar partido de ida
+        if (!jugado && (!document.getElementById('goles_local').value || !document.getElementById('goles_visitante').value)) {
+            e.preventDefault();
+            alert('Debe completar los goles del partido de ida');
+            return;
+        }
+        
+        // Validar partido de vuelta si es ida_vuelta
+        if (formato === 'ida_vuelta' && !jugadoVuelta && 
+            (!document.getElementById('goles_local_vuelta').value || !document.getElementById('goles_visitante_vuelta').value)) {
+            e.preventDefault();
+            alert('Debe completar los goles del partido de vuelta');
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}

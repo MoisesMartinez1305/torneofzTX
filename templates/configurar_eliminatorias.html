@@ -1,0 +1,79 @@
+{% extends 'base_admin.html' %}
+
+{% block content %}
+<h2>Configurar Eliminatorias</h2>
+<form method="POST">
+    <div class="form-group">
+        <label>
+            <input type="checkbox" name="tiene_eliminatorias" {% if torneo.tiene_eliminatorias %}checked{% endif %}>
+            Habilitar fase de eliminatorias
+        </label>
+    </div>
+    
+    <div id="eliminatorias-config" {% if not torneo.tiene_eliminatorias %}style="display:none"{% endif %}>
+        <div class="form-group">
+            <label>Número de equipos que pasan a eliminatorias:</label>
+            <select name="equipos_eliminatorias" class="form-control">
+                <option value="2" {% if torneo.equipos_eliminatorias == 2 %}selected{% endif %}>2 (Final directa)</option>
+                <option value="4" {% if torneo.equipos_eliminatorias == 4 %}selected{% endif %}>4 (Semifinales)</option>
+                <option value="6" {% if torneo.equipos_eliminatorias == 6 %}selected{% endif %}>6 (2 a semifinales, 4 a cuartos)</option>
+                <option value="8" {% if torneo.equipos_eliminatorias == 8 %}selected{% endif %}>8 (Cuartos de final)</option>
+                <option value="16" {% if torneo.equipos_eliminatorias == 16 %}selected{% endif %}>16 (Octavos de final)</option>
+            </select>
+        </div>
+        
+        <!-- Eliminamos el selector global de formato -->
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+
+{% if torneo.tiene_eliminatorias %}
+<div class="mt-4">
+    <h4>Gestión de Eliminatorias por Categoría</h4>
+    <div class="list-group">
+        {% for categoria in categorias %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ categoria.nombre }}</strong>
+                {% if categoria.eliminatorias %}
+                <span class="badge bg-success ms-2">Configurada</span>
+                {% else %}
+                <span class="badge bg-warning ms-2">Sin configurar</span>
+                {% endif %}
+            
+            
+            <div>
+                {% if categoria.eliminatorias %}
+                <form action="{{ url_for('eliminar_eliminatorias', categoria_id=categoria.id) }}" method="POST" class="d-inline me-2">
+                    <button type="submit" class="btn btn-sm btn-danger" 
+                            onclick="return confirm('¿Estás seguro de eliminar todas las eliminatorias de {{ categoria.nombre }}?')">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </form>
+                {% endif %}
+                
+                <a href="{{ url_for('actualizar_eliminatorias', categoria_id=categoria.id) }}" 
+                   class="btn btn-sm btn-primary">
+                    <i class="fas fa-edit"></i> {% if categoria.eliminatorias %}Editar{% else %}Configurar{% endif %}
+                </a>
+            </div>
+            </div>
+            <!-- Dentro del list-group-item, añade este botón junto a los otros -->
+            <a href="{{ url_for('editar_formato_eliminatorias', categoria_id=categoria.id) }}" 
+            class="btn btn-sm btn-info me-2">
+                <i class="fas fa-cog"></i> Formatos
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.querySelector('input[name="tiene_eliminatorias"]').addEventListener('change', function() {
+    document.getElementById('eliminatorias-config').style.display = this.checked ? 'block' : 'none';
+});
+</script>
+{% endblock %}

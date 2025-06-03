@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import case
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import os
@@ -21,12 +22,55 @@ db = SQLAlchemy(app)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Modelos de la base de datos
+# Actualiza el modelo Torneo
 class Torneo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False, default="Torneo Principal")
     formato_liga = db.Column(db.String(20), default="ida_vuelta")
+    tiene_eliminatorias = db.Column(db.Boolean, default=False)
+    equipos_eliminatorias = db.Column(db.Integer, default=0)  # Cuántos equipos pasan a eliminatorias
+    formato_eliminatorias = db.Column(db.String(20), default="ida")  # "ida", "ida_vuelta", "single"
     categorias = db.relationship('Categoria', backref='torneo', lazy=True)
 
+# Añade el modelo Eliminatoria
+class Eliminatoria(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    categoria_id = db.Column(db.Integer, db.ForeignKey('categoria.id', ondelete='CASCADE'), nullable=False)
+    fase = db.Column(db.String(50), nullable=False)  # "octavos", "cuartos", "semifinales", "final", "tercer_lugar"
+    formato = db.Column(db.String(20), default='single')  # 'single', 'ida', 'ida_vuelta'
+    partidos = db.relationship('PartidoEliminatoria', backref='eliminatoria',
+                             cascade='all, delete-orphan', passive_deletes=False)
+
+
+class PartidoEliminatoria(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    eliminatoria_id = db.Column(db.Integer, 
+                               db.ForeignKey('eliminatoria.id', ondelete='CASCADE'),  # Esto es crucial
+                               nullable=False)  # O nullable=True si es necesario
+    numero_partido = db.Column(db.Integer, nullable=False)  # Para ordenar los partidos
+    equipo_local = db.Column(db.String(50), nullable=True)
+    equipo_visitante = db.Column(db.String(50), nullable=True)
+    goles_local = db.Column(db.Integer)
+    goles_visitante = db.Column(db.Integer)
+    goles_local_vuelta = db.Column(db.Integer)
+    goles_visitante_vuelta = db.Column(db.Integer)
+    jugado = db.Column(db.Boolean, default=False)
+    jugado_vuelta = db.Column(db.Boolean, default=False)
+    fecha = db.Column(db.DateTime, nullable=True)
+    hora = db.Column(db.String(10), nullable=True)
+    fecha_vuelta = db.Column(db.DateTime, nullable=True)
+    hora_vuelta = db.Column(db.String(10), nullable=True)   
+    @property
+    def equipo_local_obj(self):
+        if not self.equipo_local:
+            return None
+        return Equipo.query.filter_by(nombre=self.equipo_local).first()
+    
+    @property
+    def equipo_visitante_obj(self):
+        if not self.equipo_visitante:
+            return None
+        return Equipo.query.filter_by(nombre=self.equipo_visitante).first()
 class Categoria(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50), nullable=False)
@@ -36,6 +80,9 @@ class Categoria(db.Model):
     equipos = db.relationship('Equipo', backref='categoria', lazy=True)
     partidos = db.relationship('Partido', backref='categoria', lazy=True)
     grupos = db.relationship('Grupo', backref='categoria', lazy=True)
+    # Relación con Eliminatorias
+    eliminatorias = db.relationship('Eliminatoria', backref='categoria', 
+                                  cascade='all, delete-orphan', lazy=True)
 
 class Grupo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -80,15 +127,116 @@ class Goleador(db.Model):
     total_goles = db.Column(db.Integer, default=0)
     goles_por_jornada = db.Column(db.JSON, default=lambda: {})
 
+def asignar_siguiente_fase(partido, eliminatoria):
+    # Obtener el formato de la eliminatoria actual
+    formato = eliminatoria.formato
+    
+    # Calcular ganador según el formato
+    if formato == 'ida':
+        if (partido.goles_local or 0) > (partido.goles_visitante or 0):
+            ganador = partido.equipo_local
+            perdedor = partido.equipo_visitante
+        else:
+            ganador = partido.equipo_visitante
+            perdedor = partido.equipo_local
+    elif formato == 'ida_vuelta':
+        global_local = (partido.goles_local or 0) + (partido.goles_visitante_vuelta or 0)
+        global_visitante = (partido.goles_visitante or 0) + (partido.goles_local_vuelta or 0)
+        
+        if global_local > global_visitante:
+            ganador = partido.equipo_local
+            perdedor = partido.equipo_visitante
+        elif global_visitante > global_local:
+            ganador = partido.equipo_visitante
+            perdedor = partido.equipo_local
+        else:
+            # Empate en global, usar regla de gol de visitante
+            if (partido.goles_visitante or 0) + (partido.goles_local_vuelta or 0) > \
+               (partido.goles_local or 0) + (partido.goles_visitante_vuelta or 0):
+                ganador = partido.equipo_visitante
+                perdedor = partido.equipo_local
+            else:
+                ganador = partido.equipo_local
+                perdedor = partido.equipo_visitante
+    else:  # single
+        if (partido.goles_local or 0) > (partido.goles_visitante or 0):
+            ganador = partido.equipo_local
+            perdedor = partido.equipo_visitante
+        else:
+            ganador = partido.equipo_visitante
+            perdedor = partido.equipo_local
+    
+    # Determinar siguiente fase
+    siguiente_fase = {
+        'octavos': 'cuartos',
+        'cuartos': 'semifinales',
+        'semifinales': 'final',
+    }.get(eliminatoria.fase)
+    
+    if siguiente_fase and ganador:
+        siguiente_eliminatoria = Eliminatoria.query.filter_by(
+            categoria_id=eliminatoria.categoria_id,
+            fase=siguiente_fase).first()
+        
+        if siguiente_eliminatoria:
+            # Encontrar el partido correspondiente en la siguiente fase
+            partido_siguiente = PartidoEliminatoria.query.filter_by(
+                eliminatoria_id=siguiente_eliminatoria.id,
+                numero_partido=(partido.numero_partido + 1) // 2  # Mapeo de partidos
+            ).first()
+            
+            if partido_siguiente:
+                # Asignar ganador como local o visitante alternadamente
+                if partido.numero_partido % 2 == 1:
+                    partido_siguiente.equipo_local = ganador
+                else:
+                    partido_siguiente.equipo_visitante = ganador
+                
+                db.session.commit()
+    
+    # Manejar el partido de tercer lugar para semifinales
+    if eliminatoria.fase == 'semifinales' and perdedor:
+        tercer_lugar = Eliminatoria.query.filter_by(
+            categoria_id=eliminatoria.categoria_id,
+            fase='tercer_lugar').first()
+        
+        if tercer_lugar:
+            partido_tercer = PartidoEliminatoria.query.filter_by(
+                eliminatoria_id=tercer_lugar.id,
+                numero_partido=1).first()
+            
+            if partido_tercer:
+                if partido.numero_partido == 1:
+                    partido_tercer.equipo_local = perdedor
+                elif partido.numero_partido == 2:
+                    partido_tercer.equipo_visitante = perdedor
+                
+                db.session.commit()
+
 # Funciones auxiliares
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 def get_logo_path(equipo):
-    if equipo.logo and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], equipo.logo)):
-        return url_for('static', filename=f'logos/{equipo.logo}')
-    return url_for('static', filename='logos/default.png')
+    # Si no hay equipo o el equipo no tiene atributo logo
+    if not equipo or not hasattr(equipo, 'logo') or equipo.logo is None:
+        return 'images/default_logo.png'  # Ruta relativa al directorio static
+    
+    # Si el logo es una URL externa
+    if isinstance(equipo.logo, str) and equipo.logo.startswith(('http://', 'https://')):
+        return equipo.logo
+    
+    # Verificar si existe el archivo local
+    try:
+        logo_path = os.path.join(app.config['UPLOAD_FOLDER'], equipo.logo)
+        if os.path.exists(logo_path):
+            return f'logos/{equipo.logo}'  # Ruta relativa
+    except (TypeError, AttributeError):
+        pass
+    
+    # Si todo falla, devolver logo por defecto
+    return 'images/default_logo.png'
 
 # Usuario administrador
 ADMIN_USER = {
@@ -297,6 +445,61 @@ def calcular_estadisticas_equipo(equipo):
     
     return stats
 
+def crear_eliminatorias(categoria_id, num_equipos):
+    # Determinar las fases necesarias
+    fases = []
+    if num_equipos >= 16:
+        fases.extend([
+            {'nombre': 'octavos', 'partidos': 8, 'formato': 'single'},
+            {'nombre': 'cuartos', 'partidos': 4, 'formato': 'single'},
+            {'nombre': 'semifinales', 'partidos': 2, 'formato': 'single'},
+            {'nombre': 'final', 'partidos': 1, 'formato': 'single'},
+            {'nombre': 'tercer_lugar', 'partidos': 1, 'formato': 'single'}
+        ])
+    elif num_equipos >= 8:
+        fases.extend([
+            {'nombre': 'cuartos', 'partidos': 4, 'formato': 'single'},
+            {'nombre': 'semifinales', 'partidos': 2, 'formato': 'single'},
+            {'nombre': 'final', 'partidos': 1, 'formato': 'single'},
+            {'nombre': 'tercer_lugar', 'partidos': 1, 'formato': 'single'}
+        ])
+    elif num_equipos >= 4:
+        fases.extend([
+            {'nombre': 'semifinales', 'partidos': 2, 'formato': 'single'},
+            {'nombre': 'final', 'partidos': 1, 'formato': 'single'},
+            {'nombre': 'tercer_lugar', 'partidos': 1, 'formato': 'single'}
+        ])
+    elif num_equipos == 2:
+        fases.append({'nombre': 'final', 'partidos': 1, 'formato': 'single'})
+    elif num_equipos == 6:
+        # Caso especial: 2 pasan directo a semifinales, 4 a cuartos
+        fases.extend([
+            {'nombre': 'cuartos', 'partidos': 2, 'formato': 'single'},
+            {'nombre': 'semifinales', 'partidos': 2, 'formato': 'single'},
+            {'nombre': 'final', 'partidos': 1, 'formato': 'single'},
+            {'nombre': 'tercer_lugar', 'partidos': 1, 'formato': 'single'}
+        ])
+    
+    # Crear las fases de eliminatoria
+    for fase in fases:
+        eliminatoria = Eliminatoria(
+            categoria_id=categoria_id,
+            fase=fase['nombre'],
+            formato=fase['formato']
+        )
+        db.session.add(eliminatoria)
+        db.session.flush()
+        
+        # Crear partidos según la fase
+        for i in range(1, fase['partidos'] + 1):
+            partido = PartidoEliminatoria(
+                eliminatoria_id=eliminatoria.id,
+                numero_partido=i
+            )
+            db.session.add(partido)
+    
+    db.session.commit()
+
 @app.context_processor
 def utility_processor():
     return dict(calcular_estadisticas_equipo=calcular_estadisticas_equipo,
@@ -338,6 +541,54 @@ def modo_invitado():
     datos_ligas = []
     total_partidos_torneo = 0
     partidos_jugados_torneo = 0
+    eliminatorias_data = []
+    # Procesar eliminatorias si existen
+    if torneo.tiene_eliminatorias:
+        for categoria in categorias:
+            eliminatorias = Eliminatoria.query.filter_by(categoria_id=categoria.id)\
+                                  .order_by(case(
+                                      {"octavos": 1, "cuartos": 2, "semifinales": 3, "final": 4, "tercer_lugar": 5},
+                                      value=Eliminatoria.fase
+                                  )).all()
+            
+            categoria_eliminatorias = []
+            for eliminatoria in eliminatorias:
+                partidos = PartidoEliminatoria.query.filter_by(eliminatoria_id=eliminatoria.id)\
+                                         .order_by(PartidoEliminatoria.numero_partido)\
+                                         .all()
+                
+                partidos_data = []
+                for partido in partidos:
+                    partido_dict = {
+                        'id': partido.id,
+                        'numero_partido': partido.numero_partido,
+                        'equipo_local': partido.equipo_local,
+                        'equipo_visitante': partido.equipo_visitante,
+                        'goles_local': partido.goles_local,
+                        'goles_visitante': partido.goles_visitante,
+                        'goles_local_vuelta': partido.goles_local_vuelta,
+                        'goles_visitante_vuelta': partido.goles_visitante_vuelta,
+                        'jugado': partido.jugado,
+                        'jugado_vuelta': partido.jugado_vuelta,
+                        'fecha': partido.fecha,
+                        'hora': partido.hora,
+                        'fecha_vuelta': partido.fecha_vuelta,
+                        'hora_vuelta': partido.hora_vuelta,
+                        'formato': torneo.formato_eliminatorias
+                    }
+                    partidos_data.append(partido_dict)
+                
+                categoria_eliminatorias.append({
+                    'fase': eliminatoria.fase,
+                    'partidos': partidos_data
+                })
+            
+            if categoria_eliminatorias:
+                eliminatorias_data.append({
+                    'categoria': categoria,
+                    'eliminatorias': categoria_eliminatorias
+                })
+
 
     for categoria in categorias:
         equipos_categoria = Equipo.query.filter_by(categoria_id=categoria.id).all()
@@ -409,6 +660,7 @@ def modo_invitado():
                 # Sumamos al total de la categoría
                 categoria_data['total_partidos'] += grupo_total_partidos
                 categoria_data['partidos_jugados'] += grupo_partidos_jugados
+                
 
                 grupos_data.append(grupo_data)
 
@@ -478,6 +730,7 @@ def modo_invitado():
     return render_template('modo_invitado.html',
                          torneo=torneo,
                          datos_ligas=datos_ligas,
+                         eliminatorias_data=eliminatorias_data,
                          today=today,
                          equipos_por_categoria=equipos_por_categoria,
                          datos={
@@ -508,13 +761,26 @@ def admin_dashboard():
     if not torneo:
         return redirect(url_for('crear_torneo_admin'))
 
-    categorias = Categoria.query.filter_by(torneo_id=torneo.id).all()
+    # Cargar categorías con sus eliminatorias y partidos
+    categorias = Categoria.query.filter_by(torneo_id=torneo.id).options(
+        db.joinedload(Categoria.eliminatorias).joinedload(Eliminatoria.partidos)
+    ).all()
+    
     datos_ligas = []
     total_general_partidos = 0
     total_general_jugados = 0
 
     for categoria in categorias:
         equipos_con_logo = [{'nombre': e.nombre, 'logo': get_logo_path(e)} for e in Equipo.query.filter_by(categoria_id=categoria.id).all()]
+        
+        # Obtener datos de eliminatorias para esta categoría
+        eliminatorias_data = []
+        if categoria.eliminatorias:
+            for eliminatoria in categoria.eliminatorias:
+                eliminatorias_data.append({
+                    'fase': eliminatoria.fase,
+                    'partidos': sorted(eliminatoria.partidos, key=lambda x: x.numero_partido)
+                })
         
         if categoria.tiene_grupos:
             grupos = Grupo.query.filter_by(categoria_id=categoria.id).all()
@@ -567,7 +833,10 @@ def admin_dashboard():
                 'grupos': datos_grupos,
                 'equipos_con_logo': equipos_con_logo,
                 'total_partidos': total_categoria_partidos,
-                'partidos_jugados': total_categoria_jugados
+                'partidos_jugados': total_categoria_jugados,
+                'eliminatorias': eliminatorias_data,  # Añadir datos de eliminatorias
+                'porcentaje_progreso': (total_categoria_jugados / total_categoria_partidos * 100) if total_categoria_partidos > 0 else 0
+
             })
             total_general_partidos += total_categoria_partidos
             total_general_jugados += total_categoria_jugados
@@ -609,7 +878,10 @@ def admin_dashboard():
                 'total_partidos': total_partidos,
                 'partidos_jugados': partidos_jugados,
                 'total_equipos': len(equipos),
-                'tiene_descanso': len(equipos) % 2 != 0
+                'tiene_descanso': len(equipos) % 2 != 0,
+                'eliminatorias': eliminatorias_data,  # Añadir datos de eliminatorias
+                'porcentaje_progreso': (partidos_jugados / total_partidos * 100) if total_partidos > 0 else 0
+
             })
 
     goleadores = Goleador.query.order_by(Goleador.total_goles.desc()).all()
@@ -741,9 +1013,12 @@ def crear_torneo_admin():
                 return redirect(url_for('crear_torneo_admin'))
 
             # Limpiar datos anteriores
+            db.session.query(PartidoEliminatoria).delete()
+            
             db.session.query(Partido).delete()
             db.session.query(Equipo).delete()
             db.session.query(Grupo).delete()
+            db.session.query(Eliminatoria).delete()
             db.session.query(Categoria).delete()
             db.session.query(Goleador).delete()
 
@@ -810,6 +1085,359 @@ def crear_torneo_admin():
             flash(f'Error al crear el torneo: {str(e)}', 'danger')
 
     return render_template('crear_torneo.html', max_categorias=6)
+
+@app.route('/admin/editar-formato-eliminatorias/<int:categoria_id>', methods=['GET', 'POST'])
+@admin_required
+def editar_formato_eliminatorias(categoria_id):
+    categoria = Categoria.query.get_or_404(categoria_id)
+    
+    if request.method == 'POST':
+        try:
+            for eliminatoria in categoria.eliminatorias:
+                formato = request.form.get(f'formato_{eliminatoria.id}')
+                if formato in ['single', 'ida', 'ida_vuelta']:
+                    eliminatoria.formato = formato
+                    # Actualizar todos los partidos de esta eliminatoria
+                    for partido in eliminatoria.partidos:
+                        partido.jugado_vuelta = False
+                        partido.goles_local_vuelta = None
+                        partido.goles_visitante_vuelta = None
+            
+            db.session.commit()
+            flash('Formatos actualizados correctamente', 'success')
+            return redirect(url_for('configurar_eliminatorias'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar formatos: {str(e)}', 'danger')
+    
+    return render_template('editar_formato_eliminatorias.html',
+                         categoria=categoria)
+
+@app.route('/admin/eliminar-eliminatorias/<int:categoria_id>', methods=['POST'])
+@admin_required
+def eliminar_eliminatorias(categoria_id):
+    try:
+        # Iniciar una transacción explícita
+        db.session.begin()
+        
+        # Opción 1: Usar subquery para mayor eficiencia
+        eliminatorias_ids = db.session.query(Eliminatoria.id)\
+            .filter_by(categoria_id=categoria_id)\
+            .subquery()
+        
+        # Eliminar primero los partidos
+        db.session.query(PartidoEliminatoria)\
+            .filter(PartidoEliminatoria.eliminatoria_id.in_(eliminatorias_ids))\
+            .delete(synchronize_session=False)
+        
+        # Luego eliminar las eliminatorias
+        db.session.query(Eliminatoria)\
+            .filter_by(categoria_id=categoria_id)\
+            .delete(synchronize_session=False)
+        
+        # Confirmar la transacción
+        db.session.commit()
+        flash('Eliminatorias eliminadas correctamente', 'success')
+    
+    except Exception as e:
+        # Revertir en caso de error
+        db.session.rollback()
+        flash(f'Error al eliminar eliminatorias: {str(e)}', 'danger')
+        app.logger.error(f"Error eliminando eliminatorias: {str(e)}", exc_info=True)
+    
+    return redirect(url_for('configurar_eliminatorias'))
+
+@app.route('/admin/configurar-eliminatorias', methods=['GET', 'POST'])
+@admin_required
+def configurar_eliminatorias():
+    torneo = Torneo.query.first()
+    if not torneo:
+        flash('Primero debes crear un torneo', 'danger')
+        return redirect(url_for('crear_torneo_admin'))
+
+    categorias = Categoria.query.filter_by(torneo_id=torneo.id).all()
+    
+    if request.method == 'POST':
+        try:
+            torneo.tiene_eliminatorias = 'tiene_eliminatorias' in request.form
+            if torneo.tiene_eliminatorias:
+                torneo.equipos_eliminatorias = int(request.form.get('equipos_eliminatorias', 0))
+                torneo.formato_eliminatorias = request.form.get('formato_eliminatorias', 'ida')
+                
+                # Limpiar eliminatorias existentes
+                for categoria in categorias:
+                    Eliminatoria.query.filter_by(categoria_id=categoria.id).delete()
+                    db.session.commit()
+                
+                # Crear eliminatorias para cada categoría
+                for categoria in categorias:
+                    crear_eliminatorias(categoria.id, torneo.equipos_eliminatorias, torneo.formato_eliminatorias)
+            
+            db.session.commit()
+            flash('Configuración de eliminatorias actualizada', 'success')
+            # Redirigir al mismo lugar para mostrar los nuevos botones
+            return redirect(url_for('configurar_eliminatorias'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al configurar eliminatorias: {str(e)}', 'danger')
+    
+    return render_template('configurar_eliminatorias.html', 
+                         torneo=torneo,
+                         categorias=categorias)
+
+def crear_eliminatorias(categoria_id, num_equipos, formato):
+    # Determinar las fases necesarias
+    fases = []
+    if num_equipos >= 16:
+        fases.extend(['octavos', 'cuartos', 'semifinales', 'final', 'tercer_lugar'])
+    elif num_equipos >= 8:
+        fases.extend(['cuartos', 'semifinales', 'final', 'tercer_lugar'])
+    elif num_equipos >= 4:
+        fases.extend(['semifinales', 'final', 'tercer_lugar'])
+    elif num_equipos == 2:
+        fases.append('final')
+    elif num_equipos == 6:
+        # Caso especial: 2 pasan directo a semifinales, 4 a cuartos
+        fases.extend(['cuartos', 'semifinales', 'final', 'tercer_lugar'])
+    
+    # Crear las fases de eliminatoria
+    for fase in fases:
+        eliminatoria = Eliminatoria(
+            categoria_id=categoria_id,
+            fase=fase
+        )
+        db.session.add(eliminatoria)
+        db.session.flush()
+        
+        # Crear partidos según la fase
+        num_partidos = {
+            'octavos': 8,
+            'cuartos': 4,
+            'semifinales': 2,
+            'final': 1,
+            'tercer_lugar': 1
+        }.get(fase, 0)
+        
+        for i in range(1, num_partidos + 1):
+            partido = PartidoEliminatoria(
+                eliminatoria_id=eliminatoria.id,
+                numero_partido=i
+            )
+            db.session.add(partido)
+    
+    db.session.commit()
+
+@app.route('/admin/actualizar-eliminatorias/<int:categoria_id>', methods=['GET', 'POST'])
+@admin_required
+def actualizar_eliminatorias(categoria_id):
+    categoria = Categoria.query.get_or_404(categoria_id)
+    torneo = Torneo.query.first()
+    
+    # Obtener los mejores equipos de la categoría para asignar a las eliminatorias
+    equipos = Equipo.query.filter_by(categoria_id=categoria_id).order_by(
+        Equipo.puntos.desc(),
+        Equipo.diferencia_goles.desc(),
+        Equipo.goles_favor.desc()).limit(torneo.equipos_eliminatorias).all()
+    
+    eliminatorias = Eliminatoria.query.filter_by(categoria_id=categoria_id).order_by(
+        case(
+            {"octavos": 1, "cuartos": 2, "semifinales": 3, "final": 4, "tercer_lugar": 5},
+            value=Eliminatoria.fase
+        )).all()
+    
+    if request.method == 'POST':
+        try:
+            # Asignar equipos a octavos (si aplica)
+            if torneo.equipos_eliminatorias >= 16:
+                octavos = next((e for e in eliminatorias if e.fase == 'octavos'), None)
+                if octavos:
+                    for partido in octavos.partidos:
+                        partido.equipo_local = request.form.get(f'octavos_{partido.numero_partido}_local')
+                        partido.equipo_visitante = request.form.get(f'octavos_{partido.numero_partido}_visitante')
+            
+            # Asignar equipos a cuartos (si aplica o es el caso especial de 6 equipos)
+            if torneo.equipos_eliminatorias >= 8 or torneo.equipos_eliminatorias == 6:
+                cuartos = next((e for e in eliminatorias if e.fase == 'cuartos'), None)
+                if cuartos:
+                    for partido in cuartos.partidos:
+                        partido.equipo_local = request.form.get(f'cuartos_{partido.numero_partido}_local')
+                        partido.equipo_visitante = request.form.get(f'cuartos_{partido.numero_partido}_visitante')
+            
+            # Asignar equipos a semifinales (pueden venir de octavos o cuartos o ser directos)
+            semifinales = next((e for e in eliminatorias if e.fase == 'semifinales'), None)
+            if semifinales:
+                for partido in semifinales.partidos:
+                    partido.equipo_local = request.form.get(f'semifinales_{partido.numero_partido}_local')
+                    partido.equipo_visitante = request.form.get(f'semifinales_{partido.numero_partido}_visitante')
+            
+            # Asignar equipos a final
+            final = next((e for e in eliminatorias if e.fase == 'final'), None)
+            if final:
+                for partido in final.partidos:
+                    partido.equipo_local = request.form.get(f'final_{partido.numero_partido}_local')
+                    partido.equipo_visitante = request.form.get(f'final_{partido.numero_partido}_visitante')
+            
+            # Asignar equipos a tercer lugar
+            tercer_lugar = next((e for e in eliminatorias if e.fase == 'tercer_lugar'), None)
+            if tercer_lugar:
+                for partido in tercer_lugar.partidos:
+                    partido.equipo_local = request.form.get(f'tercer_lugar_{partido.numero_partido}_local')
+                    partido.equipo_visitante = request.form.get(f'tercer_lugar_{partido.numero_partido}_visitante')
+            
+            db.session.commit()
+            flash('Emparejamientos de eliminatorias actualizados', 'success')
+            return redirect(url_for('admin_dashboard'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar eliminatorias: {str(e)}', 'danger')
+    
+    return render_template('actualizar_eliminatorias.html',
+                         categoria=categoria,
+                         torneo=torneo,
+                         equipos=equipos,
+                         eliminatorias=eliminatorias)
+
+@app.route('/admin/resultado-eliminatoria/<int:partido_id>', methods=['GET', 'POST'])
+@admin_required
+def resultado_eliminatoria(partido_id):
+    partido = PartidoEliminatoria.query.get_or_404(partido_id)
+    eliminatoria = Eliminatoria.query.get(partido.eliminatoria_id)
+    categoria = Categoria.query.get(eliminatoria.categoria_id)
+    torneo = Torneo.query.first()
+    
+    equipos_categoria = Equipo.query.filter_by(categoria_id=categoria.id).all()
+
+    # Verificar y asignar equipos
+    if not hasattr(partido, 'equipo_local_obj'):
+        partido.equipo_local_obj = None
+    if not hasattr(partido, 'equipo_visitante_obj'):
+        partido.equipo_visitante_obj = None
+    
+    if request.method == 'POST':
+        try:
+            # Procesar partido de ida
+            partido.goles_local = int(request.form.get('goles_local', 0)) if request.form.get('goles_local') else None
+            partido.goles_visitante = int(request.form.get('goles_visitante', 0)) if request.form.get('goles_visitante') else None
+            partido.jugado = True
+            
+            # Procesar partido de vuelta (si aplica)
+            if torneo.formato_eliminatorias == 'ida_vuelta':
+                partido.goles_local_vuelta = int(request.form.get('goles_local_vuelta', 0)) if request.form.get('goles_local_vuelta') else None
+                partido.goles_visitante_vuelta = int(request.form.get('goles_visitante_vuelta', 0)) if request.form.get('goles_visitante_vuelta') else None
+                partido.jugado_vuelta = True
+            
+            # Actualizar fechas y horas
+            partido.fecha = datetime.strptime(request.form.get('fecha'), '%Y-%m-%d') if request.form.get('fecha') else None
+            partido.hora = request.form.get('hora')
+            
+            if torneo.formato_eliminatorias == 'ida_vuelta':
+                partido.fecha_vuelta = datetime.strptime(request.form.get('fecha_vuelta'), '%Y-%m-%d') if request.form.get('fecha_vuelta') else None
+                partido.hora_vuelta = request.form.get('hora_vuelta')
+            
+            db.session.commit()
+            flash('Resultado actualizado correctamente', 'success')
+            
+            # Determinar ganador y asignar a siguiente fase
+            if partido.jugado and (torneo.formato_eliminatorias != 'ida_vuelta' or partido.jugado_vuelta):
+                asignar_siguiente_fase(partido, eliminatoria, torneo.formato_eliminatorias)
+            
+            return redirect(url_for('admin_dashboard'))
+            
+        except ValueError as e:
+            db.session.rollback()
+            flash('Error: Los goles deben ser números válidos', 'danger')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar resultado: {str(e)}', 'danger')
+    
+    return render_template('resultado_eliminatoria.html',
+                         partido=partido,
+                         eliminatoria=eliminatoria,
+                         categoria=categoria,
+                         torneo=torneo,
+                         equipos_categoria=equipos_categoria)
+
+def asignar_siguiente_fase(partido, eliminatoria, formato):
+    # Calcular ganador
+    if formato == 'ida':
+        ganador = partido.equipo_local if (partido.goles_local or 0) > (partido.goles_visitante or 0) else partido.equipo_visitante
+    else:
+        global_local = (partido.goles_local or 0) + (partido.goles_visitante_vuelta or 0)
+        global_visitante = (partido.goles_visitante or 0) + (partido.goles_local_vuelta or 0)
+        
+        if global_local > global_visitante:
+            ganador = partido.equipo_local
+        elif global_visitante > global_local:
+            ganador = partido.equipo_visitante
+        else:
+            # Empate en global, usar goles de visitante
+            if (partido.goles_visitante or 0) + (partido.goles_local_vuelta or 0) > (partido.goles_local or 0) + (partido.goles_visitante_vuelta or 0):
+                ganador = partido.equipo_visitante
+            else:
+                ganador = partido.equipo_local
+    
+    # Determinar siguiente fase
+    siguiente_fase = {
+        'octavos': 'cuartos',
+        'cuartos': 'semifinales',
+        'semifinales': 'final',
+    }.get(eliminatoria.fase)
+    
+    if siguiente_fase:
+        siguiente_eliminatoria = Eliminatoria.query.filter_by(
+            categoria_id=eliminatoria.categoria_id,
+            fase=siguiente_fase).first()
+        
+        if siguiente_eliminatoria:
+            # Encontrar el partido correspondiente en la siguiente fase
+            partido_siguiente = PartidoEliminatoria.query.filter_by(
+                eliminatoria_id=siguiente_eliminatoria.id,
+                numero_partido=(partido.numero_partido + 1) // 2  # Para mapear 1-2→1, 3-4→2, etc.
+            ).first()
+            
+            if partido_siguiente:
+                # Asignar ganador como local o visitante alternadamente
+                if partido.numero_partido % 2 == 1:
+                    partido_siguiente.equipo_local = ganador
+                else:
+                    partido_siguiente.equipo_visitante = ganador
+                
+                db.session.commit()
+    
+    # Manejar el partido de tercer lugar para semifinales
+    if eliminatoria.fase == 'semifinales' and partido.numero_partido == 1:
+        tercer_lugar = Eliminatoria.query.filter_by(
+            categoria_id=eliminatoria.categoria_id,
+            fase='tercer_lugar').first()
+        
+        if tercer_lugar:
+            partido_tercer = PartidoEliminatoria.query.filter_by(
+                eliminatoria_id=tercer_lugar.id,
+                numero_partido=1).first()
+            
+            if partido_tercer:
+                # El perdedor de la primera semifinal será local
+                perdedor = partido.equipo_visitante if ganador == partido.equipo_local else partido.equipo_local
+                partido_tercer.equipo_local = perdedor
+    
+    elif eliminatoria.fase == 'semifinales' and partido.numero_partido == 2:
+        tercer_lugar = Eliminatoria.query.filter_by(
+            categoria_id=eliminatoria.categoria_id,
+            fase='tercer_lugar').first()
+        
+        if tercer_lugar:
+            partido_tercer = PartidoEliminatoria.query.filter_by(
+                eliminatoria_id=tercer_lugar.id,
+                numero_partido=1).first()
+            
+            if partido_tercer:
+                # El perdedor de la segunda semifinal será visitante
+                perdedor = partido.equipo_visitante if ganador == partido.equipo_local else partido.equipo_local
+                partido_tercer.equipo_visitante = perdedor
+                db.session.commit()
 
 @app.route('/admin/actualizar-resultado/<int:partido_id>', methods=['GET', 'POST'])
 @admin_required
