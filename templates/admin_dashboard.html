@@ -552,7 +552,8 @@
                                                                                     <img src="{% if equipo_local %}{{ get_logo_path(equipo_local) }}{% else %}{{ url_for('static', filename='images/default_logo.png') }}{% endif %}" 
                                                                                         class="team-logo" 
                                                                                         alt="{{ partido.equipo_local }}"
-                                                                                        onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                                        onerror="handleImageError(this)" 
+                                                                                        data-default="{{ url_for('static', filename='images/default_logo.png') }}">
                                                                                     
                                                                                     {# Nombre del equipo #}
                                                                                     {{ partido.equipo_local }}
@@ -581,7 +582,8 @@
                                                                                     <img src="{% if equipo_visitante %}{{ get_logo_path(equipo_visitante) }}{% else %}{{ url_for('static', filename='images/default_logo.png') }}{% endif %}" 
                                                                                         class="team-logo" 
                                                                                         alt="{{ partido.equipo_visitante }}"
-                                                                                        onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                                        onerror="handleImageError(this)" 
+                                                                                        data-default="{{ url_for('static', filename='images/default_logo.png') }}">
                                                                                     {{ partido.equipo_visitante }}
                                                                                 </div>
                                                                             {% endif %}
@@ -1071,5 +1073,9 @@
                     new bootstrap.Collapse(collapse, { hide: true });
                 });
             });
+            function handleImageError(img) {
+            img.onerror = null;
+            img.src = img.dataset.default;
+            }
         </script>
 {% endblock %}
