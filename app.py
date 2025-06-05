@@ -219,25 +219,9 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 def get_logo_path(equipo):
-    # Si no hay equipo o el equipo no tiene atributo logo
-    if not equipo or not hasattr(equipo, 'logo') or equipo.logo is None:
-        return 'images/default_logo.png'  # Ruta relativa al directorio static
-    
-    # Si el logo es una URL externa
-    if isinstance(equipo.logo, str) and equipo.logo.startswith(('http://', 'https://')):
-        return equipo.logo
-    
-    # Verificar si existe el archivo local
-    try:
-        logo_path = os.path.join(app.config['UPLOAD_FOLDER'], equipo.logo)
-        if os.path.exists(logo_path):
-            return f'logos/{equipo.logo}'  # Ruta relativa
-    except (TypeError, AttributeError):
-        pass
-    
-    # Si todo falla, devolver logo por defecto
-    return 'images/default_logo.png'
-
+    if equipo.logo and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], equipo.logo)):
+        return url_for('static', filename=f'logos/{equipo.logo}')
+    return url_for('static', filename='images/default_logo.png')
 # Usuario administrador
 ADMIN_USER = {
     "username": "Moy",
