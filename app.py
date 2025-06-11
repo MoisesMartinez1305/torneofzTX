@@ -9,6 +9,7 @@ import random
 from collections import defaultdict
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24).hex()
@@ -17,6 +18,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/logos'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Asegurar que la carpeta de logos existe
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
