@@ -1,0 +1,1246 @@
+
+    /* ===== ESTILOS GENERALES ===== */
+/* Estilo para el contenedor principal del bracket - Versión Premium Optimizada */
+.bracket-container {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #050a1f 0%, #121633 100%);
+    border-radius: 12px;
+    box-shadow: 
+        0 0 25px rgba(0, 150, 255, 0.4),
+        inset 0 0 15px rgba(0, 191, 255, 0.2);
+    position: relative;
+    margin: 30px 0;
+    min-height: 400px;
+    /* Scroll suave en horizontal */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Efecto de borde neón mejorado - Más eficiente */
+.bracket-container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, 
+        #00fff0 0%, 
+        #0080ff 25%, 
+        #00bfff 50%,
+        #0080ff 75%, 
+        #00fff0 100%);
+    z-index: -1;
+    animation: neonBorder 4s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+@keyframes neonBorder {
+    0%, 100% { 
+        opacity: 0.6; 
+        filter: blur(1px);
+    }
+    50% { 
+        opacity: 1; 
+        filter: blur(0px);
+    }
+}
+
+/* Estilo para cada fase de la eliminatoria - Más flexible */
+.bracket-phase {
+    min-width: 280px;
+    max-width: 350px;
+    flex: 0 0 auto;
+    margin: 0 30px;
+    padding: 20px 15px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* Adaptable al número de partidos */
+    gap: 20px;
+}
+
+/* Ajuste automático para diferentes números de partidos */
+.bracket-phase[data-matches="1"] { justify-content: center; }
+.bracket-phase[data-matches="2"] { justify-content: space-around; }
+.bracket-phase[data-matches="4"] { justify-content: space-between; }
+.bracket-phase[data-matches="8"] { gap: 15px; }
+
+/* Líneas conectivas más elegantes */
+.bracket-phase:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -30px;
+    width: 30px;
+    height: 3px;
+    background: linear-gradient(90deg, 
+        rgba(0, 255, 240, 0.9) 0%, 
+        rgba(0, 191, 255, 0.7) 50%,
+        rgba(0, 128, 255, 0.9) 100%);
+    z-index: 2;
+    box-shadow: 
+        0 0 10px rgba(0, 255, 240, 0.5),
+        0 0 20px rgba(0, 191, 255, 0.3);
+    transform: translateY(-1.5px);
+    border-radius: 2px;
+}
+
+/* Línea vertical conectiva premium */
+.bracket-phase:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    bottom: 20%;
+    left: -30px;
+    width: 3px;
+    background: linear-gradient(to bottom, 
+        transparent 5%, 
+        rgba(0, 255, 240, 0.9) 15%, 
+        rgba(0, 191, 255, 0.8) 50%,
+        rgba(0, 128, 255, 0.9) 85%, 
+        transparent 95%);
+    z-index: 2;
+    box-shadow: 
+        0 0 12px rgba(0, 255, 240, 0.4),
+        0 0 25px rgba(0, 128, 255, 0.3);
+    border-radius: 2px;
+}
+
+/* Estilo para cada partido - Ultra Premium */
+.bracket-match {
+    background: linear-gradient(135deg, 
+        rgba(5, 10, 30, 0.95) 0%, 
+        rgba(8, 15, 35, 0.9) 50%,
+        rgba(5, 10, 30, 0.95) 100%);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 0;
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(0, 191, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 191, 255, 0.1);
+    border: 1px solid rgba(0, 191, 255, 0.25);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.bracket-match::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(0, 191, 255, 0.03) 0%, 
+        transparent 50%,
+        rgba(0, 255, 240, 0.02) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.bracket-match:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(0, 191, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 191, 255, 0.2);
+    border-color: rgba(0, 255, 240, 0.5);
+}
+
+.bracket-match:hover::before {
+    opacity: 1;
+}
+
+/* Efecto de brillo más sutil */
+.bracket-match::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, 
+        rgba(0, 255, 240, 0.1) 0%, 
+        transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.bracket-match:hover::after {
+    opacity: 1;
+}
+
+/* Contenedor de equipos más organizado */
+.teams-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* Estilo para los equipos - UX Premium */
+.team {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #e8e8ff;
+    font-weight: 500;
+    font-family: 'Segoe UI', 'Inter', sans-serif;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    min-height: 44px;
+    overflow: hidden;
+}
+
+.team::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: transparent;
+    transition: all 0.3s ease;
+}
+
+.team:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(2px) translateY(-1px);
+    color: #ffffff;
+    border-color: rgba(0, 191, 255, 0.3);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.2),
+        0 0 15px rgba(0, 191, 255, 0.1);
+}
+
+.team:hover::before {
+    background: linear-gradient(to bottom, #00fff0, #0080ff);
+    box-shadow: 0 0 8px rgba(0, 191, 255, 0.4);
+}
+
+/* Contenedor del contenido del equipo */
+.team-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 10px;
+}
+
+/* Nombre del equipo con ellipsis mejorado */
+.team-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.95em;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* Estilo para el equipo ganador - Diseño premium */
+.team.winner {
+    background: linear-gradient(135deg, 
+        rgba(0, 191, 255, 0.12) 0%, 
+        rgba(0, 128, 255, 0.08) 50%,
+        rgba(0, 255, 240, 0.06) 100%);
+    font-weight: 600;
+    color: #00f9ff;
+    border-color: rgba(0, 249, 255, 0.4);
+    text-shadow: 0 0 8px rgba(0, 249, 255, 0.3);
+    position: relative;
+    animation: winnerGlow 3s ease-in-out infinite alternate;
+}
+
+.team.winner::before {
+    background: linear-gradient(to bottom, 
+        #00fff0 0%, 
+        #00bfff 50%, 
+        #0080ff 100%);
+    box-shadow: 
+        0 0 10px rgba(0, 249, 255, 0.5),
+        inset 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+/* Trofeo posicionado estéticamente */
+.trophy-icon {
+    font-size: 1.1em;
+    color: #ffd700;
+    text-shadow: 
+        0 0 8px rgba(255, 215, 0, 0.6),
+        0 0 15px rgba(255, 215, 0, 0.3);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    animation: trophyShine 2s ease-in-out infinite alternate;
+    flex-shrink: 0;
+}
+
+@keyframes trophyShine {
+    0% { 
+        text-shadow: 
+            0 0 8px rgba(255, 215, 0, 0.6),
+            0 0 15px rgba(255, 215, 0, 0.3);
+    }
+    100% { 
+        text-shadow: 
+            0 0 12px rgba(255, 215, 0, 0.8),
+            0 0 20px rgba(255, 215, 0, 0.5),
+            0 0 25px rgba(255, 215, 0, 0.2);
+    }
+}
+
+@keyframes winnerGlow {
+    0% { 
+        box-shadow: 
+            0 4px 12px rgba(0, 0, 0, 0.2),
+            0 0 15px rgba(0, 249, 255, 0.2);
+    }
+    100% { 
+        box-shadow: 
+            0 6px 18px rgba(0, 0, 0, 0.3),
+            0 0 25px rgba(0, 249, 255, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Estilo para los equipos no ganadores */
+.team:not(.winner) {
+    color: #bbb8ff;
+    opacity: 0.85;
+}
+
+.team:not(.winner):hover {
+    opacity: 1;
+}
+
+/* Estilo para los marcadores - Diseño premium */
+.score {
+    font-weight: 700;
+    color: #00f9ff;
+    text-shadow: 
+        0 0 8px rgba(0, 249, 255, 0.6),
+        0 0 15px rgba(0, 249, 255, 0.3);
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 1.05em;
+    letter-spacing: 0.5px;
+    min-width: 50px;
+    text-align: center;
+    background: linear-gradient(135deg, 
+        rgba(0, 249, 255, 0.15) 0%, 
+        rgba(0, 191, 255, 0.1) 100%);
+    border-radius: 6px;
+    padding: 4px 10px;
+    border: 1px solid rgba(0, 249, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.score::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.1), 
+        transparent);
+    transition: left 0.5s ease;
+}
+
+.team:hover .score::before {
+    left: 100%;
+}
+
+/* Marcador del equipo ganador */
+.team.winner .score {
+    background: linear-gradient(135deg, 
+        rgba(0, 249, 255, 0.25) 0%, 
+        rgba(0, 191, 255, 0.2) 50%,
+        rgba(0, 255, 240, 0.15) 100%);
+    border-color: rgba(0, 249, 255, 0.6);
+    box-shadow: 
+        0 0 12px rgba(0, 249, 255, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-weight: 800;
+}
+
+/* Estilo para la información del partido */
+.match-info {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 191, 255, 0.3);
+    font-size: 0.85em;
+    color: #a8b8ff;
+    font-family: 'Segoe UI', sans-serif;
+    line-height: 1.4;
+}
+
+.match-info div {
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.match-info .info-icon {
+    color: #00bfff;
+    font-size: 1em;
+    min-width: 16px;
+}
+
+/* Resultado global más compacto */
+.global-result {
+    margin-top: 8px;
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(90deg, 
+        rgba(0, 191, 255, 0.25) 0%, 
+        rgba(0, 128, 255, 0.25) 100%);
+    padding: 6px 12px;
+    border-radius: 5px;
+    display: inline-block;
+    font-size: 0.9em;
+    border: 1px solid rgba(0, 191, 255, 0.4);
+    box-shadow: 0 0 8px rgba(0, 191, 255, 0.15);
+    font-family: 'Consolas', monospace;
+}
+
+/* Títulos de fase más elegantes */
+.bracket-phase h4 {
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 191, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 1.1em;
+    position: relative;
+    font-family: 'Segoe UI', sans-serif;
+    text-shadow: 0 0 8px rgba(0, 191, 255, 0.4);
+    font-weight: 600;
+}
+
+.bracket-phase h4::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 25%;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        #00fff0 20%, 
+        #0080ff 50%,
+        #00fff0 80%, 
+        transparent);
+    box-shadow: 0 0 12px rgba(0, 191, 255, 0.4);
+}
+
+/* Estados especiales para partidos */
+.bracket-match.upcoming {
+    opacity: 0.7;
+    border-style: dashed;
+}
+
+.bracket-match.live {
+    animation: livePulse 2s infinite ease-in-out;
+    border-color: #ff4444;
+}
+
+@keyframes livePulse {
+    0%, 100% { 
+        box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+    }
+    50% { 
+        box-shadow: 0 0 25px rgba(255, 68, 68, 0.6);
+    }
+}
+
+.bracket-match.finished {
+    opacity: 0.9;
+}
+
+/* Responsive mejorado */
+@media (max-width: 1024px) {
+    .bracket-phase {
+        min-width: 260px;
+        margin: 0 20px;
+    }
+}
+
+/* Responsive premium */
+@media (max-width: 768px) {
+    .bracket-container {
+        flex-direction: column;
+        padding: 20px 15px;
+        overflow-x: visible;
+        overflow-y: auto;
+        min-height: auto;
+    }
+    
+    .bracket-phase {
+        min-width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 20px 10px;
+        gap: 18px;
+    }
+    
+    .bracket-phase:not(:last-child)::after,
+    .bracket-phase:not(:first-child)::before {
+        display: none;
+    }
+    
+    .bracket-phase h4 {
+        font-size: 1em;
+        margin-bottom: 18px;
+    }
+    
+    .bracket-match {
+        padding: 16px;
+        min-height: 110px;
+    }
+    
+    .team {
+        padding: 10px 14px;
+        min-height: 42px;
+    }
+    
+    .team-name {
+        font-size: 0.9em;
+    }
+    
+    .score {
+        font-size: 0.95em;
+        min-width: 45px;
+        padding: 3px 8px;
+    }
+    
+    .trophy-icon {
+        font-size: 1em;
+    }
+    
+    /* Separador visual premium entre fases */
+    .bracket-phase:not(:last-child) {
+        border-bottom: 3px solid transparent;
+        border-image: linear-gradient(90deg, 
+            transparent 10%,
+            rgba(0, 191, 255, 0.4) 30%,
+            rgba(0, 255, 240, 0.6) 50%,
+            rgba(0, 191, 255, 0.4) 70%,
+            transparent 90%) 1;
+        padding-bottom: 25px;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .bracket-phase:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        bottom: -3px;
+        left: 30%;
+        width: 40%;
+        height: 3px;
+        background: linear-gradient(90deg, 
+            transparent,
+            rgba(0, 255, 240, 0.8),
+            transparent);
+        box-shadow: 0 0 15px rgba(0, 255, 240, 0.4);
+        display: block;
+        right: auto;
+        top: auto;
+        transform: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .bracket-container {
+        padding: 15px 10px;
+        margin: 15px 0;
+        border-radius: 8px;
+    }
+    
+    .bracket-phase {
+        padding: 15px 5px;
+    }
+    
+    .bracket-match {
+        padding: 12px;
+    }
+    
+    .team {
+        padding: 6px 10px;
+        min-height: 32px;
+    }
+    
+    .team-name {
+        font-size: 0.85em;
+    }
+    
+    .score {
+        font-size: 0.9em;
+        min-width: 30px;
+    }
+    
+    .match-info {
+        font-size: 0.8em;
+    }
+}
+
+/* Animación del contenedor principal más suave */
+@keyframes subtleGlow {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(0, 191, 255, 0.25);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(0, 191, 255, 0.4);
+    }
+}
+
+.bracket-container {
+    animation: subtleGlow 8s infinite ease-in-out;
+}
+
+/* Utilidades para diferentes tamaños de bracket */
+.bracket-container.compact .bracket-phase {
+    min-width: 240px;
+    gap: 15px;
+}
+
+.bracket-container.large .bracket-phase {
+    min-width: 320px;
+    gap: 25px;
+}
+
+/* Estados de carga */
+.bracket-match.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.bracket-match.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(0, 191, 255, 0.2), 
+        transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+    .overflow-auto {
+        overflow-x: auto !important;
+    }
+    
+    .progress {
+        height: 6px;
+        background-color: rgba(255,255,255,0.2);
+    }
+    
+    .progress-bar {
+        background: linear-gradient(90deg, #00fff0 0%, #00fff0 100%);
+        box-shadow:
+            0 0 8px #00fff0,
+            0 0 16px #00fff0,
+            0 0 32px #00fff0,
+            0 0 64px #00fff0;
+        border-radius: 10px;
+        transition: box-shadow 0.3s, background 0.3s;
+        border: 1.5px solid #00fff0;
+        position: relative;
+        height: 18px;
+        min-height: 18px;
+        max-height: 18px;
+    }
+    .progress {
+        height: 18px;
+        min-height: 18px;
+        max-height: 18px;
+    }
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        border-radius: 10px;
+        box-shadow:
+            0 0 12px 4px #00fff0,
+            0 0 24px 8px #00fff0;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    
+    .liga-card {
+        transition: all 0.3s ease;
+        color: #fff;
+        
+    }
+    
+    .liga-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgb(255, 255, 255), 0 0 12px 2px #00fff0, 0 0 24px 4px #00fff0 !important;
+        border: 2px solid #00fff0 !important;
+    }
+    
+    /* ===== ESTILOS PARA LOGOS ===== */
+    .team-with-logo {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+    }
+    
+    .team-logo-container {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .team-logo {
+        width: 30px;
+        height: 30px;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        display: inline-block;
+    }
+    
+    .team-name {
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ===== ESTILOS PARA TABLAS ===== */
+    .table {
+        width: 100%;
+        margin: 0;
+    }
+    
+    .table th, .table td {
+        white-space: nowrap;
+        padding: 0.5rem;
+        font-size: 0.8rem;
+        vertical-align: middle;
+    }
+
+    /* ===== TABLA DE POSICIONES ===== */
+    .table-standings-container {
+        position: relative;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        padding-bottom: 5px;
+        
+    }
+    
+    .table-standings {
+        width: auto;
+        min-width: 100%;
+        margin: 0;
+    }
+    
+    .table-standings th:first-child,
+    .table-standings td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background-color: #0d3b66;
+    }
+    
+    .table-standings th:nth-child(2),
+    .table-standings td:nth-child(2) {
+        min-width: 150px;
+    }
+
+    /* ===== ESTILOS PARA PESTAÑAS ===== */
+    .nav-tabs-modern {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .nav-tabs-modern .nav-link {
+        color: #0d3b66;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 0;
+        padding: 12px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        margin-right: 5px;
+    }
+    
+    .nav-tabs-modern .nav-link:hover,
+    .nav-tabs-modern .nav-link.active {
+        color: #fff;
+    }
+    
+    .nav-tabs-modern .nav-link.active {
+        background-color: #031194;
+        font-weight: 600;
+        text-shadow: 0 0 1px #00FFFF;
+    }
+    
+    .nav-tabs-modern .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #28a745;
+    }
+
+    /* ===== TABLA DE GOLEADORES ===== */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        overflow-x: scroll;
+    }
+    .table-scorers {
+        width: auto;
+        min-width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .table-scorers thead th {
+        background-color: #031194;
+        color: white;
+        padding: 12px 15px;
+        text-align: center;
+        font-weight: 600;
+        border: none;
+        text-shadow: 0 0 5px #00FFFF;
+        font-weight: bold;  
+    }
+    
+    .table-scorers tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .table-scorers tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .table-scorers tbody td {
+        padding: 12px 15px;
+        vertical-align: middle;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .table-scorers .position-cell {
+        font-weight: bold;
+        color: white;
+        background-color: #031194;
+        border-radius: 5px 0 0 5px;
+        text-shadow: 0 0 1px #00FFFF, 0 0 5px #00FFFF, 0 0 10px #00FFFF !important;
+    }
+    
+    .table-scorers .player-cell{
+        text-align: left;
+        font-weight: 500;
+        background-color: #031194 !important;
+        color: white;
+        padding-left: 1rem !important;
+        text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+    }
+    .table-scorers .team-cell {
+        text-align: left;
+        font-weight: 500;
+        background-color: #031194 !important;
+        color: white;
+        padding-left: 0.5rem !important;
+    }
+    
+    .table-scorers .team-cell {
+        display: flex;
+        align-items: center;
+    }
+    
+    .table-scorers .goals-cell {
+        font-weight: bold;
+        color: white !important;
+        background-color: #031194;
+        border-radius: 0 5px 5px 0;
+        text-shadow: 0 0 1px #00FFFF, 0 0 5px #00FFFF, 0 0 10px #00FFFF;
+        text-align: center !important;
+    }
+    
+    .table-scorers .jornada-badge {
+        background-color: #0d3b66;
+        color: white;
+        border-radius: 3px;
+        padding: 2px 6px;
+        font-size: 0.7rem;
+        margin: 0 3px 3px 0;
+        display: inline-block;
+    }
+    
+    .jornadas-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+        margin-top: 5px;
+    }
+    
+.top-scorer .player-cell strong::after {
+    content: " 👑";
+    margin-left: 8px;
+    font-size: 1.5em;
+    color: #FFD700; /* Dorado */
+    text-shadow:
+        0 0 4px #FFD700,
+        0 0 8px rgba(255, 215, 0, 0.8),
+        0 0 12px rgba(255, 215, 0, 0.5),
+        0 0 16px rgba(255, 215, 0, 0.3);
+    animation: goldenPulse 2s infinite ease-in-out;
+    vertical-align: middle;
+}
+
+/* Animación de brillo dorado premium */
+@keyframes goldenPulse {
+    0% {
+        text-shadow:
+            0 0 4px #FFD700,
+            0 0 8px rgba(255, 215, 0, 0.8),
+            0 0 12px rgba(255, 215, 0, 0.5),
+            0 0 16px rgba(255, 215, 0, 0.3);
+    }
+    100% {
+        text-shadow:
+            0 0 6px #FFD700,
+            0 0 12px rgba(255, 215, 0, 1),
+            0 0 18px rgba(255, 215, 0, 0.8),
+            0 0 25px rgba(255, 215, 0, 0.6);
+    }
+}
+
+   /* === Celda de botón "Ver" === */
+.goals-jornada {
+    background-color: #031194 !important; /* Azul profundo */
+    border-radius: 6px;
+}
+
+/* === Botón Premium === */
+.goals-jornada .btn {
+    background: #fff;
+    color: #031194 !important;
+    border: 2px solid #031194;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0, 17, 148, 0.15);
+    transition: all 0.3s ease;
+}
+
+.goals-jornada .btn:hover {
+    background-color: #031194;
+    color: #fff !important;
+    box-shadow: 0 6px 15px rgba(0, 17, 148, 0.4);
+    transform: scale(1.03);
+}
+
+/* === Modal Fixes & Estilo === */
+.modal {
+    z-index: 1050;
+}
+.modal-backdrop.show {
+    opacity: 0.4 !important;
+    z-index: 1040;
+}
+
+/* === Modal Elegante === */
+.modal-content {
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Encabezado azul pro */
+.modal-header.bg-primary {
+    background: linear-gradient(135deg, #031194, #003cff);
+    color: #fff;
+    padding: 1rem 1.2rem;
+}
+
+/* Icono de balón */
+.modal-header .fa-futbol {
+    color: #ffd700; /* Dorado */
+}
+
+/* Botón cerrar */
+.modal-header .btn-close-white {
+    filter: invert(1);
+}
+
+/* Cuerpo del modal: limpio y claro */
+.modal-body {
+    max-height: 50vh;
+    overflow-y: auto;
+    background-color: #f8f9fc;
+    padding: 0;
+}
+
+/* Lista de jornadas */
+.list-group-item {
+    background-color: #fff;
+    border: none;
+    border-bottom: 1px solid #eee;
+    padding: 10px 16px;
+    font-size: 15px;
+    transition: background-color 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: #eef4ff;
+}
+
+/* Badge con goles */
+.list-group-item .badge {
+    background: #031194;
+    font-weight: 600;
+    padding: 6px 12px;
+}
+
+/* Footer del modal */
+.modal-footer {
+    background-color: #f1f3f8;
+    border-top: 1px solid #e0e0e0;
+    font-size: 13px;
+    padding: 10px 16px;
+    color: #555;
+    justify-content: flex-start;
+}
+
+    /* ===== MEDIA QUERIES PARA MÓVILES ===== */
+    @media (max-width: 768px) {
+        /* Contenedor principal */
+        .container {
+            width: 100%;
+            padding: 0 !important;
+            margin: 0 auto !important;
+        }
+        
+        /* Tablas responsivas */
+        .table-responsive {
+            overflow-x: auto !important;              /* Mostrar scroll solo cuando es necesario */
+            overflow-y: auto !important;              /* Permite scroll vertical si es necesario */
+            -webkit-overflow-scrolling: touch;        /* Mejora el scroll en iOS */
+            touch-action: auto !important;            /* Permite gestos normales: scroll y zoom */
+            display: block !important;                /* Asegura el comportamiento esperado del scroll */
+            width: 100%;
+            padding-bottom: 10px;
+        }
+
+        
+        .table th {
+            padding: 0.3rem;
+            font-size: 0.7rem !important;
+            border: 0.01px solid #ffffff !important;          /* Borde neón cian */
+            box-shadow: 0 0 3px #00ffff, 0 0 6px #00ffff; 
+
+        }
+         .table td {
+            padding: 0.3rem;
+            font-size: 0.7rem !important;
+            border: none !important;                         /* Limpieza del borde */
+            box-shadow: 0 0 1px #00ffff, 0 0 3px #00ffff !important;  
+            border-radius: 3px !important; /* Bordes redondeados */
+        }
+
+         /* Padding específico para columnas Local y Visitante */
+        /* Local */
+        table.table-striped thead th:nth-child(2) {
+            background: #031194 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+        }
+        table.table-striped tbody tr td:nth-child(2) {
+            padding-right: 1.3rem !important;
+            text-align: left !important;
+            
+        }
+
+        /* Visitante */
+        table.table-striped thead th:nth-child(4) {
+            background: #031194 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+        }
+        table.table-striped tbody tr td:nth-child(4) {
+            padding-right: 1.3rem !important;
+            text-align: left !important;
+            
+        }
+
+        /* Fecha/Hora */
+        table.table-striped thead th:nth-child(1) {
+            background: #031194 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+        }
+        table.table-striped tbody tr td:nth-child(1) {
+            background: #fff !important;
+            
+        }
+
+        /* Resultado */
+        table.table-striped thead th:nth-child(3) {
+            background: #031194 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+        }
+        table.table-striped tbody tr td:nth-child(3) {
+            background: #fff !important;
+            
+        }
+
+        /* Estado */
+        table.table-striped thead th:nth-child(5) {
+            background: #031194 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+        }
+        table.table-striped tbody tr td:nth-child(5) {
+            background: #fff !important;
+            
+        }
+        
+       /* Tabla de posiciones en móvil */
+    .table-standings-container {
+        -webkit-overflow-scrolling: touch;
+        touch-action: auto;               /* <-- Permite gestos normales: scroll y zoom */
+        overflow-x: auto !important;      /* <-- auto en vez de scroll es más natural */
+        overflow-y: auto !important;      /* <-- Por si hay desborde vertical en algunos casos */
+        display: block !important;        /* <-- Forzar bloque para scroll horizontal correcto */
+        padding-bottom: 15px;
+        
+    }
+
+        
+        .table-standings {
+            width: auto;
+        }
+        
+        .table-standings th:first-child,
+        .table-standings td:first-child {
+            z-index: 3;
+        }
+        
+      /* Tabla de goleadores en móvil */
+        .table-scorers thead th {
+            padding: 0.5rem !important;
+            font-size: 0.75rem !important;
+            border: 0.01px solid #ffffff !important;          /* Borde neón cian */
+           text-shadow: 0 0 1px #00FFFF, 0 0 5px #00FFFF, 0 0 10px #00FFFF;     /* Efecto neón */
+            width: auto !important;
+            overflow: hidden;                                /* Asegura control de contenido */
+            white-space: nowrap;                             /* Evita salto de línea */
+            text-overflow: ellipsis;
+            touch-action: auto !important;                   /* Permite scroll y zoom */
+        }
+
+        .table-scorers tbody td {
+            padding: 0.001rem !important;                     /* Más razonable que 0.001rem */
+            font-size: 0.7rem !important;
+            border: none !important;                         /* Limpieza del borde */
+            box-shadow: 0 0 1px #00ffff, 0 0 3px #00ffff;     /* Efecto neón */
+            width: auto !important;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            touch-action: auto !important;                   /* Permite scroll y zoom */
+        }
+        .table-scorers .player-cell{
+        text-align: left;
+        font-weight: 500;
+        background-color: #031194 !important;
+        color: white;
+        padding-left: 1rem !important;
+        text-shadow: 0 0 1px #00FFFF, 0 0 3px #00FFFF, 0 0 8px #00FFFF;
+        padding-right: 0.5rem !important;
+    }
+    .table-scorers .team-cell {
+        text-align: left;
+        font-weight: 500;
+        background-color: #031194 !important;
+        color: white;
+        padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+    }
+        
+        .table-scorers .goals-cell {
+            text-align: center !important;
+            display: table-cell !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            text-shadow: 0 0 1px #00FFFF, 0 0 5px #00FFFF, 0 0 10px #00FFFF;
+        }
+        
+        .table-scorers .jornada-badge {
+            font-size: 0.6rem;
+            padding: 1px 4px;
+            margin: 0 2px 2px 0;
+        }
+        
+        .jornadas-container {
+            gap: 3px;
+        }
+        
+        /* Ajustes para logos */
+        .team-logo {
+            width: 18px !important;
+            height: 18px !important;
+        }
+        
+        /* Ajustes para pestañas */
+        .nav-tabs-modern .nav-link {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        /* Asegurar que las tablas no tengan width 100% en móvil */
+        .table {
+            width: auto !important;
+            min-width: 100%;
+            
+        }
+    }
