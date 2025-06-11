@@ -1,156 +1,266 @@
-/* ===== ESTRUCTURA BASE PARA BRACKET ===== */
+/* ===== ESTRUCTURA PRINCIPAL ===== */
 .bracket-container {
   display: flex;
   justify-content: center;
-  flex-wrap: nowrap;
   width: 100%;
   position: relative;
-  padding: 20px 0;
+  padding: 30px 0;
   background: #050a1f;
-  overflow-x: auto;
-  gap: 30px;
+  min-height: 600px;
 }
 
-/* ===== FASES DE ELIMINATORIAS ===== */
-.bracket-phase {
+/* ===== LADOS IZQUIERDO Y DERECHO ===== */
+.bracket-left, .bracket-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 40%;
+  position: relative;
+}
+
+.bracket-left {
+  align-items: flex-end;
+  padding-right: 40px;
+}
+
+.bracket-right {
+  align-items: flex-start;
+  padding-left: 40px;
+}
+
+/* ===== FINAL CENTRAL ===== */
+.bracket-center {
+  width: 20%;
+  min-width: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   position: relative;
-  min-width: 280px;
+  z-index: 2;
 }
 
-/* Posicionar las fases a la izquierda */
-.bracket-left {
-  align-items: flex-end;
+.bracket-center .bracket-match {
+  transform: scale(1.1);
+  background: linear-gradient(135deg, rgba(5,10,30,0.9) 0%, rgba(10,20,50,0.9) 100%);
+  border: 2px solid rgba(255,215,0,0.5);
 }
 
-/* Posicionar las fases a la derecha */
-.bracket-right {
-  align-items: flex-start;
+.bracket-center h4 {
+  font-size: 1.3em;
+  position: relative;
+  margin-bottom: 25px;
 }
 
-/* Centrar la final */
-.bracket-center {
-  align-items: center;
+.bracket-center h4::before {
+  content: "🏆";
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.8em;
+  filter: drop-shadow(0 0 5px gold);
+}
+
+/* ===== CONECTORES VISUALES ===== */
+.bracket-phase {
+  position: relative;
+  margin: 15px 0;
+}
+
+.bracket-phase::after {
+  content: '';
+  position: absolute;
+  background: rgba(0, 191, 255, 0.7);
+  box-shadow: 0 0 8px rgba(0, 191, 255, 0.5);
+}
+
+/* Conexiones para lado izquierdo */
+.bracket-left .bracket-phase::after {
+  right: -40px;
+  top: 50%;
+  width: 40px;
+  height: 2px;
+}
+
+.bracket-left .bracket-phase:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  right: -40px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(0, 191, 255, 0.5);
+}
+
+/* Conexiones para lado derecho */
+.bracket-right .bracket-phase::after {
+  left: -40px;
+  top: 50%;
+  width: 40px;
+  height: 2px;
+}
+
+.bracket-right .bracket-phase:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  left: -40px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(0, 191, 255, 0.5);
+}
+
+/* Conexiones a la final */
+.bracket-left .bracket-phase:last-child::after {
+  right: -40px;
+  top: 50%;
+  width: 40px;
+  height: 2px;
+}
+
+.bracket-right .bracket-phase:last-child::after {
+  left: -40px;
+  top: 50%;
+  width: 40px;
+  height: 2px;
+}
+
+/* ===== TERCER LUGAR ===== */
+.third-place {
+  margin-top: 50px;
+  position: relative;
+}
+
+.third-place h4::before {
+  content: "🥉";
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5em;
+}
+
+/* ===== ESTILOS RESPONSIVOS ===== */
+@media (max-width: 992px) {
+  .bracket-container {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    min-height: auto;
+  }
+  
+  .bracket-left, .bracket-right, .bracket-center {
+    width: 100%;
+    padding: 0;
+    align-items: center !important;
+  }
+  
+  .bracket-center {
+    order: 1;
+    margin: 30px 0;
+    min-width: 100%;
+  }
+  
+  .third-place {
+    order: 2;
+    margin-top: 20px;
+  }
+  
+  /* Conexiones verticales para móvil */
+  .bracket-phase::after {
+    top: 100%;
+    left: 50%;
+    width: 2px !important;
+    height: 30px !important;
+    transform: translateX(-50%);
+  }
+  
+  .bracket-phase:not(:first-child)::before {
+    display: none;
+  }
+  
+  .bracket-left .bracket-phase::after,
+  .bracket-right .bracket-phase::after {
+    right: auto;
+    left: 50%;
+  }
 }
 
 /* ===== ESTILOS DE PARTIDOS ===== */
 .bracket-match {
   background: rgba(8, 15, 35, 0.8);
-  border-radius: 8px;
-  padding: 12px;
-  margin: 10px 0;
-  border: 1px solid rgba(0, 191, 255, 0.3);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  border: 1px solid rgba(0, 191, 255, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 280px;
+  max-width: 300px;
+  transition: transform 0.3s ease;
+}
+
+.bracket-match:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 .bracket-phase h4 {
   color: white;
   text-align: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   text-transform: uppercase;
   font-size: 1.1em;
   letter-spacing: 1px;
+  position: relative;
 }
 
-/* ===== EQUIPOS ===== */
 .team {
   display: flex;
   justify-content: space-between;
-  padding: 8px 12px;
-  margin: 5px 0;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  padding: 10px 15px;
+  margin: 8px 0;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
   color: #e8e8ff;
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .team.winner {
-  background: rgba(0, 191, 255, 0.15);
+  background: rgba(0, 191, 255, 0.2);
   font-weight: 600;
   color: #00f9ff;
+  border: 1px solid rgba(0, 191, 255, 0.5);
 }
 
 .score {
   color: #00f9ff;
   font-weight: 600;
-  margin-left: 10px;
+  margin-left: 15px;
+  background: rgba(0, 191, 255, 0.1);
+  padding: 2px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 191, 255, 0.3);
 }
 
 .match-info {
-  font-size: 0.85em;
+  font-size: 0.9em;
   color: #a8b8ff;
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(0, 191, 255, 0.2);
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 191, 255, 0.3);
 }
 
 .global-result {
   font-weight: 600;
   color: #ffffff;
-  margin-top: 5px;
+  margin-top: 8px;
   display: inline-block;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(0, 191, 255, 0.2);
-}
-
-/* ===== CONECTORES VISUALES (SENCILLOS) ===== */
-.bracket-phase::after {
-  content: '';
-  position: absolute;
-  width: 30px;
-  height: 1px;
-  background: rgba(0, 191, 255, 0.6);
-  box-shadow: 0 0 5px rgba(0, 191, 255, 0.4);
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.bracket-left::after {
-  right: -30px;
-}
-
-.bracket-right::after {
-  left: -30px;
-}
-
-.bracket-center::after {
-  display: none;
-}
-
-/* ===== RESPONSIVE: COLUMNAS EN MÓVIL ===== */
-@media (max-width: 768px) {
-  .bracket-container {
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 10px;
-    gap: 20px;
-    overflow-x: hidden;
-  }
-
-  .bracket-phase,
-  .bracket-left,
-  .bracket-right,
-  .bracket-center {
-    align-items: center !important;
-    min-width: unset;
-    width: 100%;
-  }
-
-  .bracket-phase::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    width: 1px;
-    height: 20px;
-    background: rgba(0, 191, 255, 0.6);
-    transform: translateX(-50%);
-  }
+  padding: 5px 12px;
+  border-radius: 5px;
+  background: rgba(0, 191, 255, 0.25);
+  border: 1px solid rgba(0, 191, 255, 0.4);
 }
 
 
