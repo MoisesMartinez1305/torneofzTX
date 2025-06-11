@@ -881,91 +881,97 @@
                     </div>
 
                 <!-- Pestaña de Eliminatorias -->
-                <div class="tab-pane fade" id="eliminatorias{{ datos.categoria.id }}" role="tabpanel" aria-labelledby="eliminatorias{{ datos.categoria.id }}-tab">
-                    {% if eliminatorias_data %}
-                        {% set categoria_eliminatorias = eliminatorias_data | selectattr('categoria.id', 'equalto', datos.categoria.id) | list %}
-                        {% if categoria_eliminatorias %}
-                            <div class="container mt-4">
-                                
-                                {% for categoria_data in categoria_eliminatorias %}
-                                    <div class="card mb-4">
-                                        
-                                        <div class="card-body">
-                                            <div class="bracket-container">
-                                                {% for eliminatoria in categoria_data.eliminatorias %}
-                                                    <div class="bracket-phase">
-                                                        <h4>{{ eliminatoria.fase|replace('_', ' ')|title }}</h4>
-                                                        {% for partido in eliminatoria.partidos %}
-                                                            <div class="bracket-match">
-                                                                {% set goles_local_total = (partido.goles_local or 0) + (partido.goles_visitante_vuelta or 0) %}
-                                                                {% set goles_visitante_total = (partido.goles_visitante or 0) + (partido.goles_local_vuelta or 0) %}
-                                                                <div class="team {% if partido.jugado and (torneo.formato_eliminatorias != 'ida_vuelta' or partido.jugado_vuelta) %}
-                                                                    {% if torneo.formato_eliminatorias == 'ida_vuelta' and goles_local_total > goles_visitante_total %}winner
-                                                                    {% elif torneo.formato_eliminatorias != 'ida_vuelta' and (partido.goles_local or 0) > (partido.goles_visitante or 0) %}winner{% endif %}
-                                                                {% endif %}">
-                                                                    {{ partido.equipo_local|default("Por definir") }}
-                                                                    <span class="score">
-                                                                        {% if partido.jugado %}
-                                                                            {{ partido.goles_local|default('-') }}
-                                                                            {% if torneo.formato_eliminatorias == 'ida_vuelta' and partido.jugado_vuelta %}
-                                                                                ({{ partido.goles_visitante_vuelta|default('-') }})
-                                                                            {% endif %}
-                                                                        {% else %}
-                                                                            -
-                                                                        {% endif %}
-                                                                    </span>
-                                                                </div>
-                                                                <div class="team {% if partido.jugado and (torneo.formato_eliminatorias != 'ida_vuelta' or partido.jugado_vuelta) %}
-                                                                    {% if torneo.formato_eliminatorias == 'ida_vuelta' and goles_visitante_total > goles_local_total %}winner
-                                                                    {% elif torneo.formato_eliminatorias != 'ida_vuelta' and (partido.goles_visitante or 0) > (partido.goles_local or 0) %}winner{% endif %}
-                                                                {% endif %}">
-                                                                    {{ partido.equipo_visitante|default("Por definir") }}
-                                                                    <span class="score">
-                                                                        {% if partido.jugado %}
-                                                                            {{ partido.goles_visitante|default('-') }}
-                                                                            {% if torneo.formato_eliminatorias == 'ida_vuelta' and partido.jugado_vuelta %}
-                                                                                ({{ partido.goles_local_vuelta|default('-') }})
-                                                                            {% endif %}
-                                                                        {% else %}
-                                                                            -
-                                                                        {% endif %}
-                                                                    </span>
-                                                                </div>
-                                                                {% if partido.fecha or (torneo.formato_eliminatorias == 'ida_vuelta' and partido.fecha_vuelta) %}
-                                                                    <div class="match-info">
-                                                                        {% if torneo.formato_eliminatorias == 'ida_vuelta' %}
-                                                                            <div>Ida: {{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Por definir' }} {{ partido.hora if partido.hora else '' }}</div>
-                                                                            <div>Vuelta: {{ partido.fecha_vuelta.strftime('%d/%m/%Y') if partido.fecha_vuelta else 'Por definir' }} {{ partido.hora_vuelta if partido.hora_vuelta else '' }}</div>
-                                                                        {% else %}
-                                                                            <div>{{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Por definir' }} {{ partido.hora if partido.hora else '' }}</div>
-                                                                        {% endif %}
-                                                                        {% if partido.jugado and (torneo.formato_eliminatorias != 'ida_vuelta' or partido.jugado_vuelta) %}
-                                                                            <div class="global-result">
-                                                                                {% if torneo.formato_eliminatorias == 'ida_vuelta' %}
-                                                                                    Global: {{ goles_local_total }} - {{ goles_visitante_total }}
-                                                                                {% else %}
-                                                                                    Resultado: {{ partido.goles_local or 0 }} - {{ partido.goles_visitante or 0 }}
-                                                                                {% endif %}
-                                                                            </div>
-                                                                        {% endif %}
-                                                                    </div>
+<div class="tab-pane fade" id="eliminatorias{{ datos.categoria.id }}" role="tabpanel" aria-labelledby="eliminatorias{{ datos.categoria.id }}-tab">
+    {% if eliminatorias_data %}
+        {% set categoria_eliminatorias = eliminatorias_data | selectattr('categoria.id', 'equalto', datos.categoria.id) | list %}
+        {% if categoria_eliminatorias %}
+            <div class="container mt-4">
+                {% for categoria_data in categoria_eliminatorias %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="bracket-container">
+                                {% set total_fases = categoria_data.eliminatorias | length %}
+                                {% for eliminatoria in categoria_data.eliminatorias %}
+                                    {% set index = loop.index0 %}
+                                    {% set mitad = (total_fases // 2) %}
+                                    {% set fase_class = 'bracket-center' if eliminatoria.fase == 'final' else 'bracket-left' if index < mitad else 'bracket-right' %}
+                                    <div class="bracket-phase {{ fase_class }}">
+                                        <h4>{{ eliminatoria.fase|replace('_', ' ')|title }}</h4>
+                                        {% for partido in eliminatoria.partidos %}
+                                            <div class="bracket-match">
+                                                {% set goles_local_total = (partido.goles_local or 0) + (partido.goles_visitante_vuelta or 0) %}
+                                                {% set goles_visitante_total = (partido.goles_visitante or 0) + (partido.goles_local_vuelta or 0) %}
+
+                                                <div class="team {% if partido.jugado and (torneo.formato_eliminatorias != 'ida_vuelta' or partido.jugado_vuelta) %}
+                                                    {% if torneo.formato_eliminatorias == 'ida_vuelta' and goles_local_total > goles_visitante_total %}winner
+                                                    {% elif torneo.formato_eliminatorias != 'ida_vuelta' and (partido.goles_local or 0) > (partido.goles_visitante or 0) %}winner{% endif %}
+                                                {% endif %}">
+                                                    {{ partido.equipo_local|default("Por definir") }}
+                                                    <span class="score">
+                                                        {% if partido.jugado %}
+                                                            {{ partido.goles_local|default('-') }}
+                                                            {% if torneo.formato_eliminatorias == 'ida_vuelta' and partido.jugado_vuelta %}
+                                                                ({{ partido.goles_visitante_vuelta|default('-') }})
+                                                            {% endif %}
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+
+                                                <div class="team {% if partido.jugado and (torneo.formato_eliminatorias != 'ida_vuelta' or partido.jugado_vuelta) %}
+                                                    {% if torneo.formato_eliminatorias == 'ida_vuelta' and goles_visitante_total > goles_local_total %}winner
+                                                    {% elif torneo.formato_eliminatorias != 'ida_vuelta' and (partido.goles_visitante or 0) > (partido.goles_local or 0) %}winner{% endif %}
+                                                {% endif %}">
+                                                    {{ partido.equipo_visitante|default("Por definir") }}
+                                                    <span class="score">
+                                                        {% if partido.jugado %}
+                                                            {{ partido.goles_visitante|default('-') }}
+                                                            {% if torneo.formato_eliminatorias == 'ida_vuelta' and partido.jugado_vuelta %}
+                                                                ({{ partido.goles_local_vuelta|default('-') }})
+                                                            {% endif %}
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+
+                                                {% if partido.fecha or (torneo.formato_eliminatorias == 'ida_vuelta' and partido.fecha_vuelta) %}
+                                                    <div class="match-info">
+                                                        {% if torneo.formato_eliminatorias == 'ida_vuelta' %}
+                                                            <div>Ida: {{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Por definir' }} {{ partido.hora if partido.hora else '' }}</div>
+                                                            <div>Vuelta: {{ partido.fecha_vuelta.strftime('%d/%m/%Y') if partido.fecha_vuelta else 'Por definir' }} {{ partido.hora_vuelta if partido.hora_vuelta else '' }}</div>
+                                                        {% else %}
+                                                            <div>{{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Por definir' }} {{ partido.hora if partido.hora else '' }}</div>
+                                                        {% endif %}
+                                                        {% if partido.jugado and (torneo.formato_eliminatorias != 'ida_vuelta' or partido.jugado_vuelta) %}
+                                                            <div class="global-result">
+                                                                {% if torneo.formato_eliminatorias == 'ida_vuelta' %}
+                                                                    Global: {{ goles_local_total }} - {{ goles_visitante_total }}
+                                                                {% else %}
+                                                                    Resultado: {{ partido.goles_local or 0 }} - {{ partido.goles_visitante or 0 }}
                                                                 {% endif %}
                                                             </div>
-                                                        {% endfor %}
+                                                        {% endif %}
                                                     </div>
-                                                {% endfor %}
+                                                {% endif %}
                                             </div>
-                                        </div>
+                                        {% endfor %}
                                     </div>
                                 {% endfor %}
                             </div>
-                        {% else %}
-                            <div class="alert alert-info text-center my-4">
-                                No hay datos de eliminatorias para esta categoría.
-                            </div>
-                        {% endif %}
-                    {% endif %}
-                </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center my-4">
+                No hay datos de eliminatorias para esta categoría.
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
 
                     <!-- Pestaña de Goleadores (MODIFICADA) -->
                     <div class="tab-pane fade" id="goleadores{{ datos.categoria.id }}" role="tabpanel" aria-labelledby="goleadores{{ datos.categoria.id }}-tab">
