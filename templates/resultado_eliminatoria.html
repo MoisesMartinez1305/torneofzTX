@@ -13,6 +13,9 @@
         
         <div class="card-body">
             <form method="POST">
+                <!-- Campo oculto para indicar modo edición -->
+                <input type="hidden" id="modo_edicion" name="modo_edicion" value="0">
+                
                 <!-- Sección Partido de Ida/Único -->
                 <div class="row mb-4">
                     <div class="col-md-5">
@@ -30,7 +33,7 @@
                                 <input type="number" min="0" class="form-control text-center" 
                                        id="goles_local" name="goles_local" 
                                        value="{{ partido.goles_local if partido.goles_local is not none else '' }}"
-                                       {% if partido.jugado %}disabled{% endif %}>
+                                       readonly>
                             </div>
                         </div>
                     </div>
@@ -54,7 +57,7 @@
                                 <input type="number" min="0" class="form-control text-center" 
                                        id="goles_visitante" name="goles_visitante" 
                                        value="{{ partido.goles_visitante if partido.goles_visitante is not none else '' }}"
-                                       {% if partido.jugado %}disabled{% endif %}>
+                                       readonly>
                             </div>
                         </div>
                     </div>
@@ -67,13 +70,21 @@
                 
                 <div class="row mb-4">
                     <div class="col-md-5">
-                        <div class="text-center">
+                        <div class="text-center mb-3">
+                            <h5>Equipo Local (Vuelta)</h5>
+                            <div class="d-flex justify-content-center align-items-center mb-2">
+                                <img src="{{ get_logo_path(partido.equipo_visitante_obj) if partido.equipo_visitante_obj else url_for('static', filename='images/default_logo.png') }}" 
+                                     class="team-logo-medium me-3"
+                                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                <h4>{{ partido.equipo_visitante or "Por definir" }}</h4>
+                            </div>
+                            
                             <div class="form-group">
-                                <label for="goles_local_vuelta" class="form-label">Goles Local</label>
+                                <label for="goles_local_vuelta" class="form-label">Goles</label>
                                 <input type="number" min="0" class="form-control text-center" 
                                        id="goles_local_vuelta" name="goles_local_vuelta" 
                                        value="{{ partido.goles_local_vuelta if partido.goles_local_vuelta is not none else '' }}"
-                                       {% if partido.jugado_vuelta %}disabled{% endif %}>
+                                       readonly>
                             </div>
                         </div>
                     </div>
@@ -83,13 +94,21 @@
                     </div>
                     
                     <div class="col-md-5">
-                        <div class="text-center">
+                        <div class="text-center mb-3">
+                            <h5>Equipo Visitante (Vuelta)</h5>
+                            <div class="d-flex justify-content-center align-items-center mb-2">
+                                <img src="{{ get_logo_path(partido.equipo_local_obj) if partido.equipo_local_obj else url_for('static', filename='images/default_logo.png') }}" 
+                                     class="team-logo-medium me-3"
+                                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                <h4>{{ partido.equipo_local or "Por definir" }}</h4>
+                            </div>
+                            
                             <div class="form-group">
-                                <label for="goles_visitante_vuelta" class="form-label">Goles Visitante</label>
+                                <label for="goles_visitante_vuelta" class="form-label">Goles</label>
                                 <input type="number" min="0" class="form-control text-center" 
                                        id="goles_visitante_vuelta" name="goles_visitante_vuelta" 
                                        value="{{ partido.goles_visitante_vuelta if partido.goles_visitante_vuelta is not none else '' }}"
-                                       {% if partido.jugado_vuelta %}disabled{% endif %}>
+                                       readonly>
                             </div>
                         </div>
                     </div>
@@ -161,6 +180,9 @@
                     <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary me-md-2">
                         <i class="fas fa-arrow-left me-1"></i> Volver
                     </a>
+                    <button type="button" id="btn-editar" class="btn btn-warning me-md-2">
+                        <i class="fas fa-edit me-1"></i> Editar Resultados
+                    </button>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i> Guardar Resultado
                     </button>
@@ -181,9 +203,15 @@
         padding: 2px;
     }
     
-    .form-control:disabled {
+    .form-control[readonly] {
         background-color: #f8f9fa;
         opacity: 1;
+        border-color: #ced4da;
+    }
+    
+    .form-control.editable-mode {
+        background-color: #fff3cd !important;
+        border-color: #ffc107 !important;
     }
     
     .alert-info {
@@ -199,25 +227,93 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Elementos del formulario
+    const btnEditar = document.getElementById('btn-editar');
+    const modoEdicionInput = document.getElementById('modo_edicion');
+    const inputsGoles = [
+        document.getElementById('goles_local'),
+        document.getElementById('goles_visitante'),
+        document.getElementById('goles_local_vuelta'),
+        document.getElementById('goles_visitante_vuelta')
+    ].filter(input => input !== null);
+    
+    // Estado inicial: si no hay resultados, habilitar edición automáticamente
+    const hayResultados = inputsGoles.some(input => input.value !== '');
+    
+    if (!hayResultados) {
+        // Si no hay resultados, habilitar edición desde el inicio
+        habilitarEdicion();
+    }
+    
+    // Función para habilitar edición
+    function habilitarEdicion() {
+        inputsGoles.forEach(input => {
+            input.readOnly = false;
+            input.classList.add('editable-mode');
+        });
+        
+        btnEditar.innerHTML = '<i class="fas fa-lock me-1"></i> Bloquear Edición';
+        btnEditar.classList.remove('btn-warning');
+        btnEditar.classList.add('btn-success');
+        modoEdicionInput.value = '1';
+    }
+    
+    // Función para deshabilitar edición
+    function deshabilitarEdicion() {
+        inputsGoles.forEach(input => {
+            input.readOnly = true;
+            input.classList.remove('editable-mode');
+        });
+        
+        btnEditar.innerHTML = '<i class="fas fa-edit me-1"></i> Editar Resultados';
+        btnEditar.classList.remove('btn-success');
+        btnEditar.classList.add('btn-warning');
+        modoEdicionInput.value = '0';
+    }
+    
+    // Botón de edición
+    btnEditar.addEventListener('click', function() {
+        const estaEditando = this.innerHTML.includes('Editar');
+        
+        if (estaEditando) {
+            habilitarEdicion();
+        } else {
+            deshabilitarEdicion();
+        }
+    });
+    
     // Validación antes de enviar el formulario
     document.querySelector('form').addEventListener('submit', function(e) {
         const formato = "{{ eliminatoria.formato }}";
-        const jugado = {{ partido.jugado|tojson }};
-        const jugadoVuelta = {{ partido.jugado_vuelta|tojson }};
+        const modoEdicion = modoEdicionInput.value === '1';
+        
+        // Solo validar si estamos en modo edición
+        if (!modoEdicion) {
+            return; // Permitir envío para actualizar fechas/horas
+        }
         
         // Validar partido de ida
-        if (!jugado && (!document.getElementById('goles_local').value || !document.getElementById('goles_visitante').value)) {
+        const golesLocal = document.getElementById('goles_local').value.trim();
+        const golesVisitante = document.getElementById('goles_visitante').value.trim();
+        
+        // Si se está ingresando resultado de ida, ambos campos deben estar completos
+        if ((golesLocal !== '' || golesVisitante !== '') && (golesLocal === '' || golesVisitante === '')) {
             e.preventDefault();
-            alert('Debe completar los goles del partido de ida');
+            alert('Si ingresa goles del partido de ida, debe completar ambos campos');
             return;
         }
         
-        // Validar partido de vuelta si es ida_vuelta
-        if (formato === 'ida_vuelta' && !jugadoVuelta && 
-            (!document.getElementById('goles_local_vuelta').value || !document.getElementById('goles_visitante_vuelta').value)) {
-            e.preventDefault();
-            alert('Debe completar los goles del partido de vuelta');
-            return;
+        // Validar partido de vuelta si es ida_vuelta y hay campos de vuelta
+        if (formato === 'ida_vuelta') {
+            const golesLocalVuelta = document.getElementById('goles_local_vuelta').value.trim();
+            const golesVisitanteVuelta = document.getElementById('goles_visitante_vuelta').value.trim();
+            
+            // Si se está ingresando resultado de vuelta, ambos campos deben estar completos
+            if ((golesLocalVuelta !== '' || golesVisitanteVuelta !== '') && (golesLocalVuelta === '' || golesVisitanteVuelta === '')) {
+                e.preventDefault();
+                alert('Si ingresa goles del partido de vuelta, debe completar ambos campos');
+                return;
+            }
         }
     });
 });

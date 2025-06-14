@@ -1225,7 +1225,7 @@ def actualizar_eliminatorias(categoria_id):
     equipos = Equipo.query.filter_by(categoria_id=categoria_id).order_by(
         Equipo.puntos.desc(),
         Equipo.diferencia_goles.desc(),
-        Equipo.goles_favor.desc()).limit(torneo.equipos_eliminatorias).all()
+        Equipo.goles_favor.desc()).all()
     
     eliminatorias = Eliminatoria.query.filter_by(categoria_id=categoria_id).order_by(
         case(
