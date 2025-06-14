@@ -1296,39 +1296,70 @@ def resultado_eliminatoria(partido_id):
     
     equipos_categoria = Equipo.query.filter_by(categoria_id=categoria.id).all()
 
-    # Verificar y asignar equipos
-    if not hasattr(partido, 'equipo_local_obj'):
-        partido.equipo_local_obj = None
-    if not hasattr(partido, 'equipo_visitante_obj'):
-        partido.equipo_visitante_obj = None
-    
     if request.method == 'POST':
         try:
-            # Procesar partido de ida
-            partido.goles_local = int(request.form.get('goles_local', 0)) if request.form.get('goles_local') else None
-            partido.goles_visitante = int(request.form.get('goles_visitante', 0)) if request.form.get('goles_visitante') else None
-            partido.jugado = True
+            # Determinar si estamos en modo edición
+            modo_edicion = request.form.get('modo_edicion') == '1'
             
-            # Procesar partido de vuelta (si aplica)
-            if torneo.formato_eliminatorias == 'ida_vuelta':
-                partido.goles_local_vuelta = int(request.form.get('goles_local_vuelta', 0)) if request.form.get('goles_local_vuelta') else None
-                partido.goles_visitante_vuelta = int(request.form.get('goles_visitante_vuelta', 0)) if request.form.get('goles_visitante_vuelta') else None
-                partido.jugado_vuelta = True
+            # Solo procesar goles si estamos en modo edición
+            if modo_edicion:
+                # Procesar partido de ida
+                goles_local = request.form.get('goles_local', '').strip()
+                goles_visitante = request.form.get('goles_visitante', '').strip()
+                
+                if goles_local and goles_visitante:
+                    partido.goles_local = int(goles_local)
+                    partido.goles_visitante = int(goles_visitante)
+                    partido.jugado = True
+                elif goles_local == '' and goles_visitante == '':
+                    # Si ambos campos están vacíos, limpiar resultado
+                    partido.goles_local = None
+                    partido.goles_visitante = None
+                    partido.jugado = False
+                
+                # Procesar partido de vuelta (si aplica)
+                if eliminatoria.formato == 'ida_vuelta':
+                    goles_local_vuelta = request.form.get('goles_local_vuelta', '').strip()
+                    goles_visitante_vuelta = request.form.get('goles_visitante_vuelta', '').strip()
+                    
+                    if goles_local_vuelta and goles_visitante_vuelta:
+                        partido.goles_local_vuelta = int(goles_local_vuelta)
+                        partido.goles_visitante_vuelta = int(goles_visitante_vuelta)
+                        partido.jugado_vuelta = True
+                    elif goles_local_vuelta == '' and goles_visitante_vuelta == '':
+                        # Si ambos campos están vacíos, limpiar resultado
+                        partido.goles_local_vuelta = None
+                        partido.goles_visitante_vuelta = None
+                        partido.jugado_vuelta = False
             
-            # Actualizar fechas y horas
-            partido.fecha = datetime.strptime(request.form.get('fecha'), '%Y-%m-%d') if request.form.get('fecha') else None
-            partido.hora = request.form.get('hora')
+            # Actualizar fechas y horas (siempre editables)
+            fecha_str = request.form.get('fecha', '').strip()
+            if fecha_str:
+                partido.fecha = datetime.strptime(fecha_str, '%Y-%m-%d')
             
-            if torneo.formato_eliminatorias == 'ida_vuelta':
-                partido.fecha_vuelta = datetime.strptime(request.form.get('fecha_vuelta'), '%Y-%m-%d') if request.form.get('fecha_vuelta') else None
-                partido.hora_vuelta = request.form.get('hora_vuelta')
+            hora_str = request.form.get('hora', '').strip()
+            if hora_str:
+                partido.hora = hora_str
+            
+            if eliminatoria.formato == 'ida_vuelta':
+                fecha_vuelta_str = request.form.get('fecha_vuelta', '').strip()
+                if fecha_vuelta_str:
+                    partido.fecha_vuelta = datetime.strptime(fecha_vuelta_str, '%Y-%m-%d')
+                
+                hora_vuelta_str = request.form.get('hora_vuelta', '').strip()
+                if hora_vuelta_str:
+                    partido.hora_vuelta = hora_vuelta_str
             
             db.session.commit()
-            flash('Resultado actualizado correctamente', 'success')
             
-            # Determinar ganador y asignar a siguiente fase
-            if partido.jugado and (torneo.formato_eliminatorias != 'ida_vuelta' or partido.jugado_vuelta):
-                asignar_siguiente_fase(partido, eliminatoria, torneo.formato_eliminatorias)
+            # Mensaje de éxito diferenciado
+            if modo_edicion:
+                flash('Resultado actualizado correctamente', 'success')
+                
+                # Determinar ganador y asignar a siguiente fase
+                asignar_siguiente_fase(partido, eliminatoria)
+            else:
+                flash('Fechas y horarios actualizados correctamente', 'success')
             
             return redirect(url_for('admin_dashboard'))
             
@@ -1337,7 +1368,8 @@ def resultado_eliminatoria(partido_id):
             flash('Error: Los goles deben ser números válidos', 'danger')
         except Exception as e:
             db.session.rollback()
-            flash(f'Error al actualizar resultado: {str(e)}', 'danger')
+            flash(f'Error al actualizar: {str(e)}', 'danger')
+            app.logger.error(f"Error en resultado_eliminatoria: {str(e)}", exc_info=True)
     
     return render_template('resultado_eliminatoria.html',
                          partido=partido,
@@ -1345,6 +1377,7 @@ def resultado_eliminatoria(partido_id):
                          categoria=categoria,
                          torneo=torneo,
                          equipos_categoria=equipos_categoria)
+
 
 def asignar_siguiente_fase(partido, eliminatoria, formato):
     # Calcular ganador
