@@ -560,7 +560,7 @@ def modo_invitado():
                         'hora': partido.hora,
                         'fecha_vuelta': partido.fecha_vuelta,
                         'hora_vuelta': partido.hora_vuelta,
-                        'formato': torneo.formato_eliminatorias
+                        'formato': eliminatoria.formato  # Esto es importante para diferenciar los formatos
                     }
                     partidos_data.append(partido_dict)
                 
@@ -765,7 +765,8 @@ def admin_dashboard():
             for eliminatoria in categoria.eliminatorias:
                 eliminatorias_data.append({
                     'fase': eliminatoria.fase,
-                    'partidos': sorted(eliminatoria.partidos, key=lambda x: x.numero_partido)
+                    'partidos': sorted(eliminatoria.partidos, key=lambda x: x.numero_partido),
+                    'formato': eliminatoria.formato  # Esto ya debería estar incluido
                 })
         
         if categoria.tiene_grupos:

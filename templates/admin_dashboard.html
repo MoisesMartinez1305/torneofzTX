@@ -902,6 +902,12 @@
                                                     aria-expanded="false" 
                                                     aria-controls="collapse-{{ liga.categoria.id }}-{{ loop.index }}">
                                                 {{ eliminatoria.fase|replace('_', ' ')|title }}
+                                                <span class="badge bg-info ms-2">
+                                                    {% if eliminatoria.formato == 'single' %}Partido único
+                                                    {% elif eliminatoria.formato == 'ida' %}Solo ida
+                                                    {% else %}Ida y vuelta
+                                                    {% endif %}
+                                                </span>
                                             </button>
                                         </h2>
                                         <div id="collapse-{{ liga.categoria.id }}-{{ loop.index }}" 
@@ -926,15 +932,56 @@
                                                                     {% endif %}
                                                                 </div>
                                                                 {% endif %}
+                                                                
+                                                                <!-- Mostrar fechas de vuelta si es ida y vuelta -->
+                                                                {% if eliminatoria.formato == 'ida_vuelta' and partido.fecha_vuelta %}
+                                                                <div class="text-muted small mt-1">
+                                                                    <i class="fas fa-exchange-alt"></i> Vuelta: 
+                                                                    {{ partido.fecha_vuelta.strftime('%d/%m/%Y') }}
+                                                                    {% if partido.hora_vuelta %}
+                                                                    - {{ partido.hora_vuelta }}
+                                                                    {% endif %}
+                                                                </div>
+                                                                {% endif %}
                                                             </div>
                                                             <div class="text-end">
-                                                                {% if partido.jugado %}
-                                                                <span class="badge bg-success">
-                                                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
-                                                                </span>
+                                                                {% if eliminatoria.formato == 'ida_vuelta' %}
+                                                                    <!-- Mostrar resultados para ida y vuelta -->
+                                                                    {% if partido.jugado or partido.jugado_vuelta %}
+                                                                        <div class="mb-2">
+                                                                            {% if partido.jugado %}
+                                                                            <span class="badge bg-primary">
+                                                                                Ida: {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                                                            </span>
+                                                                            {% endif %}
+                                                                            
+                                                                            {% if partido.jugado_vuelta %}
+                                                                            <span class="badge bg-info">
+                                                                                Vuelta: {{ partido.goles_visitante_vuelta }} - {{ partido.goles_local_vuelta }}
+                                                                            </span>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                        <div>
+                                                                            <span class="badge bg-success">
+                                                                                Global: 
+                                                                                {{ (partido.goles_local or 0) + (partido.goles_visitante_vuelta or 0) }} - 
+                                                                                {{ (partido.goles_visitante or 0) + (partido.goles_local_vuelta or 0) }}
+                                                                            </span>
+                                                                        </div>
+                                                                    {% else %}
+                                                                        <span class="badge bg-secondary">Pendiente</span>
+                                                                    {% endif %}
                                                                 {% else %}
-                                                                <span class="badge bg-secondary">Pendiente</span>
+                                                                    <!-- Mostrar resultados para partido único -->
+                                                                    {% if partido.jugado %}
+                                                                    <span class="badge bg-success">
+                                                                        {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                                                    </span>
+                                                                    {% else %}
+                                                                    <span class="badge bg-secondary">Pendiente</span>
+                                                                    {% endif %}
                                                                 {% endif %}
+                                                                
                                                                 <a href="{{ url_for('resultado_eliminatoria', partido_id=partido.id) }}" 
                                                                    class="btn btn-sm btn-outline-primary mt-2">
                                                                     <i class="fas fa-edit"></i>
