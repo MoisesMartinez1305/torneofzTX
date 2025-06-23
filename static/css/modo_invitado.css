@@ -510,14 +510,9 @@
         text-align: center !important;
     }
     
-    .table-scorers .jornada-badge {
-        background-color: #0d3b66;
-        color: white;
-        border-radius: 3px;
-        padding: 2px 6px;
-        font-size: 0.7rem;
-        margin: 0 3px 3px 0;
-        display: inline-block;
+    .goals-jornada {
+        color: white !important;
+        background-color: #031194 !important;
     }
     
     .jornadas-container {
@@ -727,9 +722,7 @@
             margin: 0 2px 2px 0;
         }
         
-        .jornadas-container {
-            gap: 3px;
-        }
+        
         
         /* Ajustes para logos */
         .team-logo {

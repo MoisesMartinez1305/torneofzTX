@@ -1301,19 +1301,19 @@
                                                     </td>
                                                     <td class="goals-cell text-center" style="color: #02fc3c; border-radius: 5px;">{{ goleador.total_goles }}</td>
                                                 <td class="goals-jornada text-center align-middle">
-    {% if goleador.goles_por_jornada %}
-        <!-- Botón Ver - Redirige a página de detalles -->
-        <div class="d-flex justify-content-center">
-            <a href="{{ url_for('detalle_goleador', goleador_id=goleador.id) }}" 
-               class="btn btn-sm btn-outline-primary px-3" 
-               style="min-width: 60px;">
-                <i class="fas fa-eye me-1"></i>Ver
-            </a>
-        </div>
-    {% else %}
-        <span class="text-muted">-</span>
-    {% endif %}
-</td>
+                                                    {% if goleador.goles_por_jornada %}
+                                                        <!-- Botón Ver - Redirige a página de detalles -->
+                                                        <div class="d-flex justify-content-center">
+                                                            <a href="{{ url_for('detalle_goleador', goleador_id=goleador.id) }}" 
+                                                            class="btn btn-sm btn-outline-primary px-3" 
+                                                            style="min-width: 60px;">
+                                                                <i class="fas fa-eye me-1" style="color: white;"></i><span style="color: white;">Ver</span>
+                                                            </a>
+                                                        </div>
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>
