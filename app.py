@@ -881,6 +881,119 @@ def admin_dashboard():
                              'total_partidos': total_general_partidos,
                              'partidos_jugados': total_general_jugados
                          })
+
+# Nueva ruta para mostrar detalles del goleador
+@app.route('/goleador/<int:goleador_id>')
+def detalle_goleador(goleador_id):
+    # Obtener el goleador con su categoría
+    goleador_info = db.session.query(
+        Goleador,
+        Categoria.nombre.label('categoria_nombre')
+    ).join(Categoria).filter(Goleador.id == goleador_id).first()
+    
+    if not goleador_info:
+        flash('Goleador no encontrado', 'danger')
+        return redirect(url_for('index'))
+    
+    goleador, categoria_nombre = goleador_info
+    
+    # Obtener el objeto equipo completo para el logo
+    equipo_obj = Equipo.query.filter_by(
+        nombre=goleador.equipo, 
+        categoria_id=goleador.categoria_id
+    ).first()
+    
+    # Calcular estadísticas adicionales
+    estadisticas = calcular_estadisticas_goleador(goleador)
+    
+    return render_template('detalle_goleador.html',
+                         goleador=goleador,
+                         categoria_nombre=categoria_nombre,
+                         equipo_obj=equipo_obj,
+                         estadisticas=estadisticas)
+
+def calcular_estadisticas_goleador(goleador):
+    """Calcula estadísticas avanzadas del goleador"""
+    goles_por_jornada = goleador.goles_por_jornada or {}
+    
+    if not goles_por_jornada:
+        return {
+            'mayor_cantidad_jornada': 0,
+            'jornada_mayor_cantidad': None,
+            'racha_actual': 0,
+            'mejor_racha': 0,
+            'jornadas_con_gol': 0,
+            'jornadas_sin_gol': 0,
+            'promedio_goles': 0.0,
+            'jornadas_jugadas': 0,
+            'efectividad': 0.0
+        }
+    
+    # Convertir jornadas a enteros para ordenar correctamente
+    jornadas_ordenadas = sorted([(int(j), g) for j, g in goles_por_jornada.items()])
+    
+    # Mayor cantidad de goles en una jornada
+    mayor_cantidad = max(goles_por_jornada.values()) if goles_por_jornada else 0
+    jornada_mayor = None
+    for jornada, goles in goles_por_jornada.items():
+        if goles == mayor_cantidad:
+            jornada_mayor = jornada
+            break
+    
+    # Calcular rachas
+    racha_actual = 0
+    mejor_racha = 0
+    racha_temporal = 0
+    
+    # Contar jornadas con y sin gol
+    jornadas_con_gol = sum(1 for g in goles_por_jornada.values() if g > 0)
+    jornadas_sin_gol = len(goles_por_jornada) - jornadas_con_gol
+    
+    # Calcular rachas (necesitamos jornadas consecutivas)
+    for i, (jornada, goles) in enumerate(jornadas_ordenadas):
+        if goles > 0:
+            racha_temporal += 1
+            mejor_racha = max(mejor_racha, racha_temporal)
+            
+            # Si es la última jornada o la siguiente no tiene goles, calcular racha actual
+            if i == len(jornadas_ordenadas) - 1:
+                racha_actual = racha_temporal
+        else:
+            racha_temporal = 0
+            if i == len(jornadas_ordenadas) - 1:
+                racha_actual = 0
+    
+    # Si la última jornada no tiene goles, la racha actual es 0
+    if jornadas_ordenadas and jornadas_ordenadas[-1][1] == 0:
+        racha_actual = 0
+    elif jornadas_ordenadas:
+        # Calcular racha actual desde la última jornada hacia atrás
+        racha_actual = 0
+        for jornada, goles in reversed(jornadas_ordenadas):
+            if goles > 0:
+                racha_actual += 1
+            else:
+                break
+    
+    # Promedio de goles por jornada
+    jornadas_jugadas = len(goles_por_jornada)
+    promedio_goles = goleador.total_goles / jornadas_jugadas if jornadas_jugadas > 0 else 0
+    
+    # Efectividad (porcentaje de jornadas con gol)
+    efectividad = (jornadas_con_gol / jornadas_jugadas * 100) if jornadas_jugadas > 0 else 0
+    
+    return {
+        'mayor_cantidad_jornada': mayor_cantidad,
+        'jornada_mayor_cantidad': jornada_mayor,
+        'racha_actual': racha_actual,
+        'mejor_racha': mejor_racha,
+        'jornadas_con_gol': jornadas_con_gol,
+        'jornadas_sin_gol': jornadas_sin_gol,
+        'promedio_goles': round(promedio_goles, 2),
+        'jornadas_jugadas': jornadas_jugadas,
+        'efectividad': round(efectividad, 1)
+    }
+
 @app.route('/admin/goleadores', methods=['GET', 'POST'])
 @admin_required
 def administrar_goleadores():
@@ -931,6 +1044,59 @@ def administrar_goleadores():
                     
                     db.session.commit()
                     flash('Goles actualizados correctamente', 'success')
+                else:
+                    flash('Goleador no encontrado', 'danger')
+            
+            elif 'completar_jornadas' in request.form:
+                goleador_id = int(request.form['goleador_id'])
+                jornadas_data = request.form['jornadas_data']
+                
+                # Parsear los datos JSON
+                import json
+                try:
+                    jornadas_a_completar = json.loads(jornadas_data)
+                except json.JSONDecodeError:
+                    flash('Error: Datos de jornadas inválidos', 'danger')
+                    return redirect(url_for('administrar_goleadores'))
+                
+                goleador = Goleador.query.get(goleador_id)
+                if goleador:
+                    # Asegurar que goles_por_jornada es un diccionario
+                    if goleador.goles_por_jornada is None:
+                        goleador.goles_por_jornada = {}
+                    
+                    # Convertir claves a strings por si acaso
+                    goles_por_jornada = {str(k): v for k, v in goleador.goles_por_jornada.items()}
+                    
+                    # Procesar cada jornada
+                    jornadas_completadas = []
+                    total_diferencia = 0
+                    
+                    for jornada_info in jornadas_a_completar:
+                        jornada = str(jornada_info['jornada'])
+                        goles = int(jornada_info['goles'])  # Debería ser 0
+                        
+                        # Solo actualizar si la jornada no existe o es None
+                        if jornada not in goles_por_jornada or goles_por_jornada[jornada] is None:
+                            goles_anteriores = goles_por_jornada.get(jornada, 0) or 0
+                            diferencia = goles - goles_anteriores
+                            
+                            goles_por_jornada[jornada] = goles
+                            total_diferencia += diferencia
+                            jornadas_completadas.append(jornada)
+                    
+                    if jornadas_completadas:
+                        # Actualizar el goleador
+                        goleador.goles_por_jornada = goles_por_jornada
+                        goleador.total_goles += total_diferencia
+                        
+                        db.session.commit()
+                        
+                        # Mensaje de éxito personalizado
+                        jornadas_texto = ', '.join([f"J{j}" for j in sorted(jornadas_completadas, key=int)])
+                        flash(f'Se completaron {len(jornadas_completadas)} jornadas con 0 goles para {goleador.nombre}: {jornadas_texto}', 'success')
+                    else:
+                        flash('No se encontraron jornadas para completar', 'info')
                 else:
                     flash('Goleador no encontrado', 'danger')
             

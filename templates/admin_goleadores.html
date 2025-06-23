@@ -265,6 +265,7 @@
 </div>
 
 <!-- Modales para editar goles (uno por cada goleador) -->
+<!-- Modales para editar goles (uno por cada goleador) -->
 {% for goleador in goleadores %}
 <div class="modal fade" id="modalEditarGoles{{ goleador.id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -298,16 +299,43 @@
                         <input type="number" class="form-control goles-input" name="goles" 
                                value="{{ goleador.goles_por_jornada.get(primera_jornada, 0)|int }}" min="0" required>
                     </div>
+                    
+                    <!-- Nueva sección para completar jornadas en 0 -->
+                    <div class="mb-3 border-top pt-3">
+                        <label class="form-label fw-bold" style="color: black;">Completar Jornadas Automáticamente</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <select class="form-select" id="jornadaCompletarHasta{{ goleador.id }}" style="flex: 1;">
+                                {% for jornada_num in jornadas_por_categoria[goleador.categoria_id] %}
+                                    <option value="{{ jornada_num }}">Hasta Jornada {{ jornada_num }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" class="btn btn-warning btn-sm" 
+                                    onclick="completarJornadasEnCero({{ goleador.id }})">
+                                <i class="fas fa-magic"></i> Completar en 0
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            Esto pondrá en 0 goles todas las jornadas sin valor hasta la jornada seleccionada
+                        </small>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
             </form>
+            
+            <!-- Formulario oculto para enviar múltiples jornadas -->
+            <form id="formCompletarJornadas{{ goleador.id }}" action="{{ url_for('administrar_goleadores') }}" method="POST" style="display: none;">
+                <input type="hidden" name="completar_jornadas" value="1">
+                <input type="hidden" name="goleador_id" value="{{ goleador.id }}">
+                <input type="hidden" name="jornadas_data" id="jornadasData{{ goleador.id }}">
+            </form>
         </div>
     </div>
 </div>
 {% endfor %}
+
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -396,6 +424,110 @@ $(document).ready(function() {
 
     // Inicializar filtro al cargar la página
     filtrarGoleadores();
+});
+
+// *** NUEVA FUNCIONALIDAD: Completar jornadas en 0 ***
+function completarJornadasEnCero(goleadorId) {
+    const jornadaHasta = document.getElementById(`jornadaCompletarHasta${goleadorId}`).value;
+    
+    // Datos de goleadores desde el template (esto debe ser renderizado por Flask)
+    const goleadorData = {
+        {% for goleador in goleadores %}
+        {{ goleador.id }}: {
+            nombre: "{{ goleador.nombre }}",
+            jornadas: {{ jornadas_por_categoria[goleador.categoria_id]|tojson }},
+            goles_existentes: {{ goleador.goles_por_jornada|tojson }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    };
+    
+    const datosGoleador = goleadorData[goleadorId];
+    if (!datosGoleador) {
+        alert('Error: No se encontraron datos del goleador');
+        return;
+    }
+    
+    const jornadasACompletar = [];
+    
+    // Encontrar jornadas sin goles hasta la jornada seleccionada
+    for (let i = 0; i < datosGoleador.jornadas.length; i++) {
+        const jornada = datosGoleador.jornadas[i];
+        if (jornada <= parseInt(jornadaHasta)) {
+            const jornadaStr = jornada.toString();
+            // Si no existe la jornada o tiene valor null/undefined, agregarla para completar en 0
+            if (!datosGoleador.goles_existentes.hasOwnProperty(jornadaStr) || 
+                datosGoleador.goles_existentes[jornadaStr] === null ||
+                datosGoleador.goles_existentes[jornadaStr] === undefined) {
+                jornadasACompletar.push({
+                    jornada: jornadaStr,
+                    goles: 0
+                });
+            }
+        }
+    }
+    
+    if (jornadasACompletar.length === 0) {
+        alert(`No hay jornadas sin goles para completar hasta la jornada ${jornadaHasta} para ${datosGoleador.nombre}`);
+        return;
+    }
+    
+    // Mostrar confirmación
+    const jornadasTexto = jornadasACompletar.map(j => `Jornada ${j.jornada}`).join(', ');
+    const mensaje = `¿Estás seguro de que deseas poner en 0 goles las siguientes jornadas para ${datosGoleador.nombre}?\n\n${jornadasTexto}\n\nEsta acción completará automáticamente estas jornadas con 0 goles.`;
+    
+    if (confirm(mensaje)) {
+        // Mostrar indicador de carga
+        const btnCompletar = document.querySelector(`#modalEditarGoles${goleadorId} .btn-warning`);
+        const textoOriginal = btnCompletar.innerHTML;
+        btnCompletar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+        btnCompletar.disabled = true;
+        
+        // Enviar los datos
+        document.getElementById(`jornadasData${goleadorId}`).value = JSON.stringify(jornadasACompletar);
+        document.getElementById(`formCompletarJornadas${goleadorId}`).submit();
+    }
+}
+
+// Función auxiliar para resetear el botón en caso de error
+function resetearBotonCompletar(goleadorId) {
+    const btnCompletar = document.querySelector(`#modalEditarGoles${goleadorId} .btn-warning`);
+    if (btnCompletar) {
+        btnCompletar.innerHTML = '<i class="fas fa-magic"></i> Completar en 0';
+        btnCompletar.disabled = false;
+    }
+}
+
+// Función para actualizar la interfaz después de completar jornadas
+function actualizarInterfazDespuesDeCompletar(goleadorId, jornadasCompletadas) {
+    // Actualizar los options del select de jornadas
+    const modal = document.getElementById(`modalEditarGoles${goleadorId}`);
+    const jornadaSelect = modal.querySelector('.jornada-select');
+    
+    if (jornadaSelect && jornadasCompletadas) {
+        jornadasCompletadas.forEach(jornada => {
+            const option = jornadaSelect.querySelector(`option[value="${jornada.jornada}"]`);
+            if (option) {
+                option.setAttribute('data-goles', '0');
+                // Actualizar el texto del option si no muestra goles
+                if (!option.textContent.includes('goles')) {
+                    option.textContent = `Jornada ${jornada.jornada} (0 goles)`;
+                }
+            }
+        });
+    }
+    
+    // Resetear el botón
+    resetearBotonCompletar(goleadorId);
+}
+
+// Event listener para manejar errores de envío
+document.addEventListener('DOMContentLoaded', function() {
+    // Resetear botones si hay error en la página
+    {% for goleador in goleadores %}
+    if (document.getElementById('formCompletarJornadas{{ goleador.id }}')) {
+        resetearBotonCompletar({{ goleador.id }});
+    }
+    {% endfor %}
 });
 </script>
 {% endblock %}

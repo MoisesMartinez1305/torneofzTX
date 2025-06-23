@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block title %}Detalles - {{ goleador.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header con información del jugador -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <i class="fas fa-user-circle fa-4x"></i>
+                        </div>
+                        <div class="col-md-8">
+                            <h2 class="card-title mb-1">{{ goleador.nombre }}</h2>
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                {% if equipo_obj %}
+                                    <img src="{{ get_logo_path(equipo_obj) }}" 
+                                         class="team-logo me-2" 
+                                         alt="{{ goleador.equipo }}"
+                                         style="width: 32px; height: 32px; object-fit: contain;"
+                                         onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                         class="team-logo me-2" 
+                                         alt="{{ goleador.equipo }}"
+                                         style="width: 32px; height: 32px; object-fit: contain;">
+                                {% endif %}
+                                <h5 class="card-text mb-0">{{ goleador.equipo }}</h5>
+                            </div>
+                            <p class="card-text">{{ categoria_nombre }}</p>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="display-4 fw-bold">{{ goleador.total_goles }}</div>
+                            <small>Goles totales</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas principales -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center h-100 bg-primary text-white">
+                <div class="card-body">
+                    <i class="fas fa-bullseye text-success fa-2x mb-2"></i>
+                    <h4 class="text-success text-white">{{ estadisticas.mayor_cantidad_jornada }}</h4>
+                    <p class="card-text text-white">Máximos goles en una jornada</p>
+                    {% if estadisticas.jornada_mayor_cantidad %}
+                        <small class="text-white-50">Jornada {{ estadisticas.jornada_mayor_cantidad }}</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center h-100 bg-primary text-white">
+                <div class="card-body">
+                    <i class="fas fa-fire text-danger fa-2x mb-2"></i>
+                    <h4 class="text-danger text-white">{{ estadisticas.racha_actual }}</h4>
+                    <p class="card-text text-white">Racha actual</p>
+                    <small class="text-white-50">Jornadas consecutivas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center h-100 bg-primary text-white">
+                <div class="card-body">
+                    <i class="fas fa-trophy text-warning fa-2x mb-2"></i>
+                    <h4 class="text-warning text-white">{{ estadisticas.mejor_racha }}</h4>
+                    <p class="card-text text-white">Mejor racha</p>
+                    <small class="text-white-50">Récord personal</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center h-100 bg-primary text-white">
+                <div class="card-body">
+                    <i class="fas fa-percentage text-info fa-2x mb-2"></i>
+                    <h4 class="text-info text-white">{{ estadisticas.efectividad }}%</h4>
+                    <p class="card-text text-white">Efectividad</p>
+                    <small class="text-white-50">Jornadas con gol</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas adicionales -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Estadísticas Generales</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row justify-content-center">
+                        <div class="col-8 text-center text-white d-flex flex-column align-items-center justify-content-center">
+                            <p><strong>Jornadas sin gol:</strong> {{ estadisticas.jornadas_sin_gol }}</p>
+                            <p><strong>Jornadas con gol:</strong> {{ estadisticas.jornadas_con_gol }}</p>
+                            <p><strong>Promedio por jornada:</strong> {{ estadisticas.promedio_goles }}</p>
+                            <p><strong>Total de goles:</strong> {{ goleador.total_goles }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Jornadas con gol/sin gol</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ estadisticas.efectividad }}%" 
+                             aria-valuenow="{{ estadisticas.efectividad }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            Con gol: {{ estadisticas.efectividad }}%
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="badge bg-success">{{ estadisticas.jornadas_con_gol }} con gol</span>
+                        <span class="badge bg-secondary">{{ estadisticas.jornadas_sin_gol }} sin gol</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goles por jornada -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-futbol me-2"></i>Goles por Jornada</h5>
+                    
+                    <!-- Filtros -->
+                    <div class="d-flex gap-2">
+                        <select id="ordenJornada" class="form-select form-select-sm" style="width: auto;">
+                            <option value="jornada-asc" selected>Jornada (1-N)</option>
+                            <option value="jornada-desc">Jornada (N-1)</option>
+                        </select>
+                        
+                        <select id="ordenGoles" class="form-select form-select-sm" style="width: auto;">
+                            <option value="ninguno" selected>Sin ordenar por goles</option>
+                            <option value="goles-desc">Más goles primero</option>
+                            <option value="goles-asc">Menos goles primero</option>
+                        </select>
+                        
+                        <select id="filtroRendimiento" class="form-select form-select-sm" style="width: auto;">
+                            <option value="todos" selected>Todos</option>
+                            <option value="sin-goles">Sin goles (0)</option>
+                            <option value="con-goles">Con goles (1+)</option>
+                        
+                        </select>
+                        
+                        <button id="resetFiltros" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if goleador.goles_por_jornada %}
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center">
+                                        Jornada
+                                        <i class="fas fa-sort ms-1 text-muted" style="font-size: 0.8em;"></i>
+                                    </th>
+                                    <th class="text-center">
+                                        Goles
+                                        <i class="fas fa-sort ms-1 text-muted" style="font-size: 0.8em;"></i>
+                                    </th>
+                                    <th class="text-center">Rendimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaJornadas">
+                                {% set jornadas_ordenadas = goleador.goles_por_jornada.items() | list | sort(attribute='0') %}
+                                {% for jornada, goles in jornadas_ordenadas %}
+                                    <tr data-jornada="{{ jornada }}" data-goles="{{ goles }}">
+                                        <td class="text-center fw-bold">Jornada {{ jornada }}</td>
+                                        <td class="text-center">
+                                            <span class="badge 
+                                                {% if goles == 0 %}bg-secondary
+                                                {% elif goles == 1 %}bg-primary
+                                                {% elif goles == 2 %}bg-success
+                                                {% elif goles == 3 %}bg-warning
+                                                {% else %}bg-danger
+                                                {% endif %} rounded-pill fs-6">
+                                                {{ goles }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            {% if goles == 0 %}
+                                                <i class="fas fa-minus text-muted" title="Sin goles"></i>
+                                            {% elif goles == 1 %}
+                                                <i class="fas fa-check text-primary" title="Buen rendimiento"></i>
+                                            {% elif goles == 2 %}
+                                                <i class="fas fa-star text-success" title="Destacado"></i>
+                                            {% elif goles >= 3 %}
+                                                <i class="fas fa-fire text-danger" title="Excepcional"></i>
+                                            {% endif %}
+                                            
+                                            {% if goles == estadisticas.mayor_cantidad_jornada and goles > 0 %}
+                                                <span class="badge bg-warning text-dark ms-1">Más goles</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Información de filtros aplicados -->
+                    <div id="infoFiltros" class="px-3 py-2 bg-light border-top text-muted small" style="display: none;">
+                        <i class="fas fa-info-circle me-1"></i>
+                        <span id="textoFiltros"></span>
+                    </div>
+                    
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">No hay datos de goles por jornada</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Botón de regreso -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="javascript:history.back()" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Regresar
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Script para mejorar la experiencia visual -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabla = document.getElementById('tablaJornadas');
+    const ordenJornada = document.getElementById('ordenJornada');
+    const ordenGoles = document.getElementById('ordenGoles');
+    const filtroRendimiento = document.getElementById('filtroRendimiento');
+    const resetFiltros = document.getElementById('resetFiltros');
+    const infoFiltros = document.getElementById('infoFiltros');
+    const textoFiltros = document.getElementById('textoFiltros');
+    
+    if (!tabla) return; // Si no hay datos, no ejecutar el script
+    
+    let filasOriginales = Array.from(tabla.querySelectorAll('tr'));
+    
+    function aplicarFiltrosYOrden() {
+        let filas = [...filasOriginales];
+        let filtrosAplicados = [];
+        
+        // Aplicar filtro de rendimiento
+        const filtroRend = filtroRendimiento.value;
+        if (filtroRend !== 'todos') {
+            filas = filas.filter(fila => {
+                const goles = parseInt(fila.dataset.goles);
+                switch(filtroRend) {
+                    case 'sin-goles': return goles === 0;
+                    case 'con-goles': return goles >= 1;
+                    case 'destacados': return goles >= 2;
+                    case 'excepcionales': return goles >= 3;
+                    default: return true;
+                }
+            });
+            
+            const textosFiltro = {
+                'sin-goles': 'Mostrando solo jornadas sin goles',
+                'con-goles': 'Mostrando solo jornadas con goles',
+                'destacados': 'Mostrando solo jornadas destacadas (2+ goles)',
+                'excepcionales': 'Mostrando solo jornadas excepcionales (3+ goles)'
+            };
+            filtrosAplicados.push(textosFiltro[filtroRend]);
+        }
+        
+        // Aplicar orden
+        const ordenJ = ordenJornada.value;
+        const ordenG = ordenGoles.value;
+        
+        if (ordenG !== 'ninguno') {
+            // Ordenar por goles
+            filas.sort((a, b) => {
+                const golesA = parseInt(a.dataset.goles);
+                const golesB = parseInt(b.dataset.goles);
+                
+                if (ordenG === 'goles-desc') {
+                    if (golesB !== golesA) return golesB - golesA;
+                    // Si tienen los mismos goles, ordenar por jornada según el filtro de jornada
+                    const jornadaA = parseInt(a.dataset.jornada);
+                    const jornadaB = parseInt(b.dataset.jornada);
+                    return ordenJ === 'jornada-desc' ? jornadaB - jornadaA : jornadaA - jornadaB;
+                } else {
+                    if (golesA !== golesB) return golesA - golesB;
+                    // Si tienen los mismos goles, ordenar por jornada según el filtro de jornada
+                    const jornadaA = parseInt(a.dataset.jornada);
+                    const jornadaB = parseInt(b.dataset.jornada);
+                    return ordenJ === 'jornada-desc' ? jornadaB - jornadaA : jornadaA - jornadaB;
+                }
+            });
+            
+            filtrosAplicados.push(ordenG === 'goles-desc' ? 'Ordenado por más goles primero' : 'Ordenado por menos goles primero');
+        } else {
+            // Ordenar solo por jornada
+            filas.sort((a, b) => {
+                const jornadaA = parseInt(a.dataset.jornada);
+                const jornadaB = parseInt(b.dataset.jornada);
+                return ordenJ === 'jornada-desc' ? jornadaB - jornadaA : jornadaA - jornadaB;
+            });
+            
+            if (ordenJ === 'jornada-desc') {
+                filtrosAplicados.push('Ordenado por jornada descendente');
+            }
+        }
+        
+        // Limpiar tabla y agregar filas ordenadas/filtradas
+        tabla.innerHTML = '';
+        filas.forEach(fila => tabla.appendChild(fila));
+        
+        // Mostrar información de filtros
+        if (filtrosAplicados.length > 0) {
+            textoFiltros.textContent = filtrosAplicados.join(' | ');
+            infoFiltros.style.display = 'block';
+        } else {
+            infoFiltros.style.display = 'none';
+        }
+    }
+    
+    function resetearFiltros() {
+        ordenJornada.value = 'jornada-asc';
+        ordenGoles.value = 'ninguno';
+        filtroRendimiento.value = 'todos';
+        aplicarFiltrosYOrden();
+    }
+    
+    // Event listeners
+    ordenJornada.addEventListener('change', aplicarFiltrosYOrden);
+    ordenGoles.addEventListener('change', aplicarFiltrosYOrden);
+    filtroRendimiento.addEventListener('change', aplicarFiltrosYOrden);
+    resetFiltros.addEventListener('click', resetearFiltros);
+    
+    // Aplicar orden inicial
+    aplicarFiltrosYOrden();
+});    
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación suave para las tarjetas
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}
