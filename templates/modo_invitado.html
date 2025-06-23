@@ -241,6 +241,7 @@
                                         
                                             <div class="accordion" id="accordionGrupo{{ grupo_data.grupo.id }}">
                                                 {% for jornada_num, partidos_jornada in grupo_data.jornadas %}
+                                                {% set partidos_jugados_jornada = partidos_jornada|selectattr('jugado', 'equalto', true)|list|length %}
                                                 <div class="accordion-item border-0 mb-3 shadow-sm">
                                                     <h2 class="accordion-header" id="heading{{ datos.categoria.id }}{{ grupo_data.grupo.id }}{{ jornada_num }}">
                                                         <button class="accordion-button collapsed bg-light" type="button" 
@@ -251,6 +252,9 @@
                                                             <div class="d-flex justify-content-between w-100 align-items-center">
                                                                 <div>
                                                                     <span class="badge bg-primary me-2">Jornada {{ jornada_num }}</span>
+                                                                    <span class="badge bg-success me-2">
+                                                                        {{ partidos_jugados_jornada }}/{{ partidos_jornada|length }}partidos jugados
+                                                                    </span>
                                                                     {% if grupo_data.tiene_descanso %}
                                                                         {% set equipos_jugando = [] %}
                                                                         {% for partido in partidos_jornada %}
@@ -431,6 +435,7 @@
                             {% else %}
                                 <div class="accordion" id="accordionJornadas{{ datos.categoria.id }}">
                                     {% for jornada_num, partidos_jornada in datos.jornadas %}
+                                    {% set partidos_jugados_jornada = partidos_jornada|selectattr('jugado', 'equalto', true)|list|length %}
                                     <div class="accordion-item border-0 mb-3 shadow-sm">
                                         <h2 class="accordion-header" id="heading{{ datos.categoria.id }}{{ jornada_num }}">
                                             <button class="accordion-button collapsed bg-light" type="button" 
@@ -441,6 +446,9 @@
                                                 <div class="d-flex justify-content-between w-100 align-items-center">
                                                     <div>
                                                         <span class="badge bg-primary me-2">Jornada {{ jornada_num }}</span>
+                                                        <span class="badge bg-success me-2">
+                                                            {{ partidos_jugados_jornada }}/{{ partidos_jornada|length }}  partidos jugados
+                                                        </span>
                                                         {% if datos.tiene_descanso %}
                                                             {% set equipos_jugando = [] %}
                                                             {% for partido in partidos_jornada %}

@@ -20,16 +20,16 @@
                 <div class="row mb-4">
                     <div class="col-md-5">
                         <div class="text-center mb-3">
-                            <h5>Equipo Local</h5>
+                            <h5 style="color: white;">Equipo Local</h5>
                             <div class="d-flex justify-content-center align-items-center mb-2">
                                 <img src="{{ get_logo_path(partido.equipo_local_obj) if partido.equipo_local_obj else url_for('static', filename='images/default_logo.png') }}" 
                                      class="team-logo-medium me-3"
                                      onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
-                                <h4>{{ partido.equipo_local or "Por definir" }}</h4>
+                                <h4 style="color: white;">{{ partido.equipo_local or "Por definir" }}</h4>
                             </div>
                             
                             <div class="form-group">
-                                <label for="goles_local" class="form-label">Goles</label>
+                                <label for="goles_local" class="form-label" style="color: white;">Goles</label>
                                 <input type="number" min="0" class="form-control text-center" 
                                        id="goles_local" name="goles_local" 
                                        value="{{ partido.goles_local if partido.goles_local is not none else '' }}"
@@ -39,21 +39,21 @@
                     </div>
                     
                     <div class="col-md-2 d-flex align-items-center justify-content-center">
-                        <h2 class="text-muted">VS</h2>
+                        <h2 class="text-white">VS</h2>
                     </div>
                     
                     <div class="col-md-5">
                         <div class="text-center mb-3">
-                            <h5>Equipo Visitante</h5>
+                            <h5 style="color: white;">Equipo Visitante</h5>
                             <div class="d-flex justify-content-center align-items-center mb-2">
                                 <img src="{{ get_logo_path(partido.equipo_visitante_obj) if partido.equipo_visitante_obj else url_for('static', filename='images/default_logo.png') }}" 
                                      class="team-logo-medium me-3"
                                      onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
-                                <h4>{{ partido.equipo_visitante or "Por definir" }}</h4>
+                                <h4 style="color: white;">{{ partido.equipo_visitante or "Por definir" }}</h4>
                             </div>
                             
                             <div class="form-group">
-                                <label for="goles_visitante" class="form-label">Goles</label>
+                                <label for="goles_visitante" class="form-label" style="color: white;">Goles</label>
                                 <input type="number" min="0" class="form-control text-center" 
                                        id="goles_visitante" name="goles_visitante" 
                                        value="{{ partido.goles_visitante if partido.goles_visitante is not none else '' }}"
@@ -66,21 +66,21 @@
                 <!-- Sección Partido de Vuelta (solo si formato es ida_vuelta) -->
                 {% if eliminatoria.formato == 'ida_vuelta' %}
                 <hr>
-                <h4 class="text-center mb-4">Partido de Vuelta</h4>
+                <h4 class="text-center mb-4" style="color: white;">Partido de Vuelta</h4>
                 
                 <div class="row mb-4">
                     <div class="col-md-5">
                         <div class="text-center mb-3">
-                            <h5>Equipo Local (Vuelta)</h5>
+                            <h5 style="color: white;">Equipo Local (Vuelta)</h5>
                             <div class="d-flex justify-content-center align-items-center mb-2">
                                 <img src="{{ get_logo_path(partido.equipo_visitante_obj) if partido.equipo_visitante_obj else url_for('static', filename='images/default_logo.png') }}" 
                                      class="team-logo-medium me-3"
                                      onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
-                                <h4>{{ partido.equipo_visitante or "Por definir" }}</h4>
+                                <h4 style="color: white;">{{ partido.equipo_visitante or "Por definir" }}</h4>
                             </div>
                             
                             <div class="form-group">
-                                <label for="goles_local_vuelta" class="form-label">Goles</label>
+                                <label for="goles_local_vuelta" class="form-label" style="color: white;">Goles</label>
                                 <input type="number" min="0" class="form-control text-center" 
                                        id="goles_local_vuelta" name="goles_local_vuelta" 
                                        value="{{ partido.goles_local_vuelta if partido.goles_local_vuelta is not none else '' }}"
@@ -90,21 +90,21 @@
                     </div>
                     
                     <div class="col-md-2 d-flex align-items-center justify-content-center">
-                        <h2 class="text-muted">VS</h2>
+                        <h2 class="text-muted" style="color: white !important;">VS</h2>
                     </div>
                     
                     <div class="col-md-5">
                         <div class="text-center mb-3">
-                            <h5>Equipo Visitante (Vuelta)</h5>
+                            <h5 style="color: white;">Equipo Visitante (Vuelta)</h5>
                             <div class="d-flex justify-content-center align-items-center mb-2">
                                 <img src="{{ get_logo_path(partido.equipo_local_obj) if partido.equipo_local_obj else url_for('static', filename='images/default_logo.png') }}" 
                                      class="team-logo-medium me-3"
                                      onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
-                                <h4>{{ partido.equipo_local or "Por definir" }}</h4>
+                                <h4 style="color: white;">{{ partido.equipo_local or "Por definir" }}</h4>
                             </div>
                             
                             <div class="form-group">
-                                <label for="goles_visitante_vuelta" class="form-label">Goles</label>
+                                <label for="goles_visitante_vuelta" class="form-label" style="color: white;">Goles</label>
                                 <input type="number" min="0" class="form-control text-center" 
                                        id="goles_visitante_vuelta" name="goles_visitante_vuelta" 
                                        value="{{ partido.goles_visitante_vuelta if partido.goles_visitante_vuelta is not none else '' }}"
@@ -121,14 +121,14 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group mb-3">
-                            <label for="fecha" class="form-label">Fecha del Partido</label>
+                            <label for="fecha" class="form-label" style="color: white;">Fecha del Partido</label>
                             <input type="date" class="form-control" id="fecha" name="fecha" 
                                    value="{{ partido.fecha.strftime('%Y-%m-%d') if partido.fecha else '' }}">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group mb-3">
-                            <label for="hora" class="form-label">Hora del Partido</label>
+                            <label for="hora" class="form-label" style="color: white;">Hora del Partido</label>
                             <input type="time" class="form-control" id="hora" name="hora" 
                                    value="{{ partido.hora if partido.hora else '' }}">
                         </div>
@@ -137,14 +137,14 @@
                     {% if eliminatoria.formato == 'ida_vuelta' %}
                     <div class="col-md-6">
                         <div class="form-group mb-3">
-                            <label for="fecha_vuelta" class="form-label">Fecha de Vuelta</label>
+                            <label for="fecha_vuelta" class="form-label" style="color: white;">Fecha de Vuelta</label>
                             <input type="date" class="form-control" id="fecha_vuelta" name="fecha_vuelta" 
                                    value="{{ partido.fecha_vuelta.strftime('%Y-%m-%d') if partido.fecha_vuelta else '' }}">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group mb-3">
-                            <label for="hora_vuelta" class="form-label">Hora de Vuelta</label>
+                            <label for="hora_vuelta" class="form-label" style="color: white;">Hora de Vuelta</label>
                             <input type="time" class="form-control" id="hora_vuelta" name="hora_vuelta" 
                                    value="{{ partido.hora_vuelta if partido.hora_vuelta else '' }}">
                         </div>
@@ -204,20 +204,25 @@
     }
     
     .form-control[readonly] {
-        background-color: #f8f9fa;
+        background-color:rgb(2, 14, 70);
         opacity: 1;
         border-color: #ced4da;
+        color:white;
+        font-weight: bold;
     }
     
     .form-control.editable-mode {
         background-color: #fff3cd !important;
         border-color: #ffc107 !important;
+        color:red;
+        font-weight: bold;
     }
     
     .alert-info {
         background-color: #e7f5fe;
         border-color: #b8e2fb;
-        color: #0c5460;
+        color:rgb(0, 0, 0);
+        
     }
     
     .card-header small {
