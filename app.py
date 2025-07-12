@@ -12,6 +12,13 @@ from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
 
 app = Flask(__name__)
+# Añade esto al inicio de tu Flask app
+app.config.update(
+    SESSION_COOKIE_SECURE=True,    # Solo HTTPS
+    SESSION_COOKIE_HTTPONLY=True,  # Previene XSS
+    SESSION_COOKIE_SAMESITE='Lax', # Protección CSRF
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=1)  # Sesiones expiran
+)
 app.secret_key = os.urandom(24).hex()
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
