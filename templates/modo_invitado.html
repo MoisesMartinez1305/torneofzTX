@@ -1217,77 +1217,97 @@
                                     </div>
 
                                     <div class="third-place-container">
-                                        <h4 class="phase-title">Tercer Lugar
-                                            <span class="badge bg-info ms-2">
-                                                {% if categoria_data.eliminatorias.4.partidos.0.formato == 'single' %}Partido único
-                                                {% elif categoria_data.eliminatorias.4.partidos.0.formato == 'ida' %}Solo ida
-                                                {% else %}Ida y vuelta
-                                                {% endif %}
-                                            </span>
-                                        </h4>
-                                        {% for partido in categoria_data.eliminatorias.4.partidos %}
-                                            <div class="bracket-match">
-                                                {% set goles_local_total = (partido.goles_local or 0) + (partido.goles_visitante_vuelta or 0) %}
-                                                {% set goles_visitante_total = (partido.goles_visitante or 0) + (partido.goles_local_vuelta or 0) %}
-                                                
-                                                <div class="team {% if partido.jugado and (partido.formato != 'ida_vuelta' or partido.jugado_vuelta) %}
-                                                    {% if partido.formato == 'ida_vuelta' and goles_local_total > goles_visitante_total %}winner
-                                                    {% elif partido.formato != 'ida_vuelta' and (partido.goles_local or 0) > (partido.goles_visitante or 0) %}winner{% endif %}
-                                                {% endif %}">
-                                                    {{ partido.equipo_local|default("Por definir") }}
-                                                    <span class="score">
-                                                        {% if partido.jugado %}
-                                                            {{ partido.goles_local|default('-') }}
-                                                            {% if partido.formato == 'ida_vuelta' and partido.jugado_vuelta %}
-                                                                ({{ partido.goles_visitante_vuelta|default('-') }})
-                                                            {% endif %}
-                                                        {% else %}
-                                                            -
-                                                        {% endif %}
-                                                    </span>
-                                                </div>
+    <h4 class="phase-title">Tercer Lugar
+        <span class="badge bg-info ms-2">
+            {% set formato_mostrado = false %}
+            {% for eliminatoria in categoria_data.eliminatorias %}
+                {% if eliminatoria.fase == 'final' %}
+                    {% for partido in eliminatoria.partidos %}
+                        {% if partido.formato == 'single' %}
+                            Partido único
+                            {% set formato_mostrado = true %}
+                        {% elif partido.formato == 'ida' %}
+                            Ida
+                            {% set formato_mostrado = true %}
+                        {% elif partido.formato == 'ida_vuelta' %}
+                            Ida y vuelta
+                            {% set formato_mostrado = true %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            {% if not formato_mostrado %}Ida y vuelta{% endif %}
+        </span>
+    </h4>
+    
+    {# Versión segura para el tercer lugar (índice 4) #}
+    {% if categoria_data.eliminatorias|length > 4 %}
+        {% for partido in categoria_data.eliminatorias[4].partidos %}
+            <div class="bracket-match">
+                {% set goles_local_total = (partido.goles_local or 0) + (partido.goles_visitante_vuelta or 0) %}
+                {% set goles_visitante_total = (partido.goles_visitante or 0) + (partido.goles_local_vuelta or 0) %}
+                
+                <div class="team {% if partido.jugado and (partido.formato != 'ida_vuelta' or partido.jugado_vuelta) %}
+                    {% if partido.formato == 'ida_vuelta' and goles_local_total > goles_visitante_total %}winner
+                    {% elif partido.formato != 'ida_vuelta' and (partido.goles_local or 0) > (partido.goles_visitante or 0) %}winner{% endif %}
+                {% endif %}">
+                    {{ partido.equipo_local|default("Por definir") }}
+                    <span class="score">
+                        {% if partido.jugado %}
+                            {{ partido.goles_local|default('-') }}
+                            {% if partido.formato == 'ida_vuelta' and partido.jugado_vuelta %}
+                                ({{ partido.goles_visitante_vuelta|default('-') }})
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                </div>
 
-                                                <div class="team {% if partido.jugado and (partido.formato != 'ida_vuelta' or partido.jugado_vuelta) %}
-                                                    {% if partido.formato == 'ida_vuelta' and goles_visitante_total > goles_local_total %}winner
-                                                    {% elif partido.formato != 'ida_vuelta' and (partido.goles_visitante or 0) > (partido.goles_local or 0) %}winner{% endif %}
-                                                {% endif %}">
-                                                    {{ partido.equipo_visitante|default("Por definir") }}
-                                                    <span class="score">
-                                                        {% if partido.jugado %}
-                                                            {{ partido.goles_visitante|default('-') }}
-                                                            {% if partido.formato == 'ida_vuelta' and partido.jugado_vuelta %}
-                                                                ({{ partido.goles_local_vuelta|default('-') }})
-                                                            {% endif %}
-                                                        {% else %}
-                                                            -
-                                                        {% endif %}
-                                                    </span>
-                                                </div>
+                <div class="team {% if partido.jugado and (partido.formato != 'ida_vuelta' or partido.jugado_vuelta) %}
+                    {% if partido.formato == 'ida_vuelta' and goles_visitante_total > goles_local_total %}winner
+                    {% elif partido.formato != 'ida_vuelta' and (partido.goles_visitante or 0) > (partido.goles_local or 0) %}winner{% endif %}
+                {% endif %}">
+                    {{ partido.equipo_visitante|default("Por definir") }}
+                    <span class="score">
+                        {% if partido.jugado %}
+                            {{ partido.goles_visitante|default('-') }}
+                            {% if partido.formato == 'ida_vuelta' and partido.jugado_vuelta %}
+                                ({{ partido.goles_local_vuelta|default('-') }})
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                </div>
 
-                                                {% if partido.fecha or (partido.formato == 'ida_vuelta' and partido.fecha_vuelta) %}
-                                                    <div class="match-info">
-                                                        {% if partido.formato == 'ida_vuelta' %}
-                                                            <div>Ida: {{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Por definir' }} {{ partido.hora if partido.hora else '' }}</div>
-                                                            {% if partido.fecha_vuelta %}
-                                                            <div>Vuelta: {{ partido.fecha_vuelta.strftime('%d/%m/%Y') }} {{ partido.hora_vuelta if partido.hora_vuelta else '' }}</div>
-                                                            {% endif %}
-                                                        {% else %}
-                                                            <div>{{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Por definir' }} {{ partido.hora if partido.hora else '' }}</div>
-                                                        {% endif %}
-                                                        {% if partido.jugado and (partido.formato != 'ida_vuelta' or partido.jugado_vuelta) %}
-                                                            <div class="global-result">
-                                                                {% if partido.formato == 'ida_vuelta' %}
-                                                                    Global: {{ goles_local_total }} - {{ goles_visitante_total }}
-                                                                {% else %}
-                                                                    Resultado: {{ partido.goles_local or 0 }} - {{ partido.goles_visitante or 0 }}
-                                                                {% endif %}
-                                                            </div>
-                                                        {% endif %}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
+                {% if partido.fecha or (partido.formato == 'ida_vuelta' and partido.fecha_vuelta) %}
+                    <div class="match-info">
+                        {% if partido.formato == 'ida_vuelta' %}
+                            <div>Ida: {{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Por definir' }} {{ partido.hora if partido.hora else '' }}</div>
+                            {% if partido.fecha_vuelta %}
+                            <div>Vuelta: {{ partido.fecha_vuelta.strftime('%d/%m/%Y') }} {{ partido.hora_vuelta if partido.hora_vuelta else '' }}</div>
+                            {% endif %}
+                        {% else %}
+                            <div>{{ partido.fecha.strftime('%d/%m/%Y') if partido.fecha else 'Por definir' }} {{ partido.hora if partido.hora else '' }}</div>
+                        {% endif %}
+                        {% if partido.jugado and (partido.formato != 'ida_vuelta' or partido.jugado_vuelta) %}
+                            <div class="global-result">
+                                {% if partido.formato == 'ida_vuelta' %}
+                                    Global: {{ goles_local_total }} - {{ goles_visitante_total }}
+                                {% else %}
+                                    Resultado: {{ partido.goles_local or 0 }} - {{ partido.goles_visitante or 0 }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info mt-2">No hay datos disponibles para el tercer lugar</div>
+    {% endif %}
+</div>
                                 </div>
 
                                 <!-- Columna Semifinales (derecha) -->
