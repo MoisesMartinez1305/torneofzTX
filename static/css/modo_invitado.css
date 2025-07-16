@@ -1,54 +1,75 @@
 /* Estilos generales del bracket */
 .tournament-bracket {
     display: flex;
+    justify-content: flex-start;
     align-items: center;
     padding: 20px;
     background-color: #021930;
     overflow-x: auto;
     overflow-y: hidden;
-    min-height: 600px;
-    gap: 80px; /* Aumentado para dar espacio a las conexiones */
+    min-height: 100vh;
+    width: 100%;
+    gap: 60px;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    position: relative;
 }
 
-/* Columnas del bracket */
-.bracket-column {
+/* Contenedores principales */
+.bracket-left, .bracket-center, .bracket-right {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    height: 100%;
     position: relative;
-    min-width: 220px;
+}
+
+.bracket-left, .bracket-right {
+    gap: 80px;
+}
+
+/* Columnas del bracket */
+.bracket-phase {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    min-width: 250px;
+    width: 250px;
     flex-shrink: 0;
 }
 
 /* Títulos de las fases */
-.phase-title {
+.bracket-phase h4 {
     text-align: center;
-    margin-bottom: 20px;
-    padding: 8px 12px;
+    margin-bottom: 30px;
+    padding: 12px 20px;
     background-color: #0424b3;
     color: white;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 1.1rem;
-    font-weight: 500;
+    font-weight: 600;
     white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(4, 36, 179, 0.3);
+    min-width: 180px;
 }
 
-/* Contenedor de partidos */
-.matches-container {
+/* Contenedor de partidos dentro de cada fase */
+.bracket-phase .matches-container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     gap: 40px;
-    position: relative;
+    width: 100%;
 }
 
 /* Partidos individuales */
 .bracket-match {
-    background: rgb(28, 130, 212);
+    background: linear-gradient(180deg, rgba(13,110,253,0.18) 0%, rgba(13,110,253,0.08) 100%);
     border: 2px solid #00fff0;
-    border-radius: 10px;
+    border-radius: 12px;
     box-shadow:
         0 0 6px #0d6efd,
         0 0 16px #0d6efd,
@@ -57,46 +78,66 @@
         0 0 2px #fff inset,
         0 2px 24px 2px #fff8,
         0 -2px 24px 2px #0d6efd88;
-    background: linear-gradient(180deg, rgba(13,110,253,0.18) 0%, rgba(13,110,253,0.08) 100%);
-    padding: 12px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 16px;
     position: relative;
-    min-height: 80px;
+    min-height: 100px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.bracket-match:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 0 8px #0d6efd,
+        0 0 20px #0d6efd,
+        0 0 40px #0d6efd,
+        0 0 60px #0d6efd,
+        0 0 3px #fff inset,
+        0 3px 30px 3px #fff8,
+        0 -3px 30px 3px #0d6efd88;
 }
 
 /* Equipos */
 .team {
-    padding: 8px;
-    margin: 4px 0;
-    border-radius: 4px;
+    padding: 12px;
+    margin: 6px 0;
+    border-radius: 6px;
     display: flex;
     justify-content: space-between;
-    transition: background-color 0.2s;
+    align-items: center;
+    transition: all 0.3s ease;
     color: white;
+    font-size: 0.95rem;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.team:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .team.winner {
-    background-color: #d4edda00;
-    font-weight: 600;
+    background-color: rgba(0, 255, 240, 0.1);
+    font-weight: 700;
     color: #ffffff;
     text-shadow:
-        0 0 1px #00fff0,
-        0 0 4px #00fff0,
-        0 0 8px #00fff0,
-        0 0 1px #00fff0;
-    
+        0 0 2px #00fff0,
+        0 0 6px #00fff0,
+        0 0 12px #00fff0,
+        0 0 2px #00fff0;
+    border: 1px solid rgba(0, 255, 240, 0.3);
 }
 
 /* Puntuación */
 .score {
-    font-weight: 600;
-    margin-left: 10px;
+    font-weight: 700;
+    margin-left: 15px;
     color: #ffffff;
     text-shadow:
         0 0 4px #00fff0,
         0 0 8px #00fff0,
         0 0 12px #00fff0,
         0 0 1px #00fff0;
+    font-size: 1.1rem;
 }
 
 /* Información del partido */
@@ -107,521 +148,106 @@
         0 0 2px #00fff0,
         0 0 6px #00fff0,
         0 0 1px #00fff0;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px dashed #dee2e6;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.3);
+    text-align: center;
 }
 
 .global-result {
     font-weight: 600;
     color: #ffffff;
-    margin-top: 5px;
+    margin-top: 8px;
     text-align: center;
 }
 
-/* ===== SISTEMA DE CONEXIONES MEJORADO Y SIMÉTRICO ===== */
+/* ===== CONEXIONES ENTRE PARTIDOS ===== */
 
-/* Lado izquierdo: líneas salen hacia la derecha */
-.tournament-bracket > .bracket-column.round-of-16:first-child .bracket-match::after,
-.tournament-bracket > .bracket-column.quarter-finals:first-child .bracket-match::after,
-.tournament-bracket > .bracket-column.semi-finals:first-child .bracket-match::after {
+/* Conexiones horizontales */
+.bracket-match.has-next::after {
     content: '';
     position: absolute;
-    right: -40px;
+    right: -30px;
     top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 2px;
-    background: linear-gradient(90deg, #ffffff 0%, #0d6efd 100%);
-    box-shadow: 0 0 8px #00fff0, 0 0 16px #00fff0;
-    z-index: 2;
-    pointer-events: none;
-}
-
-/* Lado derecho: líneas salen hacia la izquierda */
-.tournament-bracket > .bracket-column.round-of-16:last-child .bracket-match::after,
-.tournament-bracket > .bracket-column.quarter-finals:last-child .bracket-match::after,
-.tournament-bracket > .bracket-column.semi-finals:last-child .bracket-match::after {
-    content: '';
-    position: absolute;
-    left: -40px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 2px;
-    background: linear-gradient(270deg, #ffffff 0%, #0d6efd 100%);
-    box-shadow: 0 0 8px #00fff0, 0 0 16px #00fff0;
-    z-index: 2;
-    pointer-events: none;
-}
-
-/* Oculta la línea de salida en la columna central (final/tercer lugar) */
-.tournament-bracket > .bracket-column.final .bracket-match::after {
-    display: none !important;
-}
-
-/* No mostrar línea de salida solo en el primer partido de la primera columna izquierda */
-.tournament-bracket > .bracket-column.round-of-16:first-child .bracket-match:first-child::after,
-.tournament-bracket > .bracket-column.quarter-finals:first-child .bracket-match:first-child::after,
-.tournament-bracket > .bracket-column.semi-finals:first-child .bracket-match:first-child::after {
-    display: none !important;
-}
-
-/* No mostrar línea de salida solo en el primer partido de la primera columna derecha */
-.tournament-bracket > .bracket-column.round-of-16:last-child .bracket-match:first-child::after,
-.tournament-bracket > .bracket-column.quarter-finals:last-child .bracket-match:first-child::after,
-.tournament-bracket > .bracket-column.semi-finals:last-child .bracket-match:first-child::after {
-    display: none !important;
-}
-
-/* ===== CONEXIONES OCTAVOS DE FINAL ===== */
-.round-of-16 {
-    position: relative;
-}
-
-/* Conectores verticales para cada par de partidos (1-2, 3-4, 5-6, 7-8) */
-/* Lado izquierdo */
-.tournament-bracket > .bracket-column.round-of-16:first-child .bracket-match:nth-child(2n)::before {
-    content: '';
-    position: absolute;
-    right: -40px;
-    top: -40px;
-    width: 2px;
-    height: 80px;
-    background-color: #fdfdfd;
-    z-index: 1;
-    border-radius: 1px;
-}
-/* Lado derecho */
-.tournament-bracket > .bracket-column.round-of-16:last-child .bracket-match:nth-child(2n)::before {
-    content: '';
-    position: absolute;
-    left: -40px;
-    top: -40px;
-    width: 2px;
-    height: 80px;
-    background-color: #ffffff;
-    z-index: 1;
-    border-radius: 1px;
-}
-
-/* Conectores verticales para los partidos 5-6 y 7-8 (faltantes) */
-/* Lado izquierdo */
-.tournament-bracket > .bracket-column.round-of-16:first-child .bracket-match:nth-child(6)::before,
-.tournament-bracket > .bracket-column.round-of-16:first-child .bracket-match:nth-child(8)::before {
-    content: '';
-    position: absolute;
-    right: -40px;
-    top: -40px;
-    width: 2px;
-    height: 80px;
-    background-color: #ffffff;
-    z-index: 1;
-    border-radius: 1px;
-}
-/* Lado derecho */
-.tournament-bracket > .bracket-column.round-of-16:last-child .bracket-match:nth-child(6)::before,
-.tournament-bracket > .bracket-column.round-of-16:last-child .bracket-match:nth-child(8)::before {
-    content: '';
-    position: absolute;
-    left: -40px;
-    top: -40px;
-    width: 2px;
-    height: 80px;
-    background-color: #6c757d;
-    z-index: 1;
-    border-radius: 1px;
-}
-
-/* ===== CONEXIONES CUARTOS DE FINAL ===== */
-.quarter-finals {
-    position: relative;
-}
-
-/* Verticales cuartos - lado izquierdo */
-.tournament-bracket > .bracket-column.quarter-finals:first-child .matches-container::before {
-    content: '';
-    position: absolute;
-    right: -40px;
-    top: 25%;
-    width: 2px;
-    height: 50%;
-    background-color: #ffffff;
-    z-index: 1;
-}
-/* Verticales cuartos - lado derecho */
-.tournament-bracket > .bracket-column.quarter-finals:last-child .matches-container::before {
-    content: '';
-    position: absolute;
-    left: -40px;
-    top: 25%;
-    width: 2px;
-    height: 50%;
-    background-color: #6c757d;
-    z-index: 1;
-}
-/* Unión de partidos cuartos - lado izquierdo */
-.tournament-bracket > .bracket-column.quarter-finals:first-child .bracket-match:nth-child(3)::before {
-    content: '';
-    position: absolute;
-    right: -40px;
-    top: -80px;
-    width: 2px;
-    height: 160px;
-    background-color: #6c757d;
-    z-index: 1;
-}
-/* Unión de partidos cuartos - lado derecho */
-.tournament-bracket > .bracket-column.quarter-finals:last-child .bracket-match:nth-child(3)::before {
-    content: '';
-    position: absolute;
-    left: -40px;
-    top: -80px;
-    width: 2px;
-    height: 160px;
-    background-color: #6c757d;
-    z-index: 1;
-}
-
-/* Conectores horizontales entre partidos de cuartos y semis */
-/* Lado izquierdo */
-.tournament-bracket > .bracket-column.quarter-finals:first-child .bracket-match:nth-child(2)::after,
-.tournament-bracket > .bracket-column.quarter-finals:first-child .bracket-match:nth-child(4)::after {
-    content: '';
-    position: absolute;
-    right: -40px;
-    top: 50%;
-    width: 40px;
-    height: 2px;
-    background: linear-gradient(90deg, #0d6efd 0%, #ffc107 100%);
-    z-index: 2;
-}
-/* Lado derecho */
-.tournament-bracket > .bracket-column.quarter-finals:last-child .bracket-match:nth-child(2)::after,
-.tournament-bracket > .bracket-column.quarter-finals:last-child .bracket-match:nth-child(4)::after {
-    content: '';
-    position: absolute;
-    left: -40px;
-    top: 50%;
-    width: 40px;
-    height: 2px;
-    background: linear-gradient(270deg, #0d6efd 0%, #ffc107 100%);
-    z-index: 2;
-}
-
-/* ===== CONEXIONES SEMIFINALES ===== */
-.semi-finals {
-    position: relative;
-}
-
-/* Vertical semifinals - lado izquierdo */
-.tournament-bracket > .bracket-column.semi-finals:first-child .matches-container::before {
-    content: '';
-    position: absolute;
-    right: -40px;
-    top: 37.5%;
-    width: 2px;
-    height: 25%;
-    background-color: #6c757d;
-    z-index: 1;
-}
-/* Vertical semifinals - lado derecho */
-.tournament-bracket > .bracket-column.semi-finals:last-child .matches-container::before {
-    content: '';
-    position: absolute;
-    left: -40px;
-    top: 37.5%;
-    width: 2px;
-    height: 25%;
-    background-color: #6c757d;
-    z-index: 1;
-}
-
-/* ===== CONEXIONES HORIZONTALES ENTRE COLUMNAS ===== */
-/* Lado izquierdo: hacia la derecha */
-.tournament-bracket > .bracket-column:not(.final):not(:last-child):not(.semi-finals:last-child):not(.quarter-finals:last-child):not(.round-of-16:last-child)::after {
-    content: '';
-    position: absolute;
-    
-    right: -80px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 2px;
-    background-color: #ffffff;
-    z-index: 3;
-}
-/* Lado derecho: hacia la izquierda */
-.tournament-bracket > .bracket-column.round-of-16:last-child::after,
-.tournament-bracket > .bracket-column.quarter-finals:last-child::after,
-.tournament-bracket > .bracket-column.semi-finals:last-child::after {
-    content: '';
-    position: absolute;
-    left: -80px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 2px;
-    background-color: #5c5c5c;
-    z-index: 3;
-}
-
-/* ===== AJUSTES RESPONSIVE PARA CONEXIONES ===== */
-@media (max-width: 768px) {
-    /* Octavos verticales partidos 5-8 */
-    .tournament-bracket > .bracket-column.round-of-16:first-child .bracket-match:nth-child(6)::before,
-    .tournament-bracket > .bracket-column.round-of-16:first-child .bracket-match:nth-child(8)::before {
-        right: -25px;
-        width: 2px;
-        height: 60px;
-        top: -30px;
-    }
-    .tournament-bracket > .bracket-column.round-of-16:last-child .bracket-match:nth-child(6)::before,
-    .tournament-bracket > .bracket-column.round-of-16:last-child .bracket-match:nth-child(8)::before {
-        left: -25px;
-        width: 2px;
-        height: 60px;
-        top: -30px;
-    }
-
-    /* Cuartos verticales */
-    .tournament-bracket > .bracket-column.quarter-finals:first-child .matches-container::before,
-    .tournament-bracket > .bracket-column.quarter-finals:last-child .matches-container::before {
-        right: auto;
-        left: auto;
-        width: 2px;
-        height: 40%;
-        top: 30%;
-    }
-    .tournament-bracket > .bracket-column.quarter-finals:first-child .matches-container::before {
-        right: -25px;
-    }
-    .tournament-bracket > .bracket-column.quarter-finals:last-child .matches-container::before {
-        left: -25px;
-    }
-    /* Unión cuartos */
-    .tournament-bracket > .bracket-column.quarter-finals:first-child .bracket-match:nth-child(3)::before {
-        right: -25px;
-        width: 2px;
-        height: 100px;
-        top: -50px;
-    }
-    .tournament-bracket > .bracket-column.quarter-finals:last-child .bracket-match:nth-child(3)::before {
-        left: -25px;
-        width: 2px;
-        height: 100px;
-        top: -50px;
-    }
-    /* Horizontales cuartos-semis */
-    .tournament-bracket > .bracket-column.quarter-finals:first-child .bracket-match:nth-child(2)::after,
-    .tournament-bracket > .bracket-column.quarter-finals:first-child .bracket-match:nth-child(4)::after {
-        right: -25px;
-        width: 25px;
-    }
-    .tournament-bracket > .bracket-column.quarter-finals:last-child .bracket-match:nth-child(2)::after,
-    .tournament-bracket > .bracket-column.quarter-finals:last-child .bracket-match:nth-child(4)::after {
-        left: -25px;
-        width: 25px;
-    }
-
-    /* Semifinales verticales */
-    .tournament-bracket > .bracket-column.semi-finals:first-child .matches-container::before {
-        right: -25px;
-        width: 2px;
-        height: 18%;
-        top: 41%;
-    }
-    .tournament-bracket > .bracket-column.semi-finals:last-child .matches-container::before {
-        left: -25px;
-        width: 2px;
-        height: 18%;
-        top: 41%;
-    }
-
-    /* Horizontales entre columnas */
-    .tournament-bracket > .bracket-column:not(.final):not(:last-child):not(.semi-finals:last-child):not(.quarter-finals:last-child):not(.round-of-16:last-child)::after {
-        right: -50px;
-        width: 25px;
-    }
-    .tournament-bracket > .bracket-column.round-of-16:last-child::after,
-    .tournament-bracket > .bracket-column.quarter-finals:last-child::after,
-    .tournament-bracket > .bracket-column.semi-finals:last-child::after {
-        left: -50px;
-        width: 25px;
-    }
-}
-
-@media (max-width: 576px) {
-    /* Octavos verticales partidos 5-8 */
-    .tournament-bracket > .bracket-column.round-of-16:first-child .bracket-match:nth-child(6)::before,
-    .tournament-bracket > .bracket-column.round-of-16:first-child .bracket-match:nth-child(8)::before {
-        right: -20px;
-        width: 2px;
-        height: 40px;
-        top: -20px;
-    }
-    .tournament-bracket > .bracket-column.round-of-16:last-child .bracket-match:nth-child(6)::before,
-    .tournament-bracket > .bracket-column.round-of-16:last-child .bracket-match:nth-child(8)::before {
-        left: -20px;
-        width: 2px;
-        height: 40px;
-        top: -20px;
-    }
-
-    /* Cuartos verticales */
-    .tournament-bracket > .bracket-column.quarter-finals:first-child .matches-container::before,
-    .tournament-bracket > .bracket-column.quarter-finals:last-child .matches-container::before {
-        right: auto;
-        left: auto;
-        width: 2px;
-        height: 30%;
-        top: 35%;
-    }
-    .tournament-bracket > .bracket-column.quarter-finals:first-child .matches-container::before {
-        right: -20px;
-    }
-    .tournament-bracket > .bracket-column.quarter-finals:last-child .matches-container::before {
-        left: -20px;
-    }
-    /* Unión cuartos */
-    .tournament-bracket > .bracket-column.quarter-finals:first-child .bracket-match:nth-child(3)::before {
-        right: -20px;
-        width: 2px;
-        height: 60px;
-        top: -30px;
-    }
-    .tournament-bracket > .bracket-column.quarter-finals:last-child .bracket-match:nth-child(3)::before {
-        left: -20px;
-        width: 2px;
-        height: 60px;
-        top: -30px;
-    }
-    /* Horizontales cuartos-semis */
-    .tournament-bracket > .bracket-column.quarter-finals:first-child .bracket-match:nth-child(2)::after,
-    .tournament-bracket > .bracket-column.quarter-finals:first-child .bracket-match:nth-child(4)::after {
-        right: -20px;
-        width: 15px;
-    }
-    .tournament-bracket > .bracket-column.quarter-finals:last-child .bracket-match:nth-child(2)::after,
-    .tournament-bracket > .bracket-column.quarter-finals:last-child .bracket-match:nth-child(4)::after {
-        left: -20px;
-        width: 15px;
-    }
-
-    /* Semifinales verticales */
-    .tournament-bracket > .bracket-column.semi-finals:first-child .matches-container::before {
-        right: -20px;
-        width: 2px;
-        height: 10%;
-        top: 45%;
-    }
-    .tournament-bracket > .bracket-column.semi-finals:last-child .matches-container::before {
-        left: -20px;
-        width: 2px;
-        height: 10%;
-        top: 45%;
-    }
-
-    /* Horizontales entre columnas */
-    .tournament-bracket > .bracket-column:not(.final):not(:last-child):not(.semi-finals:last-child):not(.quarter-finals:last-child):not(.round-of-16:last-child)::after {
-        right: -40px;
-        width: 15px;
-    }
-    .tournament-bracket > .bracket-column.round-of-16:last-child::after,
-    .tournament-bracket > .bracket-column.quarter-finals:last-child::after,
-    .tournament-bracket > .bracket-column.semi-finals:last-child::after {
-        left: -40px;
-        width: 15px;
-    }
-}
-
-/* ===== ESTILOS VISUALES MEJORADOS ===== */
-
-/* Líneas más gruesas en conexiones importantes */
-.quarter-finals .matches-container::before,
-.semi-finals .matches-container::before {
-    background: linear-gradient(to bottom, #6c757d, #0d6efd);
-    width: 3px;
-}
-
-.bracket-column.semi-finals:not(:last-child)::after {
-    background: linear-gradient(90deg, #0d6efd, #ffc107);
+    width: 30px;
     height: 3px;
+    background: linear-gradient(90deg, #ffffff 0%, #0d6efd 100%);
+    box-shadow: 0 0 8px #00fff0;
+    z-index: 2;
 }
 
-/* Final y tercer lugar */
-.final-container {
-    border: 2px solid #ffffff;
-    box-shadow:
-        0 0 4px #00fff0,
-        0 0 12px #00fff0,
-        0 0 24px #00fff0;
+.bracket-match.has-prev::before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 50%;
+    width: 30px;
+    height: 3px;
+    background: linear-gradient(270deg, #ffffff 0%, #0d6efd 100%);
+    box-shadow: 0 0 8px #00fff0;
+    z-index: 2;
+}
+
+/* Estilo especial para final */
+.bracket-center .bracket-phase:first-child {
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 6px #00fff0, 0 0 18px #00fff0, 0 0 36px #00fff0;
     background-color: #061958;
-    border-radius: 28px;
-    padding: 35px 15px 15px 15px; /* espacio arriba para la copa */
+    border-radius: 20px;
+    padding: 50px 20px 20px 20px;
     position: relative;
+    min-width: 300px;
 }
 
 /* Copa tipo Champions League plateada arriba del final */
-.final-container::before {
+.bracket-center .bracket-phase:first-child::before {
     content: '';
     display: block;
     position: absolute;
     top: 0;
     left: 50%;
-    transform: translate(-50%, -65%);
-    width: 100px;
-    height: 100px;
+    transform: translate(-50%, -60%);
+    width: 80px;
+    height: 80px;
     background: none;
-    z-index: 2;
-    /* SVG copa plateada tipo Champions League con asas y base, borde neón gris */
-    background-image: url('data:image/svg+xml;utf8,<svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="silver" x1="27" y1="10" x2="27" y2="44" gradientUnits="userSpaceOnUse"><stop stop-color="%23f5f6fa"/><stop offset="0.5" stop-color="%23bfc9d1"/><stop offset="1" stop-color="%23e6e6e6"/></linearGradient><filter id="neon" x="-5" y="-5" width="64" height="64" filterUnits="userSpaceOnUse"><feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="%23bfc9d1" flood-opacity="0.9"/></filter></defs><ellipse cx="27" cy="46" rx="11" ry="4" fill="%23bfc9d1" fill-opacity="0.18"/><path d="M18 14c-6 0-10 2-10 7 0 5 5 10 11 10" stroke="%23bfc9d1" stroke-width="2.2" fill="none"/><path d="M36 14c6 0 10 2 10 7 0 5-5 10-11 10" stroke="%23bfc9d1" stroke-width="2.2" fill="none"/><path d="M16 14c0 18 6 24 11 24s11-6 11-24" fill="url(%23silver)" stroke="%23bfc9d1" stroke-width="2.2" filter="url(%23neon)"/><ellipse cx="27" cy="14" rx="11" ry="5" fill="url(%23silver)" stroke="%23bfc9d1" stroke-width="1.5"/><ellipse cx="27" cy="14" rx="7" ry="2.5" fill="%23e6e6e6" fill-opacity="0.7"/><rect x="23" y="38" width="8" height="5" rx="2" fill="url(%23silver)" stroke="%23bfc9d1" stroke-width="1.2"/><rect x="21" y="43" width="12" height="3" rx="1.5" fill="%23bfc9d1" fill-opacity="0.7" stroke="%23bfc9d1" stroke-width="1"/></svg>');
+    z-index: 10;
+    background-image: url('data:image/svg+xml;utf8,<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="silver" x1="40" y1="15" x2="40" y2="65" gradientUnits="userSpaceOnUse"><stop stop-color="%23f5f6fa"/><stop offset="0.5" stop-color="%23bfc9d1"/><stop offset="1" stop-color="%23e6e6e6"/></linearGradient><filter id="neon" x="-10" y="-10" width="100" height="100" filterUnits="userSpaceOnUse"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="%23bfc9d1" flood-opacity="0.9"/></filter></defs><ellipse cx="40" cy="68" rx="16" ry="6" fill="%23bfc9d1" fill-opacity="0.18"/><path d="M26 20c-9 0-15 3-15 10 0 7 7 15 16 15" stroke="%23bfc9d1" stroke-width="3" fill="none"/><path d="M54 20c9 0 15 3 15 10 0 7-7 15-16 15" stroke="%23bfc9d1" stroke-width="3" fill="none"/><path d="M24 20c0 27 9 36 16 36s16-9 16-36" fill="url(%23silver)" stroke="%23bfc9d1" stroke-width="3" filter="url(%23neon)"/><ellipse cx="40" cy="20" rx="16" ry="7" fill="url(%23silver)" stroke="%23bfc9d1" stroke-width="2"/><ellipse cx="40" cy="20" rx="10" ry="4" fill="%23e6e6e6" fill-opacity="0.7"/><rect x="34" y="56" width="12" height="7" rx="3" fill="url(%23silver)" stroke="%23bfc9d1" stroke-width="2"/><rect x="31" y="63" width="18" height="5" rx="2.5" fill="%23bfc9d1" fill-opacity="0.7" stroke="%23bfc9d1" stroke-width="1.5"/></svg>');
     background-repeat: no-repeat;
-    background-size: 100px 100px;
+    background-size: contain;
     pointer-events: none;
 }
 
-/* Mantener el mismo tamaño en móvil */
-@media (max-width: 768px) {
-    .final-container::before {
-        width: 70px;
-        height: 70px;
-        background-size: 70px 70px;
-        transform: translate(-50%, -65%);
-        top: 0;
-        padding: 5 rem;
-    }
-}
-
-    
-
-.third-place-container {
-    margin-top: 20px;
-    border: 1px solid #6c757d;
-    border-radius: 8px;
-    padding: 15px;
+/* Estilo para tercer lugar */
+.bracket-center .bracket-phase.third-place {
+    margin-top: 40px;
+    border: 2px solid #6c757d;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: rgba(108, 117, 125, 0.1);
+    min-width: 280px;
 }
 
 /* Badges */
 .badge {
     font-size: 0.75rem;
     font-weight: 500;
-    padding: 4px 8px;
+    padding: 6px 12px;
+    border-radius: 4px;
 }
 
 /* Scroll personalizado */
 .tournament-bracket::-webkit-scrollbar {
-    height: 8px;
+    height: 10px;
 }
 
 .tournament-bracket::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
+    background: rgba(241, 241, 241, 0.1);
+    border-radius: 5px;
 }
 
 .tournament-bracket::-webkit-scrollbar-thumb {
     background: #0d6efd;
-    border-radius: 4px;
+    border-radius: 5px;
 }
 
 .tournament-bracket::-webkit-scrollbar-thumb:hover {
@@ -630,47 +256,90 @@
 
 /* ===== RESPONSIVE DESIGN ===== */
 
-/* Tablets */
+/* Tablets y pantallas medianas */
 @media (max-width: 1200px) {
     .tournament-bracket {
         padding: 15px;
-        gap: 60px;
+        gap: 40px;
+        min-height: 80vh;
     }
     
-    .bracket-column {
+    .bracket-phase {
+        min-width: 220px;
+        width: 220px;
+    }
+    
+    .bracket-phase h4 {
+        font-size: 1rem;
+        padding: 10px 16px;
+        margin-bottom: 25px;
+        min-width: 160px;
+    }
+    
+    .bracket-match {
+        padding: 14px;
+        min-height: 90px;
+    }
+    
+    .team {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .bracket-center .bracket-phase:first-child {
+        min-width: 260px;
+        padding: 40px 18px 18px 18px;
+    }
+    
+    .bracket-center .bracket-phase:first-child::before {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .bracket-center .bracket-phase.third-place {
+        min-width: 240px;
+        padding: 18px;
+    }
+}
+
+/* Tablets pequeñas */
+@media (max-width: 992px) {
+    .tournament-bracket {
+        padding: 12px;
+        gap: 35px;
+        min-height: 70vh;
+    }
+    
+    .bracket-phase {
         min-width: 200px;
+        width: 200px;
     }
     
-    .bracket-match::after {
-        right: -30px;
-        width: 30px;
+    .bracket-phase h4 {
+        font-size: 0.95rem;
+        padding: 8px 14px;
+        margin-bottom: 20px;
+        min-width: 140px;
     }
     
-    .bracket-column:not(:last-child)::after {
-        right: -60px;
-        width: 30px;
+    .bracket-match {
+        padding: 12px;
+        min-height: 80px;
     }
     
-    .round-of-16 .matches-container::before,
-    .round-of-16 .matches-container::after {
-        right: -30px;
+    .team {
+        padding: 8px;
+        font-size: 0.85rem;
     }
     
-    .round-of-16 .bracket-match:nth-child(5)::before,
-    .round-of-16 .bracket-match:nth-child(7)::before {
-        right: -30px;
+    .bracket-center .bracket-phase:first-child {
+        min-width: 220px;
+        padding: 35px 15px 15px 15px;
     }
     
-    .quarter-finals .matches-container::before {
-        right: -30px;
-    }
-    
-    .quarter-finals .bracket-match:nth-child(3)::before {
-        right: -30px;
-    }
-    
-    .semi-finals .matches-container::before {
-        right: -30px;
+    .bracket-center .bracket-phase:first-child::before {
+        width: 60px;
+        height: 60px;
     }
 }
 
@@ -678,176 +347,215 @@
 @media (max-width: 768px) {
     .tournament-bracket {
         padding: 10px;
-        gap: 50px;
-        min-height: 450px;
+        gap: 25px;
+        min-height: 60vh;
     }
     
-    .bracket-column {
+    .bracket-phase {
         min-width: 180px;
+        width: 180px;
+    }
+    
+    .bracket-phase h4 {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        margin-bottom: 15px;
+        min-width: 120px;
     }
     
     .bracket-match {
-        padding: 8px;
+        padding: 10px;
         min-height: 70px;
     }
     
     .team {
         padding: 6px;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
+        margin: 4px 0;
     }
     
-    .phase-title {
-        font-size: 0.95rem;
-        padding: 6px 8px;
-        margin-bottom: 15px;
+    .score {
+        font-size: 1rem;
+        margin-left: 10px;
     }
     
-    .matches-container {
-        gap: 30px;
+    .match-info {
+        font-size: 0.75rem;
+        margin-top: 8px;
+        padding-top: 8px;
     }
     
-    /* Ajustar conectores en móvil */
-    .bracket-match::after {
-        right: -25px;
-        width: 25px;
+    .bracket-center .bracket-phase:first-child {
+        min-width: 200px;
+        padding: 30px 12px 12px 12px;
     }
     
-    .bracket-column:not(:last-child)::after {
-        right: -50px;
-        width: 25px;
+    .bracket-center .bracket-phase:first-child::before {
+        width: 50px;
+        height: 50px;
     }
     
-    /* Ajustar conectores verticales */
-    .round-of-16 .matches-container::before,
-    .round-of-16 .matches-container::after {
-        right: -25px;
-    }
-    
-    .round-of-16 .bracket-match:nth-child(5)::before,
-    .round-of-16 .bracket-match:nth-child(7)::before {
-        right: -25px;
-        height: 120px;
-        top: -60px;
-    }
-    
-    .quarter-finals .matches-container::before {
-        right: -25px;
-    }
-    
-    .quarter-finals .bracket-match:nth-child(3)::before {
-        right: -25px;
-        height: 140px;
-        top: -70px;
-    }
-    
-    .semi-finals .matches-container::before {
-        right: -25px;
+    .bracket-center .bracket-phase.third-place {
+        min-width: 180px;
+        padding: 12px;
+        margin-top: 20px;
     }
 }
 
 /* Móviles pequeños */
 @media (max-width: 576px) {
     .tournament-bracket {
-        padding: 5px;
-        gap: 40px;
+        padding: 8px;
+        gap: 20px;
+        min-height: 50vh;
     }
     
-    .bracket-column {
+    .bracket-phase {
         min-width: 160px;
+        width: 160px;
+    }
+    
+    .bracket-phase h4 {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        margin-bottom: 12px;
+        min-width: 100px;
     }
     
     .bracket-match {
-        padding: 6px;
+        padding: 8px;
         min-height: 60px;
     }
     
     .team {
-        padding: 4px;
-        font-size: 0.8rem;
+        padding: 5px;
+        font-size: 0.75rem;
+        margin: 3px 0;
     }
     
-    .phase-title {
+    .score {
         font-size: 0.9rem;
-        padding: 5px 6px;
-        margin-bottom: 10px;
+        margin-left: 8px;
     }
     
     .match-info {
+        font-size: 0.7rem;
+        margin-top: 6px;
+        padding-top: 6px;
+    }
+    
+    .bracket-center .bracket-phase:first-child {
+        min-width: 180px;
+        padding: 25px 10px 10px 10px;
+    }
+    
+    .bracket-center .bracket-phase:first-child::before {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .bracket-center .bracket-phase.third-place {
+        min-width: 160px;
+        padding: 10px;
+        margin-top: 15px;
+    }
+}
+
+/* Móviles extra pequeños */
+@media (max-width: 480px) {
+    .tournament-bracket {
+        padding: 5px;
+        gap: 15px;
+    }
+    
+    .bracket-phase {
+        min-width: 140px;
+        width: 140px;
+    }
+    
+    .bracket-phase h4 {
         font-size: 0.75rem;
+        padding: 5px 8px;
+        margin-bottom: 10px;
+        min-width: 80px;
+    }
+    
+    .bracket-match {
+        padding: 6px;
+        min-height: 55px;
+    }
+    
+    .team {
+        padding: 4px;
+        font-size: 0.7rem;
     }
     
     .score {
         font-size: 0.8rem;
+        margin-left: 6px;
     }
     
-    .matches-container {
-        gap: 25px;
+    .bracket-center .bracket-phase:first-child {
+        min-width: 160px;
+        padding: 20px 8px 8px 8px;
     }
     
-    /* Ajustar conectores en móvil pequeño */
-    .bracket-match::after {
-        right: -20px;
-        width: 20px;
-    }
-    
-    .bracket-column:not(:last-child)::after {
-        right: -40px;
-        width: 20px;
-    }
-    
-    /* Ajustar conectores verticales móvil pequeño */
-    .round-of-16 .matches-container::before,
-    .round-of-16 .matches-container::after {
-        right: -20px;
-    }
-    
-    .round-of-16 .bracket-match:nth-child(5)::before,
-    .round-of-16 .bracket-match:nth-child(7)::before {
-        right: -20px;
-        height: 100px;
-        top: -50px;
-    }
-    
-    .quarter-finals .matches-container::before {
-        right: -20px;
-    }
-    
-    .quarter-finals .bracket-match:nth-child(3)::before {
-        right: -20px;
-        height: 120px;
-        top: -60px;
-    }
-    
-    .semi-finals .matches-container::before {
-        right: -20px;
+    .bracket-center .bracket-phase:first-child::before {
+        width: 35px;
+        height: 35px;
     }
 }
 
-/* ===== EFECTOS DE HOVER ===== */
-.bracket-match:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: all 0.2s ease;
+/* Indicador de scroll para móviles */
+@media (max-width: 768px) {
+    .tournament-bracket::before {
+        content: '← Desliza para ver más →';
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(13, 110, 253, 0.9);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        z-index: 1000;
+        animation: fadeInOut 3s ease-in-out infinite;
+        pointer-events: none;
+    }
 }
 
-.bracket-match:hover::after {
-    background-color: #0d6efd;
-    height: 3px;
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
 }
 
-.bracket-match:hover::before {
-    background-color: #0d6efd;
-    width: 3px;
-}
-
-/* Animación en las conexiones */
-.bracket-column:not(:last-child)::after {
-    transition: all 0.3s ease;
-}
-
-.bracket-column:hover::after {
-    background-color: #0b5ed7;
-    height: 3px;
+/* Optimización para pantallas táctiles */
+@media (hover: none) and (pointer: coarse) {
+    .bracket-match:hover {
+        transform: none;
+        box-shadow:
+            0 0 6px #0d6efd,
+            0 0 16px #0d6efd,
+            0 0 32px #0d6efd,
+            0 0 48px #0d6efd,
+            0 0 2px #fff inset,
+            0 2px 24px 2px #fff8,
+            0 -2px 24px 2px #0d6efd88;
+    }
+    
+    .team:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .tournament-bracket {
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+    }
+    
+    .bracket-phase {
+        scroll-snap-align: start;
+    }
 }
 
 
