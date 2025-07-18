@@ -31,110 +31,111 @@
     {% else %}
         <!-- Mostrar los datos del torneo -->
        <!-- Sección de ligas - Diseño tipo cards modernas -->
-       <!-- Sección de ligas - Diseño tipo cards modernas -->
-        <div class="row g-4 mb-5">
-            {% for datos in datos_ligas %}
-      
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card liga-card h-100 border-0 overflow-hidden shadow" 
-                    onclick="document.getElementById('ligaCollapse{{ datos.categoria.id }}').classList.toggle('show')"
-                    style="cursor: pointer; background: linear-gradient(to bottom, #0c56b8 20%, #011a3b 80%);">
-                    <div class="card-body p-4 d-flex flex-column">
-                        <!-- Encabezado de la card -->
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div>
-                                <span class="badge bg-white text-dark mb-2 fw-normal">{{ loop.index }}° CATEGORÍA</span>
-                                <h3 class="h5 mb-0 text-white">{{ datos.categoria.nombre }}</h3>
-                                {% if datos.tiene_descanso %}
-                                    <small class="text-white-50"><i class="fas fa-info-circle me-1"></i>Número impar de equipos - Hay descansos</small>
-                                {% endif %}
-                                {% if datos.tiene_grupos %}
-                                    <small class="text-white-50"><i class="fas fa-layer-group me-1"></i>Con grupos ({{ datos.grupos|length }})</small>
-                                {% endif %}
-                            </div>
-                            <i class="fas fa-trophy fs-4 text-warning"></i>
+    <!-- Sección de ligas - Diseño tipo cards modernas -->
+    <div class="row g-4 mb-5">
+        {% for datos in datos_ligas %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card liga-card h-100 border-0 overflow-hidden shadow position-relative"
+                onclick="document.getElementById('ligaCollapse{{ datos.categoria.id }}').classList.toggle('show'); document.getElementById('hint-{{ datos.categoria.id }}').style.display='none';"
+                style="cursor: pointer; background: linear-gradient(to bottom, #0c56b8 20%, #011a3b 80%);">
+                <!-- Dedo y leyenda de hint -->
+                <div id="hint-{{ datos.categoria.id }}" class="position-absolute top-0 start-50 translate-middle-x w-100" style="z-index:10;">
+                    <div class="d-flex flex-column align-items-center mt-2">
+                        <span style="font-size:2rem; animation: bounce 1s infinite;">
+                            🖐️
+                        </span>
+                        <span class="badge bg-light text-dark shadow-sm px-3 py-2 mt-1" style="font-size:0.95rem;">
+                            Toca para ver más información
+                        </span>
+                    </div>
+                </div>
+                <!-- Encabezado de la card -->
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-white text-dark mb-2 fw-normal">{{ loop.index }}° CATEGORÍA</span>
+                            <h3 class="h5 mb-0 text-white">{{ datos.categoria.nombre }}</h3>
+                            {% if datos.tiene_descanso %}
+                                <small class="text-white-50"><i class="fas fa-info-circle me-1"></i>Número impar de equipos - Hay descansos</small>
+                            {% endif %}
+                            {% if datos.tiene_grupos %}
+                                <small class="text-white-50"><i class="fas fa-layer-group me-1"></i>Con grupos ({{ datos.grupos|length }})</small>
+                            {% endif %}
                         </div>
-                        
-                        <!-- Barra de progreso -->
-                        <div class="progress mb-3">
-                            {% set total = datos.total_partidos %}
-                            {% set jugados = datos.partidos_jugados %}
-                            
-                            <div class="progress-bar bg-warning" role="progressbar" 
-                            
-                                style="width: {% if total > 0 %}{{ (jugados / total * 100) }}{% else %}0{% endif %}%" 
-                                aria-valuenow="{{ jugados }}" 
-                                aria-valuemin="0" 
-                                aria-valuemax="{{ total }}">
-                                         
-                            </div>
-                              
+                        <i class="fas fa-trophy fs-4 text-warning"></i>
+                    </div>
+                    <!-- Barra de progreso -->
+                    <div class="progress mb-3">
+                        {% set total = datos.total_partidos %}
+                        {% set jugados = datos.partidos_jugados %}
+                        <div class="progress-bar bg-warning" role="progressbar"
+                            style="width: {% if total > 0 %}{{ (jugados / total * 100) }}{% else %}0{% endif %}%"
+                            aria-valuenow="{{ jugados }}"
+                            aria-valuemin="0"
+                            aria-valuemax="{{ total }}">
                         </div>
-                        <!-- Porcentaje de partidos jugados -->
-                        <div style="text-align: center; color: white; padding-top: 0rem; !important">   
-                         {% if datos.total_partidos > 0 %}
-                                        {{ ((datos.partidos_jugados / datos.total_partidos * 100 )|round(0)) }}%
-                                        progreso del torneo
-                                    {% else %}0%{% endif %}
-                        </div>
-                        
-                        <!-- Información de jornadas -->
-                        <div class="d-flex justify-content-between text-white-80 small mb-3">
-                            <span><i class="fas fa-calendar-alt me-1"></i> 
-                                {% if datos.tiene_grupos %}
-                                    {% if datos.grupos and datos.grupos[0].jornadas %}
-                                        {{ datos.grupos[0].jornadas|length }} jornadas por grupo
-                                    {% else %}
-                                        0 jornadas
-                                    {% endif %}
+                    </div>
+                    <!-- Porcentaje de partidos jugados -->
+                    <div style="text-align: center; color: white; padding-top: 0rem; !important">
+                        {% if datos.total_partidos > 0 %}
+                            {{ ((datos.partidos_jugados / datos.total_partidos * 100 )|round(0)) }}%
+                            progreso del torneo
+                        {% else %}0%{% endif %}
+                    </div>
+                    <!-- Información de jornadas -->
+                    <div class="d-flex justify-content-between text-white-80 small mb-3">
+                        <span><i class="fas fa-calendar-alt me-1"></i>
+                            {% if datos.tiene_grupos %}
+                                {% if datos.grupos and datos.grupos[0].jornadas %}
+                                    {{ datos.grupos[0].jornadas|length }} jornadas por grupo
                                 {% else %}
-                                    {% if datos.jornadas %}
-                                        {{ datos.jornadas|length }} jornadas
-                                    {% else %}
-                                        0 jornadas
-                                    {% endif %}
+                                    0 jornadas
                                 {% endif %}
-                            </span>
-                            
-                            <span><i class="fas fa-futbol me-1"></i> {{ datos.partidos_jugados }}/{{ datos.total_partidos }}</span>
-                            
-                        </div>
-                        <small class="opacity-75">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Formato: {{ 'Ida y Vuelta' if torneo.formato_liga == 'ida_vuelta' else 'Solo Ida' }}
-                        </small>
-                        
-                        <!-- Conteo de equipos - SOLUCIÓN DEFINITIVA -->
-                        <!-- Sección de conteo de equipos - Versión definitiva probada -->
-                        <!-- Versión mejorada que muestra total y equipos por grupo -->
-                        <div class="mt-auto">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-users me-2 text-white-60"></i>
-                                    <span class="text-white">
-                                        {% if datos.tiene_grupos %}
-                                            {# Para categorías CON grupos #}
-                                            {% set total_equipos = datos.grupos|sum(attribute='total_equipos') %}
-                                            {{ total_equipos }} equipos totales (
-                                            {% for grupo in datos.grupos %}
-                                                {{ grupo.total_equipos }} en {{ grupo.grupo.nombre }}{% if not loop.last %}, {% endif %}
-                                            {% endfor %}
-                                            )
-                                        {% else %}
-                                            {# Para categorías SIN grupos #}
-                                            {{ datos.total_equipos }} equipos
-                                        {% endif %}
-                                    </span>
-                                </div>
-                                
+                            {% else %}
+                                {% if datos.jornadas %}
+                                    {{ datos.jornadas|length }} jornadas
+                                {% else %}
+                                    0 jornadas
+                                {% endif %}
+                            {% endif %}
+                        </span>
+                        <span><i class="fas fa-futbol me-1"></i> {{ datos.partidos_jugados }}/{{ datos.total_partidos }}</span>
+                    </div>
+                    <small class="opacity-75">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Formato: {{ 'Ida y Vuelta' if torneo.formato_liga == 'ida_vuelta' else 'Solo Ida' }}
+                    </small>
+                    <!-- Conteo de equipos -->
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-users me-2 text-white-60"></i>
+                                <span class="text-white">
+                                    {% if datos.tiene_grupos %}
+                                        {% set total_equipos = datos.grupos|sum(attribute='total_equipos') %}
+                                        {{ total_equipos }} equipos totales (
+                                        {% for grupo in datos.grupos %}
+                                            {{ grupo.total_equipos }} en {{ grupo.grupo.nombre }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                        )
+                                    {% else %}
+                                        {{ datos.total_equipos }} equipos
+                                    {% endif %}
+                                </span>
                             </div>
                         </div>
-       
                     </div>
                 </div>
             </div>
-            {% endfor %}
         </div>
+        {% endfor %}
+    </div>
+    <style>
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0);}
+        50% { transform: translateY(-10px);}
+    }
+    </style>
 
         <!-- Contenido detallado de cada liga -->
         {% for datos in datos_ligas %}
@@ -504,6 +505,7 @@
                                                                         <small class="text-nowrap {% if not partido.fecha %}text-muted{% else %}text-primary{% endif %}">
                                                                             <i class="far fa-calendar-alt me-1"></i>
                                                                             {% if partido.fecha %}
+                                                                                {{ partido.fecha.strftime('%A')|lower|replace('monday','lunes')|replace('tuesday','martes')|replace('wednesday','miércoles')|replace('thursday','jueves')|replace('friday','viernes')|replace('saturday','sábado')|replace('sunday','domingo') }}
                                                                                 {{ partido.fecha.strftime('%d/%m/%Y') }}
                                                                             {% else %}
                                                                                 No asignada
@@ -525,35 +527,41 @@
                                                                     </div>
                                                                 </td>
                                                             
-                                                                 <td class="fw-bold">
-                                                                                {% if partido.equipo_local == "Descanso" %}
-                                                                                    <i class="fas fa-moon text-muted"></i> Descanso
-                                                                                {% else %}
-                                                                                    <div class="team-with-logo">
-                                                                                        {# Buscar el equipo igual que en admin #}
-                                                                                        {% if datos.tiene_grupos %}
-                                                                                            {% for grupo in datos.grupos %}
-                                                                                                {% set equipo_local = grupo.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
-                                                                                                {% if equipo_local %}
-                                                                                                    <img src="{{ get_logo_path(equipo_local) }}" 
-                                                                                                        class="team-logo" 
-                                                                                                        alt="{{ partido.equipo_local }}"
-                                                                                                        onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
-                                                                                                {% endif %}
-                                                                                            {% endfor %}
-                                                                                        {% else %}
-                                                                                            {% set equipo_local = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
-                                                                                            <img src="{{ get_logo_path(equipo_local) if equipo_local else url_for('static', filename='images/default_logo.png') }}" 
-                                                                                                class="team-logo" 
-                                                                                                alt="{{ partido.equipo_local }}"
-                                                                                                onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
-                                                                                        {% endif %}
-                                                                                        
-                                                                                        {{ partido.equipo_local }}
-                                                                                    </div>
+                                                                <td class="fw-bold">
+                                                                    {% if partido.equipo_local == "Descanso" %}
+                                                                        <i class="fas fa-moon text-muted"></i> Descanso
+                                                                    {% else %}
+                                                                        <div class="team-with-logo">
+                                                                            {# Buscar el equipo igual que en admin #}
+                                                                            {% if datos.tiene_grupos %}
+                                                                                {% for grupo in datos.grupos %}
+                                                                                    {% set equipo_local = grupo.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
+                                                                                    {% if equipo_local %}
+                                                                                        <img src="{{ get_logo_path(equipo_local) }}" 
+                                                                                            class="team-logo" 
+                                                                                            alt="{{ partido.equipo_local }}"
+                                                                                            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                                    {% endif %}
+                                                                                {% endfor %}
+                                                                            {% else %}
+                                                                                {% set equipo_local = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
+                                                                                <img src="{{ get_logo_path(equipo_local) if equipo_local else url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="{{ partido.equipo_local }}"
+                                                                                    onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                            {% endif %}
+                                                                            {{ partido.equipo_local }}
+                                                                            {% if partido.jugado and not partido.es_descanso %}
+                                                                                {% if partido.goles_local > partido.goles_visitante %}
+                                                                                    <i class="fas fa-check text-success ms-1"></i>
+                                                                                {% elif partido.goles_local < partido.goles_visitante %}
+                                                                                    <i class="fas fa-times text-danger ms-1"></i>
                                                                                 {% endif %}
-                                                                            </td>
-                                                            
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </td>
+
                                                                 <td class="text-center">
                                                                     {% if partido.jugado and not partido.es_descanso %}
                                                                         <span class="badge bg-primary rounded-pill px-3 py-1">
@@ -565,34 +573,40 @@
                                                                         <span class="text-muted">VS</span>
                                                                     {% endif %}
                                                                 </td>
-                                                            
+
                                                                 <td class="fw-bold">
-                                                                            {% if partido.equipo_visitante == "Descanso" %}
-                                                                                <i class="fas fa-moon text-muted"></i> Descanso
-                                                                            {% else %}
-                                                                                <div class="team-with-logo">
-                                                                                    {% if datos.tiene_grupos %}
-                                                                                        {% for grupo in datos.grupos %}
-                                                                                            {% set equipo_visitante = grupo.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
-                                                                                            {% if equipo_visitante %}
-                                                                                                <img src="{{ get_logo_path(equipo_visitante) }}" 
-                                                                                                    class="team-logo" 
-                                                                                                    alt="{{ partido.equipo_visitante }}"
-                                                                                                    onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
-                                                                                            {% endif %}
-                                                                                        {% endfor %}
-                                                                                    {% else %}
-                                                                                        {% set equipo_visitante = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
-                                                                                        <img src="{{ get_logo_path(equipo_visitante) if equipo_visitante else url_for('static', filename='images/default_logo.png') }}" 
+                                                                    {% if partido.equipo_visitante == "Descanso" %}
+                                                                        <i class="fas fa-moon text-muted"></i> Descanso
+                                                                    {% else %}
+                                                                        <div class="team-with-logo">
+                                                                            {% if datos.tiene_grupos %}
+                                                                                {% for grupo in datos.grupos %}
+                                                                                    {% set equipo_visitante = grupo.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
+                                                                                    {% if equipo_visitante %}
+                                                                                        <img src="{{ get_logo_path(equipo_visitante) }}" 
                                                                                             class="team-logo" 
                                                                                             alt="{{ partido.equipo_visitante }}"
                                                                                             onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
                                                                                     {% endif %}
-                                                                                    
-                                                                                    {{ partido.equipo_visitante }}
-                                                                                </div>
+                                                                                {% endfor %}
+                                                                            {% else %}
+                                                                                {% set equipo_visitante = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
+                                                                                <img src="{{ get_logo_path(equipo_visitante) if equipo_visitante else url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="{{ partido.equipo_visitante }}"
+                                                                                    onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
                                                                             {% endif %}
-                                                                        </td>
+                                                                            {{ partido.equipo_visitante }}
+                                                                            {% if partido.jugado and not partido.es_descanso %}
+                                                                                {% if partido.goles_visitante > partido.goles_local %}
+                                                                                    <i class="fas fa-check text-success ms-1"></i>
+                                                                                {% elif partido.goles_visitante < partido.goles_local %}
+                                                                                    <i class="fas fa-times text-danger ms-1"></i>
+                                                                                {% endif %}
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </td>
                                                             
                                                                 <td class="text-center">
                                                                     {% if partido.jugado and not partido.es_descanso %}
@@ -905,7 +919,7 @@
                         {% endif %}
                     </div>
 
-             <div class="tab-pane fade" id="eliminatorias{{ datos.categoria.id }}" role="tabpanel" aria-labelledby="eliminatorias{{ datos.categoria.id }}-tab">
+            <div class="tab-pane fade" id="eliminatorias{{ datos.categoria.id }}" role="tabpanel" aria-labelledby="eliminatorias{{ datos.categoria.id }}-tab">
     {% if eliminatorias_data %}
         {% set categoria_eliminatorias = eliminatorias_data | selectattr('categoria.id', 'equalto', datos.categoria.id) | list %}
         {% if categoria_eliminatorias %}
@@ -919,7 +933,7 @@
                                 
                                 {# Lado Izquierdo: cada fase en su propia columna #}
                                 {% for fase in fases_bracket %}
-                                    <div class="bracket-left">
+                                    <div class="bracket-left bracket-fase-{{ loop.index }}">
                                         {% for eliminatoria in categoria_data.eliminatorias if eliminatoria.fase == fase %}
                                             <div class="bracket-phase">
                                                 <h4>{{ fase|replace('_', ' ')|title }}
@@ -953,17 +967,34 @@
                                                                                     class="team-logo" 
                                                                                     alt="{{ partido.equipo_local }}"
                                                                                     onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                                {{ partido.equipo_local }}
+                                                                            {% elif not partido.equipo_local %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="Por definirse">
+                                                                                Por definirse
+                                                                            {% else %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="{{ partido.equipo_local }}">
+                                                                                {{ partido.equipo_local }}
                                                                             {% endif %}
                                                                         {% endfor %}
                                                                     {% else %}
                                                                         {% set equipo_local = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
-                                                                        <img src="{{ get_logo_path(equipo_local) if equipo_local else url_for('static', filename='images/default_logo.png') }}" 
-                                                                            class="team-logo" 
-                                                                            alt="{{ partido.equipo_local }}"
-                                                                            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                        {% if not partido.equipo_local %}
+                                                                            <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="Por definirse">
+                                                                            Por definirse
+                                                                        {% else %}
+                                                                            <img src="{{ get_logo_path(equipo_local) if equipo_local else url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="{{ partido.equipo_local }}"
+                                                                                onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                            {{ partido.equipo_local }}
+                                                                        {% endif %}
                                                                     {% endif %}
-                                                                    
-                                                                    {{ partido.equipo_local }}
                                                                 </div>
                                                             {% endif %}
                                                             <span class="score">
@@ -994,17 +1025,34 @@
                                                                                     class="team-logo" 
                                                                                     alt="{{ partido.equipo_visitante }}"
                                                                                     onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                                {{ partido.equipo_visitante }}
+                                                                            {% elif not partido.equipo_visitante %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="Por definirse">
+                                                                                Por definirse
+                                                                            {% else %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="{{ partido.equipo_visitante }}">
+                                                                                {{ partido.equipo_visitante }}
                                                                             {% endif %}
                                                                         {% endfor %}
                                                                     {% else %}
                                                                         {% set equipo_visitante = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
-                                                                        <img src="{{ get_logo_path(equipo_visitante) if equipo_visitante else url_for('static', filename='images/default_logo.png') }}" 
-                                                                            class="team-logo" 
-                                                                            alt="{{ partido.equipo_visitante }}"
-                                                                            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                        {% if not partido.equipo_visitante %}
+                                                                            <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="Por definirse">
+                                                                            Por definirse
+                                                                        {% else %}
+                                                                            <img src="{{ get_logo_path(equipo_visitante) if equipo_visitante else url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="{{ partido.equipo_visitante }}"
+                                                                                onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                            {{ partido.equipo_visitante }}
+                                                                        {% endif %}
                                                                     {% endif %}
-                                                                    
-                                                                    {{ partido.equipo_visitante }}
                                                                 </div>
                                                             {% endif %}
                                                             <span class="score">
@@ -1084,17 +1132,34 @@
                                                                                     class="team-logo" 
                                                                                     alt="{{ partido.equipo_local }}"
                                                                                     onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                                {{ partido.equipo_local }}
+                                                                            {% elif not partido.equipo_local %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="Por definirse">
+                                                                                Por definirse
+                                                                            {% else %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="{{ partido.equipo_local }}">
+                                                                                {{ partido.equipo_local }}
                                                                             {% endif %}
                                                                         {% endfor %}
                                                                     {% else %}
                                                                         {% set equipo_local = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
-                                                                        <img src="{{ get_logo_path(equipo_local) if equipo_local else url_for('static', filename='images/default_logo.png') }}" 
-                                                                            class="team-logo" 
-                                                                            alt="{{ partido.equipo_local }}"
-                                                                            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                        {% if not partido.equipo_local %}
+                                                                            <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="Por definirse">
+                                                                            Por definirse
+                                                                        {% else %}
+                                                                            <img src="{{ get_logo_path(equipo_local) if equipo_local else url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="{{ partido.equipo_local }}"
+                                                                                onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                            {{ partido.equipo_local }}
+                                                                        {% endif %}
                                                                     {% endif %}
-                                                                    
-                                                                    {{ partido.equipo_local }}
                                                                 </div>
                                                             {% endif %}
                                                             <span class="score">
@@ -1125,17 +1190,34 @@
                                                                                     class="team-logo" 
                                                                                     alt="{{ partido.equipo_visitante }}"
                                                                                     onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                                {{ partido.equipo_visitante }}
+                                                                            {% elif not partido.equipo_visitante %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="Por definirse">
+                                                                                Por definirse
+                                                                            {% else %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="{{ partido.equipo_visitante }}">
+                                                                                {{ partido.equipo_visitante }}
                                                                             {% endif %}
                                                                         {% endfor %}
                                                                     {% else %}
                                                                         {% set equipo_visitante = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
-                                                                        <img src="{{ get_logo_path(equipo_visitante) if equipo_visitante else url_for('static', filename='images/default_logo.png') }}" 
-                                                                            class="team-logo" 
-                                                                            alt="{{ partido.equipo_visitante }}"
-                                                                            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                        {% if not partido.equipo_visitante %}
+                                                                            <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="Por definirse">
+                                                                            Por definirse
+                                                                        {% else %}
+                                                                            <img src="{{ get_logo_path(equipo_visitante) if equipo_visitante else url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="{{ partido.equipo_visitante }}"
+                                                                                onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                            {{ partido.equipo_visitante }}
+                                                                        {% endif %}
                                                                     {% endif %}
-                                                                    
-                                                                    {{ partido.equipo_visitante }}
                                                                 </div>
                                                             {% endif %}
                                                             <span class="score">
@@ -1211,17 +1293,34 @@
                                                                                     class="team-logo" 
                                                                                     alt="{{ partido.equipo_local }}"
                                                                                     onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                                {{ partido.equipo_local }}
+                                                                            {% elif not partido.equipo_local %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="Por definirse">
+                                                                                Por definirse
+                                                                            {% else %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="{{ partido.equipo_local }}">
+                                                                                {{ partido.equipo_local }}
                                                                             {% endif %}
                                                                         {% endfor %}
                                                                     {% else %}
                                                                         {% set equipo_local = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
-                                                                        <img src="{{ get_logo_path(equipo_local) if equipo_local else url_for('static', filename='images/default_logo.png') }}" 
-                                                                            class="team-logo" 
-                                                                            alt="{{ partido.equipo_local }}"
-                                                                            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                        {% if not partido.equipo_local %}
+                                                                            <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="Por definirse">
+                                                                            Por definirse
+                                                                        {% else %}
+                                                                            <img src="{{ get_logo_path(equipo_local) if equipo_local else url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="{{ partido.equipo_local }}"
+                                                                                onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                            {{ partido.equipo_local }}
+                                                                        {% endif %}
                                                                     {% endif %}
-                                                                    
-                                                                    {{ partido.equipo_local }}
                                                                 </div>
                                                             {% endif %}
                                                             <span class="score">
@@ -1252,17 +1351,34 @@
                                                                                     class="team-logo" 
                                                                                     alt="{{ partido.equipo_visitante }}"
                                                                                     onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                                {{ partido.equipo_visitante }}
+                                                                            {% elif not partido.equipo_visitante %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="Por definirse">
+                                                                                Por definirse
+                                                                            {% else %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="{{ partido.equipo_visitante }}">
+                                                                                {{ partido.equipo_visitante }}
                                                                             {% endif %}
                                                                         {% endfor %}
                                                                     {% else %}
                                                                         {% set equipo_visitante = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
-                                                                        <img src="{{ get_logo_path(equipo_visitante) if equipo_visitante else url_for('static', filename='images/default_logo.png') }}" 
-                                                                            class="team-logo" 
-                                                                            alt="{{ partido.equipo_visitante }}"
-                                                                            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                        {% if not partido.equipo_visitante %}
+                                                                            <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="Por definirse">
+                                                                            Por definirse
+                                                                        {% else %}
+                                                                            <img src="{{ get_logo_path(equipo_visitante) if equipo_visitante else url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="{{ partido.equipo_visitante }}"
+                                                                                onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                            {{ partido.equipo_visitante }}
+                                                                        {% endif %}
                                                                     {% endif %}
-                                                                    
-                                                                    {{ partido.equipo_visitante }}
                                                                 </div>
                                                             {% endif %}
                                                             <span class="score">
@@ -1310,7 +1426,7 @@
 
                                 {# Lado Derecho: cada fase en su propia columna, en orden inverso #}
                                 {% for fase in fases_bracket|reverse %}
-                                    <div class="bracket-right">
+                                    <div class="bracket-right bracket-fase-{{ loop.index }}">
                                         {% for eliminatoria in categoria_data.eliminatorias if eliminatoria.fase == fase %}
                                             <div class="bracket-phase">
                                                 <h4>{{ fase|replace('_', ' ')|title }}
@@ -1344,17 +1460,34 @@
                                                                                     class="team-logo" 
                                                                                     alt="{{ partido.equipo_local }}"
                                                                                     onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                                {{ partido.equipo_local }}
+                                                                            {% elif not partido.equipo_local %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="Por definirse">
+                                                                                Por definirse
+                                                                            {% else %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="{{ partido.equipo_local }}">
+                                                                                {{ partido.equipo_local }}
                                                                             {% endif %}
                                                                         {% endfor %}
                                                                     {% else %}
                                                                         {% set equipo_local = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_local)|first %}
-                                                                        <img src="{{ get_logo_path(equipo_local) if equipo_local else url_for('static', filename='images/default_logo.png') }}" 
-                                                                            class="team-logo" 
-                                                                            alt="{{ partido.equipo_local }}"
-                                                                            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                        {% if not partido.equipo_local %}
+                                                                            <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="Por definirse">
+                                                                            Por definirse
+                                                                        {% else %}
+                                                                            <img src="{{ get_logo_path(equipo_local) if equipo_local else url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="{{ partido.equipo_local }}"
+                                                                                onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                            {{ partido.equipo_local }}
+                                                                        {% endif %}
                                                                     {% endif %}
-                                                                    
-                                                                    {{ partido.equipo_local }}
                                                                 </div>
                                                             {% endif %}
                                                             <span class="score">
@@ -1385,17 +1518,34 @@
                                                                                     class="team-logo" 
                                                                                     alt="{{ partido.equipo_visitante }}"
                                                                                     onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                                {{ partido.equipo_visitante }}
+                                                                            {% elif not partido.equipo_visitante %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="Por definirse">
+                                                                                Por definirse
+                                                                            {% else %}
+                                                                                <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                    class="team-logo" 
+                                                                                    alt="{{ partido.equipo_visitante }}">
+                                                                                {{ partido.equipo_visitante }}
                                                                             {% endif %}
                                                                         {% endfor %}
                                                                     {% else %}
                                                                         {% set equipo_visitante = datos.tabla|selectattr('nombre', 'equalto', partido.equipo_visitante)|first %}
-                                                                        <img src="{{ get_logo_path(equipo_visitante) if equipo_visitante else url_for('static', filename='images/default_logo.png') }}" 
-                                                                            class="team-logo" 
-                                                                            alt="{{ partido.equipo_visitante }}"
-                                                                            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                        {% if not partido.equipo_visitante %}
+                                                                            <img src="{{ url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="Por definirse">
+                                                                            Por definirse
+                                                                        {% else %}
+                                                                            <img src="{{ get_logo_path(equipo_visitante) if equipo_visitante else url_for('static', filename='images/default_logo.png') }}" 
+                                                                                class="team-logo" 
+                                                                                alt="{{ partido.equipo_visitante }}"
+                                                                                onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_logo.png') }}'">
+                                                                            {{ partido.equipo_visitante }}
+                                                                        {% endif %}
                                                                     {% endif %}
-                                                                    
-                                                                    {{ partido.equipo_visitante }}
                                                                 </div>
                                                             {% endif %}
                                                             <span class="score">
@@ -1466,7 +1616,7 @@
                                                     <th>JUGADOR</th>
                                                     <th>EQUIPO</th>
                                                     <th class="text-center">GOLES</th>
-                                                    <th class="text-center">GP/JORNADA</th>
+                                                    <th class="text-center">DETALLES</th>
                                                     
                                                 </tr>
                                             </thead>
