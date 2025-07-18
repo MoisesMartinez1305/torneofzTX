@@ -23,8 +23,8 @@
 .bracket-left.bracket-fase-5 { margin-top: 320px; } /* semifinales */
 
 /* Lado derecho: de abajo hacia arriba (espejo) */
-.bracket-right.bracket-fase-1 { margin-top: 160px; } /* semifinales */
-.bracket-right.bracket-fase-2 { margin-top: 80px; } /* cuartos */
+.bracket-right.bracket-fase-1 { margin-top: 80px; } /* semifinales */
+.bracket-right.bracket-fase-2 { margin-top: 0px; } /* cuartos */
 .bracket-right.bracket-fase-3 { margin-top: 0px; } /* octavos*/
 .bracket-right.bracket-fase-4 { margin-top: 80px; }
 .bracket-right.bracket-fase-5 { margin-top: 0px; }
