@@ -3,6 +3,9 @@
 {% block admin_title %}Dashboard del Torneo{% endblock %}
 
 {% block admin_content %}
+
+
+
 <style>
     /* General Styles */
 
@@ -215,25 +218,42 @@
                             Formato: {{ 'Ida y Vuelta' if torneo.formato_liga == 'ida_vuelta' else 'Solo Ida' }}
                         </small>
                     </div>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ url_for('crear_torneo_admin') }}" class="btn btn-success">
-                            <i class="fas fa-plus-circle me-1"></i>Nuevo Torneo
-                        </a>
-                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalReiniciar">
-                            <i class="fas fa-sync-alt me-1"></i>Reiniciar
-                        </button>
-                        <form action="{{ url_for('actualizar_tabla') }}" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-info">
-                                <i class="fas fa-sync-alt me-1"></i>Actualizar Tablas
-                            </button>
-                        </form>
-                        <a href="{{ url_for('administrar_goleadores') }}" class="btn btn-light">
-                            <i class="fas fa-futbol me-1"></i>Goleadores
-                        </a>
-                        <!-- Añade este nuevo botón -->
-                        <a href="{{ url_for('configurar_eliminatorias') }}" class="btn btn-light">
-                            <i class="fas fa-trophy me-1"></i>Eliminatorias
-                        </a>
+                    <div class="dropdown">
+   <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+       <i class="fas fa-cogs me-1"></i>Administración
+   </button>
+   <ul class="dropdown-menu">
+       <li>
+           <a href="{{ url_for('crear_torneo_admin') }}" class="dropdown-item">
+               <i class="fas fa-plus-circle me-2"></i>Nuevo Torneo
+           </a>
+       </li>
+       <li><hr class="dropdown-divider"></li>
+       <li>
+           <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modalReiniciar">
+               <i class="fas fa-sync-alt me-2"></i>Reiniciar
+           </button>
+       </li>
+       <li>
+           <form action="{{ url_for('actualizar_tabla') }}" method="POST" class="d-inline w-100">
+               <button type="submit" class="dropdown-item">
+                   <i class="fas fa-sync-alt me-2"></i>Actualizar Tablas
+               </button>
+           </form>
+       </li>
+       <li><hr class="dropdown-divider"></li>
+       <li>
+           <a href="{{ url_for('administrar_goleadores') }}" class="dropdown-item">
+               <i class="fas fa-futbol me-2"></i>Goleadores
+           </a>
+       </li>
+       <li>
+           <a href="{{ url_for('configurar_eliminatorias') }}" class="dropdown-item">
+               <i class="fas fa-trophy me-2"></i>Eliminatorias
+           </a>
+       </li>
+   </ul>
+</div>
                         <!-- Nuevo botón para configurar emparejamientos - SOLO si hay eliminatorias habilitadas -->
                             {% if torneo.tiene_eliminatorias %}
                                 {% for categoria in categorias %}

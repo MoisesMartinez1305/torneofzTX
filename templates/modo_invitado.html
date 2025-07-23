@@ -207,15 +207,26 @@
                     
                     <!-- Pestaña de Jornadas -->
                     <div class="tab-pane fade show active" id="jornadas{{ datos.categoria.id }}" role="tabpanel" aria-labelledby="jornadas{{ datos.categoria.id }}-tab">
-                        <!-- Expand/Collapse buttons -->
-                                        <div class="d-flex justify-content-end mb-3 flex-wrap">
-                                            <button class="btn btn-primary me-2 mb-2" id="expandAll">
-                                                <i class="fas fa-plus-circle me-1"></i>Ver todas las jornadas
-                                            </button>
-                                            <button class="btn btn-secondary mb-2" id="collapseAll">
-                                                <i class="fas fa-minus-circle me-1"></i>Ocultar todas las jornadas
-                                            </button>
-                                        </div>
+                        <!-- Expand/Collapse buttons in dropdown -->
+<div class="d-flex justify-content-end mb-3">
+    <div class="dropdown">
+        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-cog me-1"></i>Opciones de Jornadas
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <li>
+                <button class="dropdown-item btn btn-primary" id="expandAll">
+                    <i class="fas fa-plus-circle me-1"></i>Ver todas las jornadas
+                </button>
+            </li>
+            <li>
+                <button class="dropdown-item btn btn-secondary" id="collapseAll">
+                    <i class="fas fa-minus-circle me-1"></i>Ocultar todas las jornadas
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
                         {% if datos.tiene_grupos %}
                         <!-- Mostrar grupos si la categoría tiene grupos -->
                         <div class="row">
@@ -259,9 +270,34 @@
                                                             <div class="d-flex justify-content-between w-100 align-items-center">
                                                                 <div>
                                                                     <span class="badge bg-primary me-2">Jornada {{ jornada_num }}</span>
-                                                                    <span class="badge bg-success me-2">
-                                                                        {{ partidos_jugados_jornada }}/{{ partidos_jornada|length }}partidos jugados
-                                                                    </span>
+                                                                    <span class="badge 
+                                                            {% if partidos_jugados_jornada == partidos_jornada|length and partidos_jornada|length > 0 %}
+                                                                bg-success
+                                                            {% elif partidos_jugados_jornada > 0 %}
+                                                                bg-warning text-dark
+                                                            {% else %}
+                                                                bg-danger
+                                                            {% endif %}
+                                                            me-2">
+                                                            {{ partidos_jugados_jornada }}/{{ partidos_jornada|length }} partidos jugados
+                                                        </span>
+                                                        <span class="badge 
+                                                            {% if partidos_jornada|length > 0 and partidos_jugados_jornada == partidos_jornada|length %}
+                                                                bg-success
+                                                            {% elif partidos_jugados_jornada == 0 %}
+                                                                bg-danger
+                                                            {% else %}
+                                                                bg-warning text-dark
+                                                            {% endif %}
+                                                        ">
+                                                            {% if partidos_jornada|length > 0 and partidos_jugados_jornada == partidos_jornada|length %}
+                                                                Jornada completa <i class="fas fa-check ms-1"></i>
+                                                            {% elif partidos_jugados_jornada == 0 %}
+                                                                Por jugar <i class="fas fa-circle ms-1"></i>
+                                                            {% else %}
+                                                                En progreso <i class="fas fa-hourglass-half ms-1"></i>
+                                                            {% endif %}
+                                                        </span>
                                                                     {% if grupo_data.tiene_descanso %}
                                                                         {% set equipos_jugando = [] %}
                                                                         {% for partido in partidos_jornada %}
@@ -281,9 +317,7 @@
                                                                         {% endif %}
                                                                     {% endif %}
                                                                 </div>
-                                                                <span class="badge bg-secondary">
-                                                                    {{ partidos_jornada|length }} partido{{ 's' if partidos_jornada|length > 1 else '' }}
-                                                                </span>
+                                                                
                                                             </div>
                                                         </button>
                                                     </h2>
@@ -453,8 +487,33 @@
                                                 <div class="d-flex justify-content-between w-100 align-items-center">
                                                     <div>
                                                         <span class="badge bg-primary me-2">Jornada {{ jornada_num }}</span>
-                                                        <span class="badge bg-success me-2">
-                                                            {{ partidos_jugados_jornada }}/{{ partidos_jornada|length }}  partidos jugados
+                                                        <span class="badge 
+                                                            {% if partidos_jugados_jornada == partidos_jornada|length and partidos_jornada|length > 0 %}
+                                                                bg-success
+                                                            {% elif partidos_jugados_jornada > 0 %}
+                                                                bg-warning text-dark
+                                                            {% else %}
+                                                                bg-danger
+                                                            {% endif %}
+                                                            me-2">
+                                                            {{ partidos_jugados_jornada }}/{{ partidos_jornada|length }} partidos jugados
+                                                        </span>
+                                                        <span class="badge 
+                                                            {% if partidos_jornada|length > 0 and partidos_jugados_jornada == partidos_jornada|length %}
+                                                                bg-success
+                                                            {% elif partidos_jugados_jornada == 0 %}
+                                                                bg-danger
+                                                            {% else %}
+                                                                bg-warning text-dark
+                                                            {% endif %}
+                                                        ">
+                                                            {% if partidos_jornada|length > 0 and partidos_jugados_jornada == partidos_jornada|length %}
+                                                                Jornada completa <i class="fas fa-check ms-1"></i>
+                                                            {% elif partidos_jugados_jornada == 0 %}
+                                                                Por jugar <i class="fas fa-circle ms-1"></i>
+                                                            {% else %}
+                                                                En progreso <i class="fas fa-hourglass-half ms-1"></i>
+                                                            {% endif %}
                                                         </span>
                                                         {% if datos.tiene_descanso %}
                                                             {% set equipos_jugando = [] %}
@@ -475,9 +534,7 @@
                                                             {% endif %}
                                                         {% endif %}
                                                     </div>
-                                                    <span class="badge bg-secondary">
-                                                        {{ partidos_jornada|length }} partido{{ 's' if partidos_jornada|length > 1 else '' }}
-                                                    </span>
+                                                    
                                                 </div>
                                             </button>
                                         </h2>
@@ -553,24 +610,34 @@
                                                                             {{ partido.equipo_local }}
                                                                             {% if partido.jugado and not partido.es_descanso %}
                                                                                 {% if partido.goles_local > partido.goles_visitante %}
-                                                                                    <i class="fas fa-check text-success ms-1"></i>
+                                                                                    <i class="fas fa-trophy text-success fa-lg ms-2" title="Victoria"></i>
                                                                                 {% elif partido.goles_local < partido.goles_visitante %}
-                                                                                    <i class="fas fa-times text-danger ms-1"></i>
+                                                                                    <i class="fas fa-thumbs-down text-danger fa-lg ms-2" title="Derrota"></i>
+                                                                                {% else %}
+                                                                                    <i class="fas fa-handshake text-warning fa-lg ms-2" title="Empate"></i>
                                                                                 {% endif %}
                                                                             {% endif %}
                                                                         </div>
                                                                     {% endif %}
                                                                 </td>
 
-                                                                <td class="text-center">
+                                                                <td class="text-center align-middle">
                                                                     {% if partido.jugado and not partido.es_descanso %}
-                                                                        <span class="badge bg-primary rounded-pill px-3 py-1">
+                                                                        <span class="badge rounded-pill px-2 py-1 fs-6 fw-bold"
+                                                                              style="background: #00298aff;
+                                                                                     color: #fff;
+                                                                                     box-shadow: 0 0 4px #00fff7, 0 0 8px #00bfff;
+                                                                                     letter-spacing: 1px;
+                                                                                     border: 2px solid #fff;">
                                                                             {{ partido.goles_local }} - {{ partido.goles_visitante }}
                                                                         </span>
                                                                     {% elif partido.es_descanso %}
-                                                                        <span class="text-muted">-</span>
+                                                                        <span class="text-muted fs-6 fw-bold">-</span>
                                                                     {% else %}
-                                                                        <span class="text-muted">VS</span>
+                                                                        <span class="badge rounded-pill px-2 py-1 fs-6 fw-bold"
+                                                                            style="background: #fff; color: #031194; border: 2px solid #031194;">
+                                                                            VS
+                                                                        </span>
                                                                     {% endif %}
                                                                 </td>
 
@@ -599,9 +666,11 @@
                                                                             {{ partido.equipo_visitante }}
                                                                             {% if partido.jugado and not partido.es_descanso %}
                                                                                 {% if partido.goles_visitante > partido.goles_local %}
-                                                                                    <i class="fas fa-check text-success ms-1"></i>
+                                                                                    <i class="fas fa-trophy text-success fa-lg ms-2" title="Victoria"></i>
                                                                                 {% elif partido.goles_visitante < partido.goles_local %}
-                                                                                    <i class="fas fa-times text-danger ms-1"></i>
+                                                                                    <i class="fas fa-thumbs-down text-danger fa-lg ms-2" title="Derrota"></i>
+                                                                                {% else %}
+                                                                                    <i class="fas fa-handshake text-warning fa-lg ms-2" title="Empate"></i>
                                                                                 {% endif %}
                                                                             {% endif %}
                                                                         </div>
