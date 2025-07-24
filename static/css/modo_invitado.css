@@ -549,7 +549,7 @@
     }
     
     .progress-bar {
-        background: linear-gradient(90deg, #00fff0 0%, #00fff0 100%);
+        background: linear-gradient(90deg, #ffffff);
         box-shadow:
             0 0 8px #00fff0,
             0 0 16px #00fff0,
@@ -1021,4 +1021,46 @@
             min-width: 100%;
             
         }
+    
     }
+
+
+.double-tap-anim-up {
+                            position: relative;
+                            display: inline-block;
+                            font-size: 2.5rem;
+                            transform: rotateX(30deg);
+                            text-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 1px 0 #fff;
+                            animation: doubletap-finger-up 1.2s infinite;
+                        }
+                        @keyframes doubletap-finger-up {
+                            0%, 100% { transform: rotateX(30deg) translateY(0);}
+                            10% { transform: rotateX(30deg) translateY(8px);}
+                            20% { transform: rotateX(30deg) translateY(0);}
+                            30% { transform: rotateX(30deg) translateY(8px);}
+                            40% { transform: rotateX(30deg) translateY(0);}
+                        }
+                        .tap-wave-up {
+                            position: absolute;
+                            left: 50%;
+                            top: 0.22em; /* Ajusta la posición vertical para la punta del dedo */
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            background: rgba(0, 191, 255, 0.25);
+                            border-radius: 50%;
+                            transform: translate(-50%, -60%);
+                            pointer-events: none;
+                            opacity: 0;
+                            animation: tapwave-up 1.2s infinite;
+                            z-index: 1;
+                        }
+                        .tap-wave-up:nth-child(2) {
+                            animation-delay: 0.2s;
+                        }
+                        @keyframes tapwave-up {
+                            0% { opacity: 0; transform: translate(-50%, -60%) scale(0.7);}
+                            10% { opacity: 0.7; transform: translate(-50%, -60%) scale(1);}
+                            30% { opacity: 0.5; transform: translate(-50%, -60%) scale(1.4);}
+                            50% { opacity: 0.2; transform: translate(-50%, -60%) scale(1.8);}
+                            100% { opacity: 0; transform: translate(-50%, -60%) scale(2);}
+                        }    
